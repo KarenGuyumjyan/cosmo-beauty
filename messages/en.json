@@ -1,0 +1,159 @@
+{
+  "nav": {
+    "home": "Home",
+    "catalog": "Catalog",
+    "cart": "Cart",
+    "about": "About"
+  },
+  "home": {
+    "hero": {
+      "title": "Discover Your Beauty",
+      "subtitle": "Premium cosmetics crafted for every skin type and tone",
+      "cta": "Shop Now",
+      "scroll": "Scroll to explore",
+      "story": "Our Story"
+    },
+    "featured": {
+      "title": "Featured Products",
+      "subtitle": "Handpicked just for you",
+      "viewAll": "View All Products"
+    },
+    "bestsellers": {
+      "title": "Bestsellers",
+      "subtitle": "Our most-loved products"
+    },
+    "values": {
+      "quality":  { "title": "High Quality",          "desc": "Premium products, made with love." },
+      "natural":  { "title": "Natural Ingredients",   "desc": "Ethically sourced, cruelty-free formulations." },
+      "derma":    { "title": "Dermatologist Tested",  "desc": "Clinically proven for all skin types." },
+      "shipping": { "title": "Fast Shipping",         "desc": "Orders ship within 24 hours." }
+    }
+  },
+  "catalog": {
+    "title": "Product Catalog",
+    "subtitle": "Explore our full collection",
+    "filters": {
+      "title": "Filters",
+      "category": "Category",
+      "size": "Size",
+      "all": "All",
+      "reset": "Reset Filters",
+      "apply": "Apply Filters"
+    },
+    "sort": {
+      "label": "Sort by",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low",
+      "newest": "Newest",
+      "popular": "Most Popular"
+    },
+    "results": "{count} products",
+    "noResults": "No products found. Try adjusting your filters.",
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock",
+    "added": "Added!"
+  },
+  "product": {
+    "sku": "SKU",
+    "size": "Select Size",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "includes": "What's Included",
+    "addToCart": "Add to Cart",
+    "originalPrice": "Original Price",
+    "save": "Save",
+    "gallery": "Product Gallery",
+    "details": "Product Details",
+    "description": "Description",
+    "backToCatalog": "Back to Catalog",
+    "selectSize": "Please select a size"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "emptySubtitle": "Start shopping to add products to your cart",
+    "continueShopping": "Continue Shopping",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "shipping": "Shipping",
+    "free": "Free",
+    "total": "Total",
+    "checkout": "Proceed to Checkout",
+    "remove": "Remove",
+    "quantity": "Qty",
+    "size": "Size",
+    "items": "{count} items",
+    "item": "{count} item"
+  },
+  "about": {
+    "title": "About Cosmo",
+    "subtitle": "Our Story",
+    "story": "Cosmo was founded with a single belief: everyone deserves to feel confident and beautiful. We source only the finest ingredients and craft each product with care, ensuring luxury that's accessible to all.",
+    "mission": {
+      "title": "Our Mission",
+      "text": "To empower people through premium, ethically-sourced beauty products that celebrate individuality."
+    },
+    "values": {
+      "title": "Our Values",
+      "quality": "Uncompromising Quality",
+      "sustainability": "Sustainable Practices",
+      "inclusivity": "Beauty for Everyone",
+      "innovation": "Constant Innovation"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "email": "hello@cosmo.beauty",
+      "phone": "+374 11 234 567",
+      "address": "15 Baghramyan Ave, Yerevan, Armenia"
+    },
+    "social": {
+      "title": "Follow Us",
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "tiktok": "TikTok",
+      "youtube": "YouTube"
+    },
+    "blog": {
+      "title": "Beauty Blog",
+      "subtitle": "Tips, trends, and inspiration",
+      "readMore": "Read More"
+    }
+  },
+  "contactForm": {
+    "badge": "Contacts",
+    "title": "We'll Call You Back",
+    "subtitle": "Leave your name and phone number — our team will reach out to answer any questions.",
+    "namePlaceholder": "Your name",
+    "phonePlaceholder": "Phone number",
+    "submit": "Send Application",
+    "success": "Your application has been accepted!",
+    "successSub": "We'll get in touch with you very soon. 🌸"
+  },
+  "footer": {
+    "description": "Premium cosmetics for everyone. Crafted with love.",
+    "links": "Quick Links",
+    "contact": "Contact",
+    "social": "Follow Us",
+    "rights": "All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "writeUs": {
+      "title": "Write to Us",
+      "desc": "Have a suggestion, question, or just want to say hello? We read every message.",
+      "emailLabel": "Or reach us directly:",
+      "placeholder": "Your message…",
+      "send": "Send",
+      "sent": "Thank you! We'll be in touch. 🌸"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "back": "Back",
+    "close": "Close",
+    "search": "Search",
+    "currency": "AMD",
+    "addedToCart": "Added to cart",
+    "viewCart": "View Cart"
+  }
+}

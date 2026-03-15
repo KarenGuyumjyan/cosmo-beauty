@@ -1,0 +1,17 @@
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { Locale } from '@/lib/types';
+import CartPageClient from '@/components/cart/CartPageClient';
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'cart' });
+  return { title: t('title') };
+}
+
+export default async function CartPage({ params }: Props) {
+  const { locale } = await params;
+  return <CartPageClient locale={locale as Locale} />;
+}
