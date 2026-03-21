@@ -6,18 +6,18 @@ export interface LocalizedString {
 
 export type Locale = 'en' | 'hy' | 'ru';
 
+// Underscore format — must match Prisma enum ProductCategory values
 export type Category =
-  | 'cosmetic-sponges'
-  | 'lip-liner'
+  | 'cosmetic_sponges'
+  | 'lip_liner'
   | 'blush'
   | 'stick'
-  | 'lip-gloss'
+  | 'lip_gloss'
   | 'highlighter'
   | 'concealer';
 
 export interface Product {
   id: string;
-  slug: string;
   name: LocalizedString;
   description: LocalizedString;
   shortDescription: LocalizedString;
@@ -31,7 +31,6 @@ export interface Product {
   includedItems?: LocalizedString[];
   featured?: boolean;
   bestseller?: boolean;
-  tags?: string[];
 }
 
 export interface CartItem {
@@ -50,3 +49,8 @@ export interface CartState {
 }
 
 export type SortOption = 'priceAsc' | 'priceDesc' | 'newest' | 'popular';
+
+export interface CategoryOption {
+  value: Category;
+  label: LocalizedString;
+}

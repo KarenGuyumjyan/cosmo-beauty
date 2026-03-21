@@ -5,7 +5,7 @@ import ProductCarousel from '@/components/home/ProductCarousel';
 import CategoryStrip from '@/components/home/CategoryStrip';
 import ValuesStrip from '@/components/home/ValuesStrip';
 import ContactForm from '@/components/home/ContactForm';
-import { getFeaturedProducts, getBestsellers } from '@/lib/data';
+import { getFeaturedProducts, getBestsellers } from '@/lib/db-products';
 import { Locale } from '@/lib/types';
 
 type Props = { params: Promise<{ locale: string }> };
@@ -22,8 +22,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   const l = locale as Locale;
-  const featured = getFeaturedProducts();
-  const bestsellers = getBestsellers();
+  const [featured, bestsellers] = await Promise.all([
+    getFeaturedProducts(),
+    getBestsellers(),
+  ]);
 
   return (
     <>

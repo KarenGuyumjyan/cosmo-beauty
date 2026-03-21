@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ShoppingBag, Heart, Star } from 'lucide-react';
 import { Product, Locale } from '@/lib/types';
+import { getCategoryLabel } from '@/lib/data';
 import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
@@ -86,7 +87,7 @@ export default function ProductCard({ product, locale }: ProductCardProps) {
         {/* Info */}
         <div className="p-2 md:p-4">
           <p className="text-[10px] md:text-xs text-rose-500 font-medium uppercase tracking-wider mb-0.5 md:mb-1 capitalize">
-            {product.category}
+            {getCategoryLabel(product.category, locale)}
           </p>
           <h3 className="text-stone-800 font-semibold text-xs md:text-sm leading-tight line-clamp-2 mb-2 md:mb-3 group-hover:text-rose-700 transition-colors">
             {name}

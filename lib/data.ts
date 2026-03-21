@@ -1,10 +1,9 @@
-import { Product, Category } from './types';
+import { Product, Category, CategoryOption, Locale } from './types';
 
 export const products: Product[] = [
   // ── Cosmetic Sponges ──────────────────────────────────────────────────────
   {
     id: '1',
-    slug: 'velvet-blending-sponge',
     name: {
       en: 'Velvet Blending Sponge',
       hy: 'Velvet Խmboghich Spoнge',
@@ -25,17 +24,15 @@ export const products: Product[] = [
       'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80',
       'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80',
     ],
-    category: 'cosmetic-sponges',
+    category: 'cosmetic_sponges',
     size: '3 pc',
     sku: 'CSM-SP-001',
     inStock: true,
     featured: true,
     bestseller: true,
-    tags: ['sponge', 'blending', 'foundation'],
   },
   {
     id: '2',
-    slug: 'mini-contour-sponge-set',
     name: {
       en: 'Mini Contour Sponge Set',
       hy: 'Mini Kontur Sponge Havakacu',
@@ -57,17 +54,15 @@ export const products: Product[] = [
       'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=600&q=80',
       'https://images.unsplash.com/photo-1583241475880-083f84372725?w=600&q=80',
     ],
-    category: 'cosmetic-sponges',
+    category: 'cosmetic_sponges',
     size: '3 pcs',
     sku: 'CSM-SP-002',
     inStock: true,
-    tags: ['sponge', 'contour', 'set'],
   },
 
   // ── Lip Liner ───────────────────────────────────────────────────────────
   {
     id: '3',
-    slug: 'define-lip-liner',
     name: {
       en: 'Define Lip Liner',
       hy: 'Define Shafertaguyi Matok',
@@ -87,16 +82,14 @@ export const products: Product[] = [
     images: [
       'https://images.unsplash.com/photo-1586495777744-4e6232bf2919?w=600&q=80',
     ],
-    category: 'lip-liner',
+    category: 'lip_liner',
     size: '1.2g',
     sku: 'CSM-LL-001',
     inStock: true,
     featured: true,
-    tags: ['lip-liner', 'lip-liner', 'makeup'],
   },
   {
     id: '4',
-    slug: 'sculpt-ombre-lip-liner',
     name: {
       en: 'Sculpt Ombré Lip Liner',
       hy: 'Sculpt Ombré Shafertaguyi Matok',
@@ -118,18 +111,16 @@ export const products: Product[] = [
       'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80',
       'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80',
     ],
-    category: 'lip-liner',
+    category: 'lip_liner',
     size: '1.4g',
     sku: 'CSM-LL-002',
     inStock: true,
     bestseller: true,
-    tags: ['lip-liner', 'ombre', 'dual-tone'],
   },
 
   // ── Blush ────────────────────────────────────────────────────────────────
   {
     id: '5',
-    slug: 'satin-flush-blush',
     name: {
       en: 'Satin Flush Blush',
       hy: 'Satin Flush Ereseski Eranger',
@@ -155,11 +146,9 @@ export const products: Product[] = [
     sku: 'CSM-BL-001',
     inStock: true,
     featured: true,
-    tags: ['blush', 'powder', 'cheek'],
   },
   {
     id: '6',
-    slug: 'rosy-glow-blush',
     name: {
       en: 'Rosy Glow Blush',
       hy: 'Rosy Glow Ereseski Eranger',
@@ -185,13 +174,11 @@ export const products: Product[] = [
     sku: 'CSM-BL-002',
     inStock: true,
     bestseller: true,
-    tags: ['blush', 'radiant', 'ph-reactive'],
   },
 
   // ── Stick ────────────────────────────────────────────────────────────────
   {
     id: '7',
-    slug: 'sculpt-contour-stick',
     name: {
       en: 'Sculpt Contour Stick',
       hy: 'Sculpt Kontur Stick',
@@ -217,11 +204,9 @@ export const products: Product[] = [
     sku: 'CSM-ST-001',
     inStock: true,
     featured: true,
-    tags: ['contour', 'stick', 'sculpt'],
   },
   {
     id: '8',
-    slug: 'glow-highlight-stick',
     name: {
       en: 'Glow Highlight Stick',
       hy: 'Glow Highlight Stick',
@@ -248,13 +233,11 @@ export const products: Product[] = [
     sku: 'CSM-ST-002',
     inStock: true,
     bestseller: true,
-    tags: ['highlight', 'stick', 'glow'],
   },
 
   // ── Lip Gloss ────────────────────────────────────────────────────────────
   {
     id: '9',
-    slug: 'crystal-shine-lip-gloss',
     name: {
       en: 'Crystal Shine Lip Gloss',
       hy: 'Crystal Shine Shafertaguy Blesk',
@@ -275,17 +258,15 @@ export const products: Product[] = [
       'https://images.unsplash.com/photo-1586495777744-4e6232bf2919?w=600&q=80',
       'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80',
     ],
-    category: 'lip-gloss',
+    category: 'lip_gloss',
     size: '5.5ml',
     sku: 'CSM-LG-001',
     inStock: true,
     featured: true,
     bestseller: true,
-    tags: ['lip-gloss', 'shine', 'plump'],
   },
   {
     id: '10',
-    slug: 'tinted-plump-gloss',
     name: {
       en: 'Tinted Plump Gloss',
       hy: 'Tinted Plump Shafertaguy Blesk',
@@ -306,17 +287,15 @@ export const products: Product[] = [
     images: [
       'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&q=80',
     ],
-    category: 'lip-gloss',
+    category: 'lip_gloss',
     size: '4ml',
     sku: 'CSM-LG-002',
     inStock: true,
-    tags: ['lip-gloss', 'tinted', 'plumping'],
   },
 
-  // ── Highlighter ───────────────────────────────────────────────────────
+  // ── Highlighter ──────────────────────────────────────────────────────────
   {
     id: '11',
-    slug: 'aurora-highlighter',
     name: {
       en: 'Aurora Highlighter',
       hy: 'Aurora Lavsatsun Ereseski Eranger',
@@ -344,11 +323,9 @@ export const products: Product[] = [
     inStock: true,
     featured: true,
     bestseller: true,
-    tags: ['highlighter', 'highlight', 'glow'],
   },
   {
     id: '12',
-    slug: 'golden-hour-highlighter',
     name: {
       en: 'Golden Hour Highlighter',
       hy: 'Golden Hour Lavsatsun Ereseski Eranger',
@@ -372,13 +349,11 @@ export const products: Product[] = [
     size: '7g',
     sku: 'CSM-LB-002',
     inStock: true,
-    tags: ['highlighter', 'bronze', 'warm'],
   },
 
   // ── Concealer ────────────────────────────────────────────────────────────
   {
     id: '13',
-    slug: 'full-cover-concealer',
     name: {
       en: 'Full Cover Concealer',
       hy: 'Full Cover Konsilyator',
@@ -406,11 +381,9 @@ export const products: Product[] = [
     inStock: true,
     featured: true,
     bestseller: true,
-    tags: ['concealer', 'full-coverage', 'dark-circles'],
   },
   {
     id: '14',
-    slug: 'brightening-eye-concealer',
     name: {
       en: 'Brightening Eye Concealer',
       hy: 'Brightening Akanjavoraki Konsilyator',
@@ -435,25 +408,28 @@ export const products: Product[] = [
     size: '5ml',
     sku: 'CSM-CO-002',
     inStock: true,
-    tags: ['concealer', 'brightening', 'eye'],
   },
 ];
 
-export const categories: { value: string; label: { en: string; hy: string; ru: string } }[] = [
-  { value: 'cosmetic-sponges', label: { en: 'Cosmetic Sponges', hy: 'Kosmetik Spongeнер', ru: 'Косметические спонжи' } },
-  { value: 'lip-liner',       label: { en: 'Lip Liner',       hy: 'Shafertaguyi Matok',  ru: 'Карандаш для губ' } },
-  { value: 'blush',            label: { en: 'Blush',            hy: 'Ereseski Eranger',    ru: 'Румяна' } },
-  { value: 'stick',            label: { en: 'Stick',            hy: 'Stick',               ru: 'Стик' } },
-  { value: 'lip-gloss',        label: { en: 'Lip Gloss',        hy: 'Shafertaguy Blesk',   ru: 'Блеск для губ' } },
-  { value: 'highlighter',   label: { en: 'Highlighter',   hy: 'Lavsatsun Eranger',   ru: 'Сияющие румяна' } },
-  { value: 'concealer',        label: { en: 'Concealer',        hy: 'Konsilyator',         ru: 'Консилер' } },
+export const categories: CategoryOption[] = [
+  { value: 'cosmetic_sponges', label: { en: 'Cosmetic Sponges', hy: 'Kosmetik Spongeнер',    ru: 'Косметические спонжи' } },
+  { value: 'lip_liner',        label: { en: 'Lip Liner',         hy: 'Shafertaguyi Matok',   ru: 'Карандаш для губ' } },
+  { value: 'blush',            label: { en: 'Blush',             hy: 'Ereseski Eranger',     ru: 'Румяна' } },
+  { value: 'stick',            label: { en: 'Stick',             hy: 'Stick',                ru: 'Стик' } },
+  { value: 'lip_gloss',        label: { en: 'Lip Gloss',         hy: 'Shafertaguy Blesk',    ru: 'Блеск для губ' } },
+  { value: 'highlighter',      label: { en: 'Highlighter',       hy: 'Lavsatsun Eranger',    ru: 'Сияющие румяна' } },
+  { value: 'concealer',        label: { en: 'Concealer',         hy: 'Konsilyator',          ru: 'Консилер' } },
 ];
 
 export const allSizes = [...new Set(products.map((p) => p.size))].sort();
 
+/** Returns the localized display label for a category value */
+export function getCategoryLabel(value: Category, locale: Locale): string {
+  return categories.find((c) => c.value === value)?.label[locale] ?? value;
+}
+
 export const getFeaturedProducts = () => products.filter((p) => p.featured);
 export const getBestsellers = () => products.filter((p) => p.bestseller);
 export const getProductById = (id: string) => products.find((p) => p.id === id);
-export const getProductBySlug = (slug: string) => products.find((p) => p.slug === slug);
 export const getProductsByCategory = (category: Category) =>
   products.filter((p) => p.category === category);

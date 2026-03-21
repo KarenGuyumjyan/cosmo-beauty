@@ -2,23 +2,48 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-import { products, allSizes } from '@/lib/data';
-import { Locale, SortOption } from '@/lib/types';
+import { Locale, SortOption, Product, CategoryOption } from '@/lib/types';
 import FilterPanel from './FilterPanel';
 import ProductCard from '@/components/ui/ProductCard';
 
 interface ProductGridProps {
   locale: Locale;
+  products: Product[];
+  allSizes: string[];
+  categories: CategoryOption[];
 }
 
-export default function ProductGrid({ locale }: ProductGridProps) {
+export default function ProductGrid({ locale, products, allSizes, categories }: ProductGridProps) {
   const t = useTranslations('catalog');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Initialise from URL ?cat= param
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('cat') ?? '');
   const [selectedSize, setSelectedSize] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('popular');
   const [search, setSearch] = useState('');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Keep URL in sync when category filter changes
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set('cat', value);
+    } else {
+      params.delete('cat');
+    }
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  // Sync if URL changes externally (e.g. browser back/forward)
+  useEffect(() => {
+    setSelectedCategory(searchParams.get('cat') ?? '');
+  }, [searchParams]);
 
   const filtered = useMemo(() => {
     let result = [...products];
@@ -53,7 +78,7 @@ export default function ProductGrid({ locale }: ProductGridProps) {
   }, [selectedCategory, selectedSize, sortBy, search, locale]);
 
   const handleReset = () => {
-    setSelectedCategory('');
+    handleCategoryChange('');
     setSelectedSize('');
     setSortBy('popular');
     setSearch('');
@@ -71,11 +96,12 @@ export default function ProductGrid({ locale }: ProductGridProps) {
 
   const filterPanelProps = {
     locale,
+    categories,
     selectedCategory,
     selectedSize,
     sortBy,
     allSizes,
-    onCategoryChange: setSelectedCategory,
+    onCategoryChange: handleCategoryChange,
     onSizeChange: setSelectedSize,
     onSortChange: setSortBy,
     onReset: handleReset,

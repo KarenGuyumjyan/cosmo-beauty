@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ShoppingBag, Check, Package, Tag, ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Product, Locale } from '@/lib/types';
+import { getCategoryLabel } from '@/lib/data';
 import { useCart } from '@/context/CartContext';
 import ImageGallery from '@/components/product/ImageGallery';
 
@@ -54,7 +55,7 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
           {/* Info */}
           <div className="flex flex-col">
             <p className="text-rose-600 text-xs font-semibold uppercase tracking-widest mb-2 capitalize">
-              {product.category}
+              {getCategoryLabel(product.category, locale)}
             </p>
             <h1
               className="text-3xl sm:text-4xl font-bold text-stone-900 mb-4 leading-tight"

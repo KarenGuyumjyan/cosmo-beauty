@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { CartItem as CartItemType, Locale } from '@/lib/types';
+import { getCategoryLabel } from '@/lib/data';
 import { useCart } from '@/context/CartContext';
 
 interface CartItemProps {
@@ -34,7 +35,7 @@ export default function CartItem({ item, locale }: CartItemProps) {
       {/* Details */}
       <div className="flex-1 min-w-0">
         <p className="text-xs text-rose-500 font-medium uppercase tracking-wide capitalize mb-0.5">
-          {product.category}
+          {getCategoryLabel(product.category, locale)}
         </p>
         <h3 className="font-semibold text-stone-800 text-sm leading-snug mb-1">{name}</h3>
         <p className="text-xs text-stone-400">

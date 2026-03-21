@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import { SlidersHorizontal, RotateCcw } from 'lucide-react';
-import { categories } from '@/lib/data';
-import { Locale, SortOption } from '@/lib/types';
+import { Locale, SortOption, CategoryOption } from '@/lib/types';
 
 interface FilterPanelProps {
   locale: Locale;
+  categories: CategoryOption[];
   selectedCategory: string;
   selectedSize: string;
   sortBy: SortOption;
@@ -20,6 +20,7 @@ interface FilterPanelProps {
 
 export default function FilterPanel({
   locale,
+  categories,
   selectedCategory,
   selectedSize,
   sortBy,

@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum ProductCategory {
+  cosmetic_sponges
+  lip_liner
+  blush
+  stick
+  lip_gloss
+  highlighter
+  concealer
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// ─── Catalog ───────────────────────────────────────────────────────────────
+
+model Product {
+  id              String          @id
+  nameEn          String
+  nameHy          String
+  nameRu          String
+  shortDescEn     String
+  shortDescHy     String
+  shortDescRu     String
+  descriptionEn   String          @db.Text
+  descriptionHy   String          @db.Text
+  descriptionRu   String          @db.Text
+  price           Int
+  discountedPrice Int?
+  images          String[]
+  category        ProductCategory
+  size            String
+  sku             String          @unique
+  inStock         Boolean         @default(true)
+  includedItems   Json?
+  featured        Boolean         @default(false)
+  bestseller      Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  orderItems      OrderItem[]
+}
+
+// ─── Contact form submissions ──────────────────────────────────────────────
+
+model ContactApplication {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  message   String?
+  createdAt DateTime @default(now())
+}
+
+// ─── Orders ────────────────────────────────────────────────────────────────
+
+model Order {
+  id            String      @id @default(cuid())
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  total         Int
+  status        OrderStatus @default(PENDING)
+  createdAt     DateTime    @default(now())
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int
+  price     Int
+}
+
+// ─── Admin ─────────────────────────────────────────────────────────────────
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}

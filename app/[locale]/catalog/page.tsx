@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Locale } from '@/lib/types';
 import ProductGrid from '@/components/catalog/ProductGrid';
+import { getAllProducts } from '@/lib/db-products';
+import { categories } from '@/lib/data';
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -17,6 +19,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CatalogPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'catalog' });
+
+  const products = await getAllProducts();
+  const allSizes = [...new Set(products.map((p) => p.size))].sort();
 
   return (
     <div className="pt-20">
@@ -38,7 +43,12 @@ export default async function CatalogPage({ params }: Props) {
         </div>
       </div>
 
-      <ProductGrid locale={locale as Locale} />
+      <ProductGrid
+        locale={locale as Locale}
+        products={products}
+        allSizes={allSizes}
+        categories={categories}
+      />
     </div>
   );
 }
