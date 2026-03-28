@@ -41,22 +41,10 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <NextIntlClientProvider messages={messages}>
       <CartProvider>
-        <LangSetter locale={locale} />
         <Header locale={locale} />
         <main className="min-h-screen">{children}</main>
         <Footer />
       </CartProvider>
     </NextIntlClientProvider>
-  );
-}
-
-// Client component to dynamically set document lang
-function LangSetter({ locale }: { locale: string }) {
-  return (
-    <script
-      dangerouslySetInnerHTML={{
-        __html: `document.documentElement.lang="${locale}";`,
-      }}
-    />
   );
 }

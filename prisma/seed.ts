@@ -1,10 +1,11 @@
 import { PrismaClient, Prisma, ProductCategory } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { products } from '../lib/data';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding products from lib/data.ts…');
+  console.log('Seeding database…');
 
   await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.orderItem.deleteMany();
@@ -43,6 +44,19 @@ async function main() {
   });
 
   console.log(`Seeded ${products.length} products.`);
+
+  // Upsert admin user from env vars
+  const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@cosmo.beauty';
+  const adminPassword = process.env.ADMIN_PASSWORD ?? 'Admin123!';
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
+
+  await prisma.adminUser.upsert({
+    where: { email: adminEmail },
+    update: { passwordHash },
+    create: { email: adminEmail, passwordHash },
+  });
+
+  console.log(`Admin user ready: ${adminEmail}`);
 }
 
 main()

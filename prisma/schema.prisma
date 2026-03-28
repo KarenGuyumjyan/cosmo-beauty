@@ -44,6 +44,7 @@ model Product {
   price           Int
   discountedPrice Int?
   images          String[]
+  videos          String[]
   category        ProductCategory
   size            String
   sku             String          @unique

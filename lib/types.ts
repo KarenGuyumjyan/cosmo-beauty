@@ -24,6 +24,7 @@ export interface Product {
   price: number;
   discountedPrice?: number;
   images: string[];
+  videos: string[];
   category: Category;
   size: string;
   sku: string;
