@@ -10,7 +10,11 @@ export default async function EditProductPage({ params }: Props) {
   const product = await prisma.product.findUnique({ where: { id } });
   if (!product) notFound();
 
+  console.log( 'product', product );
+
   const action = updateProduct.bind(null, id);
+
+  console.log( 'action', action );
 
   return (
     <div className="p-8 max-w-4xl">

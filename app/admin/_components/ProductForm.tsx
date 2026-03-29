@@ -244,6 +244,8 @@ function MediaSection({
   chooseLabel: string;
   renderPreview: (url: string, index: number) => React.ReactNode;
 }) {
+
+  console.log(items, 'items');
   return (
     <div className="bg-white rounded-2xl border border-stone-100 p-6">
       <h2 className="font-semibold text-stone-900 mb-1">{title}</h2>
