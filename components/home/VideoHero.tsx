@@ -55,7 +55,7 @@ export default function VideoHero() {
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 sm:px-8">
         <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
           <p className="text-rose-300 text-sm sm:text-base tracking-[0.25em] uppercase font-medium mb-4">
-            Cosmo Beauty
+            Morena Cosmetics
           </p>
         </div>
         <h1

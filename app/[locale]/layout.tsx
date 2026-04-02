@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return {
     title: {
-      default: 'Cosmo Beauty',
-      template: '%s | Cosmo Beauty',
+      default: 'Morena Cosmetics',
+      template: '%s | Morena Cosmetics',
     },
     alternates: {
       languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])),

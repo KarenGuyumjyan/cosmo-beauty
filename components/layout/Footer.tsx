@@ -119,7 +119,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-stone-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500">
-          <span>© {new Date().getFullYear()} Cosmo Beauty. {t('rights')}</span>
+          <span>© {new Date().getFullYear()} Morena Cosmetics. {t('rights')}</span>
           <div className="flex gap-4">
             <Link href="/about" className="hover:text-rose-400 transition-colors">
               {t('privacy')}

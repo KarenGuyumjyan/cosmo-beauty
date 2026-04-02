@@ -61,10 +61,10 @@ export default function Header({ locale }: HeaderProps) {
               className="text-2xl lg:text-3xl font-bold tracking-tight"
               style={{ fontFamily: 'var(--font-display)', color: '#e11d48' }}
             >
-              COSMO
+              MORENA
             </span>
             <span className="text-xs tracking-widest text-stone-400 uppercase hidden sm:block">
-              Beauty
+              Cosmetics
             </span>
           </Link>
 

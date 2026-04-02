@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'home.hero' });
   return {
-    title: 'Cosmo Beauty – ' + t('title'),
+    title: 'Morena Cosmetics – ' + t('title'),
     description: t('subtitle'),
   };
 }

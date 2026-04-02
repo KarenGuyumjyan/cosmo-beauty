@@ -17,8 +17,8 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Cosmo Beauty',
-    template: '%s | Cosmo Beauty',
+    default: 'Morena Cosmetics',
+    template: '%s | Morena Cosmetics',
   },
   description: 'Premium cosmetics for every skin type.',
 };
