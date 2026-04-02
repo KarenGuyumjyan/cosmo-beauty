@@ -1,6 +1,6 @@
 import { createProduct } from '@/app/admin/_actions/products'
 import ProductForm from '@/app/admin/_components/ProductForm'
-import { Link } from '@/i18n/navigation'
+import Link from 'next/link'
 
 export default function NewProductPage() {
   return (
