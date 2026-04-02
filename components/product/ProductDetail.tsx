@@ -34,8 +34,6 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
     setTimeout(() => setAdded(false), 2200);
   };
 
-  console.log(product, 'product');
-
   return (
     <div className="pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -51,7 +49,7 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Gallery */}
           <div>
-            <ImageGallery images={product.images} altBase={name} />
+            <ImageGallery images={product.images} videos={product.videos} altBase={name} />
           </div>
 
           {/* Info */}

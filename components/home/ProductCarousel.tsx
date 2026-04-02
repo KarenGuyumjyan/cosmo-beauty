@@ -84,9 +84,9 @@ export default function ProductCarousel({
           className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {products.map((product) => (
+          {products.map((product, i) => (
             <div key={product.id} className="snap-start shrink-0 w-[180px] md:w-[280px]">
-              <ProductCard product={product} locale={locale} />
+              <ProductCard product={product} locale={locale} priority={i < 4} />
             </div>
           ))}
         </div>

@@ -12,9 +12,10 @@ import { useCart } from '@/context/CartContext';
 interface ProductCardProps {
   product: Product;
   locale: Locale;
+  priority?: boolean;
 }
 
-export default function ProductCard({ product, locale }: ProductCardProps) {
+export default function ProductCard({ product, locale, priority = false }: ProductCardProps) {
   const t = useTranslations('catalog');
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
@@ -46,6 +47,7 @@ export default function ProductCard({ product, locale }: ProductCardProps) {
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 280px"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
+            priority={priority}
           />
 
           {/* Badges */}

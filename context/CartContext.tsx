@@ -43,19 +43,20 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
   }
 }
 
+function loadCartFromStorage(): CartItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem('cosmo-cart');
+    return stored ? (JSON.parse(stored) as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 const CartContext = createContext<CartState | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, dispatch] = useReducer(cartReducer, []);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('cosmo-cart');
-      if (stored) dispatch({ type: 'HYDRATE', items: JSON.parse(stored) });
-    } catch {
-      // ignore
-    }
-  }, []);
+  const [items, dispatch] = useReducer(cartReducer, undefined, loadCartFromStorage);
 
   useEffect(() => {
     localStorage.setItem('cosmo-cart', JSON.stringify(items));

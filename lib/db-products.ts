@@ -3,7 +3,18 @@ import { Product, LocalizedString } from './types';
 import type { Product as DbProduct } from '@prisma/client';
 import { list } from '@vercel/blob';
 
-async function toProduct(p: DbProduct): Promise<Product> {
+/** Fetch the blob URL map once and reuse it for all products in a request. */
+async function getBlobUrlMap(): Promise<Map<string, string>> {
+  const { blobs } = await list({ prefix: 'uploads/' });
+  return new Map(blobs.map((b) => [b.pathname, b.url]));
+}
+
+function resolvePaths(paths: string[] | null | undefined, urlMap: Map<string, string>): string[] {
+  if (!paths?.length) return [];
+  return paths.map((p) => urlMap.get(p) ?? p);
+}
+
+function toProduct(p: DbProduct, urlMap: Map<string, string>): Product {
   return {
     id: p.id,
     name:             { en: p.nameEn,        hy: p.nameHy,        ru: p.nameRu },
@@ -11,8 +22,8 @@ async function toProduct(p: DbProduct): Promise<Product> {
     description:      { en: p.descriptionEn, hy: p.descriptionHy, ru: p.descriptionRu },
     price: p.price,
     discountedPrice: p.discountedPrice ?? undefined,
-    images: await signImages(p.images),
-    videos: p.videos,
+    images: resolvePaths(p.images, urlMap),
+    videos: resolvePaths(p.videos, urlMap),
     category: p.category as Product['category'],
     size: p.size,
     sku: p.sku,
@@ -23,48 +34,50 @@ async function toProduct(p: DbProduct): Promise<Product> {
   };
 }
 
-
 export async function getFeaturedProducts(): Promise<Product[]> {
-  const rows = await prisma.product.findMany({
-    where: { featured: true },
-    orderBy: { createdAt: 'asc' },
-  });
-  return Promise.all(rows.map(toProduct));
+  const [rows, urlMap] = await Promise.all([
+    prisma.product.findMany({ where: { featured: true }, orderBy: { createdAt: 'asc' } }),
+    getBlobUrlMap(),
+  ]);
+  return rows.map((p) => toProduct(p, urlMap));
 }
 
 export async function getBestsellers(): Promise<Product[]> {
-  const rows = await prisma.product.findMany({
-    where: { bestseller: true },
-    orderBy: { createdAt: 'asc' },
-  });
-  return Promise.all(rows.map(toProduct));
+  const [rows, urlMap] = await Promise.all([
+    prisma.product.findMany({ where: { bestseller: true }, orderBy: { createdAt: 'asc' } }),
+    getBlobUrlMap(),
+  ]);
+  return rows.map((p) => toProduct(p, urlMap));
 }
 
 export async function getAllProducts(): Promise<Product[]> {
-  const rows = await prisma.product.findMany({ orderBy: { createdAt: 'asc' } });
-  return Promise.all(rows.map(toProduct));
+  const [rows, urlMap] = await Promise.all([
+    prisma.product.findMany({ orderBy: { createdAt: 'asc' } }),
+    getBlobUrlMap(),
+  ]);
+  return rows.map((p) => toProduct(p, urlMap));
 }
 
-async function signImages(images: string[] | null): Promise<string[]> {
-  if (!images?.length) return [];
-
-  // fetch all blobs under uploads folder
-  const { blobs } = await list({
-    prefix: 'uploads/',
-  });
-
-  // create fast lookup map
-  const urlMap = new Map(
-    blobs.map((b) => [b.pathname, b.url])
-  );
-
-  return images.map((path) => urlMap.get(path) ?? path);
+/** Fetches featured + bestseller products with a single Blob list() call. */
+export async function getFeaturedAndBestsellers(): Promise<{
+  featured: Product[];
+  bestsellers: Product[];
+}> {
+  const [featuredRows, bestsellersRows, urlMap] = await Promise.all([
+    prisma.product.findMany({ where: { featured: true }, orderBy: { createdAt: 'asc' } }),
+    prisma.product.findMany({ where: { bestseller: true }, orderBy: { createdAt: 'asc' } }),
+    getBlobUrlMap(),
+  ]);
+  return {
+    featured: featuredRows.map((p) => toProduct(p, urlMap)),
+    bestsellers: bestsellersRows.map((p) => toProduct(p, urlMap)),
+  };
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  const row = await prisma.product.findUnique({
-    where: { id },
-  });
-
-  return row ? await toProduct(row) : null;
+  const [row, urlMap] = await Promise.all([
+    prisma.product.findUnique({ where: { id } }),
+    getBlobUrlMap(),
+  ]);
+  return row ? toProduct(row, urlMap) : null;
 }

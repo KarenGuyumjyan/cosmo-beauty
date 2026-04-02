@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { categories } from '@/lib/data';
 import type { Product as DbProduct } from '@prisma/client';
-import { ImagePlus, Film, X, Loader2 } from 'lucide-react';
+import { ImagePlus, Film, X, Loader2, GripVertical } from 'lucide-react';
 
 interface ProductFormProps {
   action: (formData: FormData) => Promise<void>;
@@ -37,6 +37,9 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
   const [imageError, setImageError] = useState('');
   const [videoError, setVideoError] = useState('');
 
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+
   const imageRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
 
@@ -68,6 +71,18 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
       setUploadingVideos(false);
       if (videoRef.current) videoRef.current.value = '';
     }
+  }
+
+  function handleImageDrop(targetIdx: number) {
+    if (dragIdx === null || dragIdx === targetIdx) return;
+    setImages((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(dragIdx, 1);
+      next.splice(targetIdx, 0, moved);
+      return next;
+    });
+    setDragIdx(null);
+    setDragOverIdx(null);
   }
 
   const uploading = uploadingImages || uploadingVideos;
@@ -125,38 +140,78 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
         </div>
       </div>
 
-      {/* Images */}
-      <MediaSection
-        title="Images"
-        hint="Upload JPG / PNG / WebP. First image is the main product image."
-        accept="image/jpeg,image/png,image/webp"
-        items={images}
-        uploading={uploadingImages}
-        error={imageError}
-        fileRef={imageRef}
-        onFiles={handleImageFiles}
-        onRemove={(url) => setImages((prev) => prev.filter((u) => u !== url))}
-        icon={<ImagePlus size={16} />}
-        chooseLabel="Choose images"
-        renderPreview={(url, i) => (
-          <div key={url} className="relative group w-24 h-24 rounded-xl overflow-hidden border border-stone-200 bg-stone-50">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt={`image ${i + 1}`} className="w-full h-full object-cover" />
-            {i === 0 && (
-              <span className="absolute bottom-0 left-0 right-0 text-center text-[10px] font-semibold bg-rose-600 text-white py-0.5">
-                Main
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={() => setImages((prev) => prev.filter((u) => u !== url))}
-              className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X size={12} />
-            </button>
+      {/* Images (drag-and-drop reorder — first image = main) */}
+      <div className="bg-white rounded-2xl border border-stone-100 p-6">
+        <h2 className="font-semibold text-stone-900 mb-1">Images</h2>
+        <p className="text-stone-400 text-xs mb-4">
+          Upload JPG / PNG / WebP. Drag to reorder — first image is the main product image.
+        </p>
+
+        {images.length > 0 && (
+          <div className="flex flex-wrap gap-3 mb-4">
+            {images.map((url, i) => (
+              <div
+                key={url}
+                draggable
+                onDragStart={() => setDragIdx(i)}
+                onDragOver={(e) => { e.preventDefault(); setDragOverIdx(i); }}
+                onDragLeave={() => setDragOverIdx(null)}
+                onDrop={(e) => { e.preventDefault(); handleImageDrop(i); }}
+                onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
+                className={`relative group w-24 h-24 rounded-xl overflow-hidden border-2 bg-stone-50 cursor-grab active:cursor-grabbing transition-all ${
+                  dragOverIdx === i && dragIdx !== i
+                    ? 'border-rose-500 scale-105'
+                    : i === 0
+                    ? 'border-rose-400'
+                    : 'border-stone-200'
+                } ${dragIdx === i ? 'opacity-40' : ''}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt={`image ${i + 1}`} className="w-full h-full object-cover pointer-events-none" />
+                <div className="absolute top-1 left-1 bg-black/50 text-white rounded p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <GripVertical size={12} />
+                </div>
+                {i === 0 && (
+                  <span className="absolute bottom-0 left-0 right-0 text-center text-[10px] font-semibold bg-rose-600 text-white py-0.5">
+                    Main
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setImages((prev) => prev.filter((u) => u !== url))}
+                  className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
           </div>
         )}
-      />
+
+        <div>
+          <input
+            ref={imageRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            className="hidden"
+            onChange={(e) => handleImageFiles(e.target.files)}
+          />
+          <button
+            type="button"
+            onClick={() => imageRef.current?.click()}
+            disabled={uploadingImages}
+            className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-stone-300 hover:border-rose-400 rounded-xl text-sm text-stone-500 hover:text-rose-600 transition-colors disabled:opacity-50"
+          >
+            {uploadingImages ? (
+              <><Loader2 size={16} className="animate-spin" /> Uploading…</>
+            ) : (
+              <><ImagePlus size={16} /> Choose images</>
+            )}
+          </button>
+          {imageError && <p className="mt-2 text-xs text-red-600">{imageError}</p>}
+        </div>
+      </div>
 
       {/* Videos */}
       <MediaSection
@@ -245,7 +300,6 @@ function MediaSection({
   renderPreview: (url: string, index: number) => React.ReactNode;
 }) {
 
-  console.log(items, 'items');
   return (
     <div className="bg-white rounded-2xl border border-stone-100 p-6">
       <h2 className="font-semibold text-stone-900 mb-1">{title}</h2>
