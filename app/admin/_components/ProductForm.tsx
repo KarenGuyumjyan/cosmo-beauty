@@ -1,17 +1,21 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { categories } from '@/lib/data';
-import type { Product as DbProduct } from '@prisma/client';
+import type { Product as DbProduct, ProductCategory } from '@prisma/client';
+import { suggestNextSku } from '@/app/admin/_actions/products';
 import { ImagePlus, Film, X, Loader2, GripVertical } from 'lucide-react';
 
 interface ProductFormProps {
-  action: (formData: FormData) => Promise<void>;
+  action: (formData: FormData) => Promise<void | { error: string }>;
   product?: DbProduct;
   submitLabel: string;
 }
 
 const CATEGORY_OPTIONS = categories.map((c) => ({ value: c.value, label: c.label.en }));
+
+const DEFAULT_CATEGORY = CATEGORY_OPTIONS[0]!.value as ProductCategory;
 
 async function uploadFiles(files: FileList): Promise<string[]> {
   const urls: string[] = [];
@@ -28,6 +32,11 @@ async function uploadFiles(files: FileList): Promise<string[]> {
 
 export default function ProductForm({ action, product, submitLabel }: ProductFormProps) {
   const v = product;
+  const isEdit = Boolean(v);
+
+  const [category, setCategory] = useState<ProductCategory>(v?.category ?? DEFAULT_CATEGORY);
+  const [sku, setSku] = useState(v?.sku ?? '');
+  const lastSuggestedSku = useRef<string | null>(null);
 
   const [images, setImages] = useState<string[]>(v?.images ?? []);
   const [videos, setVideos] = useState<string[]>(v?.videos ?? []);
@@ -39,6 +48,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
 
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const [submitError, setSubmitError] = useState('');
 
   const imageRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
@@ -87,8 +97,60 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
 
   const uploading = uploadingImages || uploadingVideos;
 
+  useEffect(() => {
+    if (isEdit) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { sku: next } = await suggestNextSku(category);
+        if (!cancelled) {
+          setSku(next);
+          lastSuggestedSku.current = next;
+        }
+      } catch {
+        /* user can still enter SKU manually */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Only seed suggestion when opening the new-product form (default category).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- category changes use handleCategoryChange
+  }, [isEdit]);
+
+  function handleCategoryChange(next: ProductCategory) {
+    setCategory(next);
+    if (isEdit) return;
+    const trimmed = sku.trim();
+    const shouldSuggest =
+      !trimmed || trimmed === (lastSuggestedSku.current ?? '');
+    if (!shouldSuggest) return;
+    void (async () => {
+      try {
+        const { sku: nextSku } = await suggestNextSku(next);
+        setSku(nextSku);
+        lastSuggestedSku.current = nextSku;
+      } catch {
+        /* keep current sku field */
+      }
+    })();
+  }
+
+  async function handleSubmit(formData: FormData) {
+    setSubmitError('');
+    try {
+      const result = await action(formData);
+      if (result && typeof result === 'object' && 'error' in result) {
+        setSubmitError(result.error);
+      }
+    } catch (e) {
+      if (isRedirectError(e)) throw e;
+      setSubmitError('Something went wrong. Please try again.');
+    }
+  }
+
   return (
-    <form action={action} className="space-y-8">
+    <form action={handleSubmit} className="space-y-8">
       <input type="hidden" name="images" value={images.join('\n')} />
       <input type="hidden" name="videos" value={videos.join('\n')} />
 
@@ -97,16 +159,34 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
         <h2 className="font-semibold text-stone-900 mb-5">Basic Info</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="label">SKU</label>
-            <input name="sku" required defaultValue={v?.sku} className="input" placeholder="CSM-XX-001" />
-          </div>
-          <div>
             <label className="label">Category</label>
-            <select name="category" required defaultValue={v?.category} className="input">
+            <select
+              name="category"
+              required
+              className="input"
+              value={category}
+              onChange={(e) => handleCategoryChange(e.target.value as ProductCategory)}
+            >
               {CATEGORY_OPTIONS.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="label">SKU</label>
+            <input
+              name="sku"
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              className="input"
+              placeholder="e.g. CSM-BL-003"
+              autoComplete="off"
+            />
+            {!isEdit && (
+              <p className="text-xs text-stone-400 mt-1.5">
+                Filled automatically from category (e.g. Blush → CSM-BL-###). Leave blank or edit as needed.
+              </p>
+            )}
           </div>
           <div>
             <label className="label">Size</label>
@@ -251,6 +331,11 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
       <LocalizedSection lang="Russian (RU)" prefix="Ru" product={v} />
 
       {/* Submit */}
+      {submitError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
+          {submitError}
+        </div>
+      )}
       <div className="flex gap-3">
         <button
           type="submit"

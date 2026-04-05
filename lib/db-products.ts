@@ -1,20 +1,11 @@
+import { unstable_cache as cache } from 'next/cache';
 import { prisma } from './prisma';
 import { Product, LocalizedString } from './types';
 import type { Product as DbProduct } from '@prisma/client';
-import { list } from '@vercel/blob';
 
-/** Fetch the blob URL map once and reuse it for all products in a request. */
-async function getBlobUrlMap(): Promise<Map<string, string>> {
-  const { blobs } = await list({ prefix: 'uploads/' });
-  return new Map(blobs.map((b) => [b.pathname, b.url]));
-}
+const REVALIDATE = 60; // seconds
 
-function resolvePaths(paths: string[] | null | undefined, urlMap: Map<string, string>): string[] {
-  if (!paths?.length) return [];
-  return paths.map((p) => urlMap.get(p) ?? p);
-}
-
-function toProduct(p: DbProduct, urlMap: Map<string, string>): Product {
+function toProduct(p: DbProduct): Product {
   return {
     id: p.id,
     name:             { en: p.nameEn,        hy: p.nameHy,        ru: p.nameRu },
@@ -22,8 +13,8 @@ function toProduct(p: DbProduct, urlMap: Map<string, string>): Product {
     description:      { en: p.descriptionEn, hy: p.descriptionHy, ru: p.descriptionRu },
     price: p.price,
     discountedPrice: p.discountedPrice ?? undefined,
-    images: resolvePaths(p.images, urlMap),
-    videos: resolvePaths(p.videos, urlMap),
+    images: p.images ?? [],
+    videos: p.videos ?? [],
     category: p.category as Product['category'],
     size: p.size,
     sku: p.sku,
@@ -34,50 +25,35 @@ function toProduct(p: DbProduct, urlMap: Map<string, string>): Product {
   };
 }
 
-export async function getFeaturedProducts(): Promise<Product[]> {
-  const [rows, urlMap] = await Promise.all([
-    prisma.product.findMany({ where: { featured: true }, orderBy: { createdAt: 'asc' } }),
-    getBlobUrlMap(),
-  ]);
-  return rows.map((p) => toProduct(p, urlMap));
-}
+export const getAllProducts = cache(
+  async (): Promise<Product[]> => {
+    const rows = await prisma.product.findMany({ orderBy: { createdAt: 'asc' } });
+    return rows.map(toProduct);
+  },
+  ['all-products'],
+  { revalidate: REVALIDATE }
+);
 
-export async function getBestsellers(): Promise<Product[]> {
-  const [rows, urlMap] = await Promise.all([
-    prisma.product.findMany({ where: { bestseller: true }, orderBy: { createdAt: 'asc' } }),
-    getBlobUrlMap(),
-  ]);
-  return rows.map((p) => toProduct(p, urlMap));
-}
+export const getFeaturedAndBestsellers = cache(
+  async (): Promise<{ featured: Product[]; bestsellers: Product[] }> => {
+    const [featuredRows, bestsellersRows] = await Promise.all([
+      prisma.product.findMany({ where: { featured: true }, orderBy: { createdAt: 'asc' } }),
+      prisma.product.findMany({ where: { bestseller: true }, orderBy: { createdAt: 'asc' } }),
+    ]);
+    return {
+      featured: featuredRows.map(toProduct),
+      bestsellers: bestsellersRows.map(toProduct),
+    };
+  },
+  ['featured-bestsellers'],
+  { revalidate: REVALIDATE }
+);
 
-export async function getAllProducts(): Promise<Product[]> {
-  const [rows, urlMap] = await Promise.all([
-    prisma.product.findMany({ orderBy: { createdAt: 'asc' } }),
-    getBlobUrlMap(),
-  ]);
-  return rows.map((p) => toProduct(p, urlMap));
-}
-
-/** Fetches featured + bestseller products with a single Blob list() call. */
-export async function getFeaturedAndBestsellers(): Promise<{
-  featured: Product[];
-  bestsellers: Product[];
-}> {
-  const [featuredRows, bestsellersRows, urlMap] = await Promise.all([
-    prisma.product.findMany({ where: { featured: true }, orderBy: { createdAt: 'asc' } }),
-    prisma.product.findMany({ where: { bestseller: true }, orderBy: { createdAt: 'asc' } }),
-    getBlobUrlMap(),
-  ]);
-  return {
-    featured: featuredRows.map((p) => toProduct(p, urlMap)),
-    bestsellers: bestsellersRows.map((p) => toProduct(p, urlMap)),
-  };
-}
-
-export async function getProductById(id: string): Promise<Product | null> {
-  const [row, urlMap] = await Promise.all([
-    prisma.product.findUnique({ where: { id } }),
-    getBlobUrlMap(),
-  ]);
-  return row ? toProduct(row, urlMap) : null;
-}
+export const getProductById = cache(
+  async (id: string): Promise<Product | null> => {
+    const row = await prisma.product.findUnique({ where: { id } });
+    return row ? toProduct(row) : null;
+  },
+  ['product-by-id'],
+  { revalidate: REVALIDATE }
+);

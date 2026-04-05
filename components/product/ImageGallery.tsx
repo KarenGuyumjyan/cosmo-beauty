@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ZoomIn, Play } from 'lucide-react';
 
@@ -20,6 +20,11 @@ export default function ImageGallery({ images, videos = [], altBase }: ImageGall
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    videoRef.current?.play().catch(() => {});
+  }, [activeIdx]);
 
   const prev = () => setActiveIdx((i) => (i - 1 + media.length) % media.length);
   const next = () => setActiveIdx((i) => (i + 1) % media.length);
@@ -38,6 +43,7 @@ export default function ImageGallery({ images, videos = [], altBase }: ImageGall
         >
           {current.type === 'video' ? (
             <video
+              ref={videoRef}
               key={current.url}
               src={current.url}
               autoPlay
