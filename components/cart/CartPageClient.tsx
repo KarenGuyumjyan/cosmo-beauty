@@ -28,7 +28,7 @@ export default function CartPageClient({ locale }: CartPageClientProps) {
 
   if (items.length === 0) {
     return (
-      <div className="pt-32 pb-24 min-h-screen flex items-center justify-center">
+      <div className="pt-32 pb-24 min-h-dvh flex items-center justify-center">
         <div className="text-center max-w-sm mx-auto px-4">
           <div className="w-24 h-24 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <ShoppingBag size={40} className="text-rose-400" />
@@ -52,7 +52,7 @@ export default function CartPageClient({ locale }: CartPageClientProps) {
   }
 
   return (
-    <div className="pt-24 pb-16 min-h-screen" style={{ background: '#fdf8f0' }}>
+    <div className="pt-24 pb-16 min-h-dvh" style={{ background: '#fdf8f0' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1
           className="text-3xl sm:text-4xl font-bold text-stone-900 mb-2"

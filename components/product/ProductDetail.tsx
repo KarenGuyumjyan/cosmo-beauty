@@ -35,7 +35,7 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
   };
 
   return (
-    <div className="pt-20">
+    <div className="pt-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Back link */}
         <Link
@@ -54,7 +54,7 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
 
           {/* Info */}
           <div className="flex flex-col">
-            <p className="text-rose-600 text-xs font-semibold uppercase tracking-widest mb-2 capitalize">
+            <p className="text-rose-600 text-xs font-semibold capitalize tracking-widest mb-2">
               {getCategoryLabel(product.category, locale)}
             </p>
             <h1

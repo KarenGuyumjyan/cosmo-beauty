@@ -24,7 +24,7 @@ export default async function CatalogPage({ params }: Props) {
   const allSizes = [...new Set(products.map((p) => p.size))].sort();
 
   return (
-    <div className="pt-20">
+    <div className="pt-10">
       {/* Page header */}
       <div
         className="relative py-16 text-center overflow-hidden"

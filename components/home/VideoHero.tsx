@@ -27,7 +27,7 @@ export default function VideoHero() {
   };
 
   return (
-    <section className="relative w-full h-screen min-h-150 overflow-hidden">
+    <section className="relative w-full h-dvh min-h-150 overflow-hidden">
       {/* Gradient fallback / overlay */}
       <div className="absolute inset-0 bg-linear-to-br from-rose-950 via-stone-900 to-rose-900" />
 

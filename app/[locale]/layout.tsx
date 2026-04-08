@@ -43,7 +43,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     <NextIntlClientProvider messages={messages}>
       <CartProvider>
         <Header locale={locale} />
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-dvh">{children}</main>
         <Footer />
         <SpeedInsights />
       </CartProvider>

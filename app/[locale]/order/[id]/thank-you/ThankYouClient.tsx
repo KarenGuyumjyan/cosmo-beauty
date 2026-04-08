@@ -31,7 +31,7 @@ export default function ThankYouClient({ order }: { order: OrderData }) {
   const isPaid = order.status === 'PAID';
 
   return (
-    <div className="pt-28 pb-20 min-h-screen" style={{ background: '#fdf8f0' }}>
+    <div className="pt-28 pb-20 min-h-dvh" style={{ background: '#fdf8f0' }}>
       <div className="max-w-2xl mx-auto px-4">
         {/* Status icon */}
         <div className="text-center mb-10">

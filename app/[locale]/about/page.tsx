@@ -46,7 +46,7 @@ export default async function AboutPage({ params }: Props) {
   const tBlog = await getTranslations({ locale, namespace: 'about.blog' });
 
   return (
-    <div className="pt-20">
+    <div className="pt-10">
       {/* Hero */}
       <section
         className="relative py-24 overflow-hidden text-center"

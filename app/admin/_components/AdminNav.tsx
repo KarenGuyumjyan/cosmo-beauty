@@ -16,7 +16,7 @@ export default function AdminNav({ email }: { email?: string | null }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 min-h-screen bg-stone-900 flex flex-col fixed left-0 top-0">
+    <aside className="w-64 min-h-dvh bg-stone-900 flex flex-col fixed left-0 top-0">
       {/* Brand */}
       <div className="px-6 py-5 border-b border-stone-800">
         <p className="text-white font-bold text-lg tracking-tight">Cosmo Admin</p>

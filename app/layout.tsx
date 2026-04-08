@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Inter } from 'next/font/google';
 import { getLocale } from 'next-intl/server';
 import './globals.css';
@@ -14,6 +14,12 @@ const playfair = Playfair_Display({
   subsets: ['latin'],
   display: 'swap',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: {
@@ -33,7 +39,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased pb-[env(safe-area-inset-bottom)]">
+        {children}
+      </body>
     </html>
   );
 }
