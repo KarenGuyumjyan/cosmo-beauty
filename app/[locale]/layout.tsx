@@ -6,6 +6,7 @@ import { CartProvider } from '@/context/CartContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import type { Metadata } from 'next';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 type Props = {
   children: React.ReactNode;
@@ -44,6 +45,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <Header locale={locale} />
         <main className="min-h-screen">{children}</main>
         <Footer />
+        <SpeedInsights />
       </CartProvider>
     </NextIntlClientProvider>
   );
