@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { updateProduct } from '../../../../_actions/products';
 import ProductForm from '../../../../_components/ProductForm';
@@ -10,18 +11,14 @@ export default async function EditProductPage({ params }: Props) {
   const product = await prisma.product.findUnique({ where: { id } });
   if (!product) notFound();
 
-  console.log( 'product', product );
-
   const action = updateProduct.bind(null, id);
-
-  console.log( 'action', action );
 
   return (
     <div className="p-8 max-w-4xl">
       <div className="mb-8">
-        <a href="/admin/products" className="text-sm text-stone-400 hover:text-rose-600 transition-colors">
+        <Link href="/admin/products" className="text-sm text-stone-400 hover:text-rose-600 transition-colors">
           ← Back to Products
-        </a>
+        </Link>
         <h1 className="text-2xl font-bold text-stone-900 mt-2">Edit Product</h1>
         <p className="text-stone-400 text-sm">{product.nameEn}</p>
       </div>

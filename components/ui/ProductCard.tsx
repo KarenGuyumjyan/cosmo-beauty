@@ -88,7 +88,7 @@ export default function ProductCard({ product, locale, priority = false }: Produ
 
         {/* Info */}
         <div className="p-2 md:p-4">
-          <p className="text-[10px] md:text-xs text-rose-500 font-medium uppercase tracking-wider mb-0.5 md:mb-1 capitalize">
+          <p className="text-[10px] md:text-xs text-rose-500 font-medium capitalize tracking-wider mb-0.5 md:mb-1">
             {getCategoryLabel(product.category, locale)}
           </p>
           <h3 className="text-stone-800 font-semibold text-xs md:text-sm leading-tight line-clamp-2 mb-2 md:mb-3 group-hover:text-rose-700 transition-colors">
@@ -99,11 +99,11 @@ export default function ProductCard({ product, locale, priority = false }: Produ
           <div className="flex items-center justify-between gap-1 md:gap-2">
             <div className="flex flex-col">
               <span className="text-rose-700 font-bold text-sm md:text-base">
-                {price.toLocaleString()} AMD
+                {price.toLocaleString()} ₽
               </span>
               {hasDiscount && (
                 <span className="text-stone-400 text-[10px] md:text-xs line-through">
-                  {product.price.toLocaleString()} AMD
+                  {product.price.toLocaleString()} ₽
                 </span>
               )}
             </div>

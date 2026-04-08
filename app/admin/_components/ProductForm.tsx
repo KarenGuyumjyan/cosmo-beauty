@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { categories } from '@/lib/data';
 import type { Product as DbProduct, ProductCategory } from '@prisma/client';
@@ -344,12 +345,12 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
         >
           {submitLabel}
         </button>
-        <a
+        <Link
           href="/admin/products"
           className="px-8 py-3 border border-stone-200 text-stone-600 font-medium rounded-xl hover:bg-stone-50 transition-colors"
         >
           Cancel
-        </a>
+        </Link>
       </div>
     </form>
   );
@@ -366,6 +367,7 @@ function MediaSection({
   error,
   fileRef,
   onFiles,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onRemove,
   icon,
   chooseLabel,

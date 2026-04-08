@@ -3,24 +3,12 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Phone, User, CheckCircle2 } from 'lucide-react';
-
-const PREFIX = '+7';
-
-function formatPhone(raw: string): string {
-  // Strip everything except digits
-  const digits = raw.replace(/\D/g, '');
-  // Remove leading 7 or 8 if user typed the country code themselves
-  const local = digits.startsWith('7') ? digits.slice(1) : digits;
-  const d = local.slice(0, 10);
-
-  // Format: +7 (XXX) XXX-XX-XX
-  let result = PREFIX;
-  if (d.length > 0) result += ' (' + d.slice(0, 3);
-  if (d.length >= 3) result += ') ' + d.slice(3, 6);
-  if (d.length >= 6) result += '-' + d.slice(6, 8);
-  if (d.length >= 8) result += '-' + d.slice(8, 10);
-  return result;
-}
+import {
+  formatPhone,
+  isValidRuPhone,
+  RU_PHONE_DISPLAY_MAX_LENGTH,
+  RU_PHONE_PREFIX,
+} from '@/lib/utils/phone';
 
 export default function ContactForm() {
   const t = useTranslations('contactForm');
@@ -36,6 +24,7 @@ export default function ContactForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
+    if (!isValidRuPhone(phone)) return;
     setSubmitted(true);
   };
 
@@ -99,10 +88,10 @@ export default function ContactForm() {
                 required
                 value={phone}
                 onChange={handlePhoneChange}
-                onFocus={() => { if (!phone) setPhone(PREFIX); }}
-                onBlur={() => { if (phone === PREFIX) setPhone(''); }}
-                placeholder={`${PREFIX} (___) ___-__-__`}
-                maxLength={18}
+                onFocus={() => { if (!phone) setPhone(RU_PHONE_PREFIX); }}
+                onBlur={() => { if (phone === RU_PHONE_PREFIX) setPhone(''); }}
+                placeholder={`${RU_PHONE_PREFIX} (___) ___-__-__`}
+                maxLength={RU_PHONE_DISPLAY_MAX_LENGTH}
                 className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-stone-200 text-sm text-stone-800 placeholder-stone-400 bg-stone-50 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors"
               />
             </div>

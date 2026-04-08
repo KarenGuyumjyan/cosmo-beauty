@@ -85,7 +85,7 @@ export default function ProductCarousel({
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map((product, i) => (
-            <div key={product.id} className="snap-start shrink-0 w-[180px] md:w-[280px]">
+            <div key={product.id} className="snap-start shrink-0 w-45 md:w-70">
               <ProductCard product={product} locale={locale} priority={i < 4} />
             </div>
           ))}

@@ -67,12 +67,12 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
             {/* Price */}
             <div className="flex items-center gap-4 mb-6">
               <span className="text-3xl font-bold text-rose-700">
-                {price.toLocaleString()} AMD
+                {price.toLocaleString()} ₽
               </span>
               {hasDiscount && (
                 <>
                   <span className="text-lg text-stone-400 line-through">
-                    {product.price.toLocaleString()} AMD
+                    {product.price.toLocaleString()} ₽
                   </span>
                   <span className="bg-rose-600 text-white text-sm font-bold px-3 py-1 rounded-full">
                     -{discountPercent}%
@@ -120,7 +120,7 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
               </span>
               {hasDiscount && (
                 <span className="flex items-center gap-1.5 text-green-600 font-medium">
-                  {t('save')}: {(product.price - product.discountedPrice!).toLocaleString()} AMD
+                  {t('save')}: {(product.price - product.discountedPrice!).toLocaleString()} ₽
                 </span>
               )}
             </div>

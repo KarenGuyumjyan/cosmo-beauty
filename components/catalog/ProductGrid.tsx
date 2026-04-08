@@ -21,8 +21,8 @@ export default function ProductGrid({ locale, products, allSizes, categories }: 
   const router = useRouter();
   const pathname = usePathname();
 
-  // Initialise from URL ?cat= param
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('cat') ?? '');
+  // Derive selected category directly from URL
+  const selectedCategory = searchParams.get('cat') ?? '';
   const [selectedSize, setSelectedSize] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('popular');
   const [search, setSearch] = useState('');
@@ -30,7 +30,6 @@ export default function ProductGrid({ locale, products, allSizes, categories }: 
 
   // Keep URL in sync when category filter changes
   const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
       params.set('cat', value);
@@ -39,11 +38,6 @@ export default function ProductGrid({ locale, products, allSizes, categories }: 
     }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
-
-  // Sync if URL changes externally (e.g. browser back/forward)
-  useEffect(() => {
-    setSelectedCategory(searchParams.get('cat') ?? '');
-  }, [searchParams]);
 
   const filtered = useMemo(() => {
     let result = [...products];
@@ -75,7 +69,7 @@ export default function ProductGrid({ locale, products, allSizes, categories }: 
         result.sort((a, b) => (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0));
     }
     return result;
-  }, [selectedCategory, selectedSize, sortBy, search, locale]);
+  }, [products, selectedCategory, selectedSize, sortBy, search, locale]);
 
   const handleReset = () => {
     handleCategoryChange('');

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useReducer } from 'react';
+import React, { createContext, useContext, useEffect, useReducer } from 'react';
 import { CartItem, CartState, Product } from '@/lib/types';
 
 type CartAction =
@@ -56,22 +56,11 @@ function loadCartFromStorage(): CartItem[] {
 const CartContext = createContext<CartState | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, dispatch] = useReducer(cartReducer, []);
-  const [hydrated, setHydrated] = useState(false);
+  const [items, dispatch] = useReducer(cartReducer, undefined, loadCartFromStorage);
 
   useEffect(() => {
-    const stored = loadCartFromStorage();
-    if (stored.length > 0) {
-      dispatch({ type: 'HYDRATE', items: stored });
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated) {
-      localStorage.setItem('cosmo-cart', JSON.stringify(items));
-    }
-  }, [items, hydrated]);
+    localStorage.setItem('cosmo-cart', JSON.stringify(items));
+  }, [items]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce(

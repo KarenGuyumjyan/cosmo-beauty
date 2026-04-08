@@ -27,9 +27,9 @@ export default function VideoHero() {
   };
 
   return (
-    <section className="relative w-full h-screen min-h-[600px] overflow-hidden">
+    <section className="relative w-full h-screen min-h-150 overflow-hidden">
       {/* Gradient fallback / overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-rose-950 via-stone-900 to-rose-900" />
+      <div className="absolute inset-0 bg-linear-to-br from-rose-950 via-stone-900 to-rose-900" />
 
       {/* Video */}
       <video
@@ -45,7 +45,7 @@ export default function VideoHero() {
       />
 
       {/* Dark overlay for text contrast */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+      <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/20 to-black/60" />
 
       {/* Decorative circles */}
       <div className="absolute top-1/4 right-1/4 w-64 h-64 rounded-full bg-rose-600/20 blur-3xl pointer-events-none" />

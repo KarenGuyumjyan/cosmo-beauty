@@ -63,7 +63,7 @@ export default function CartItem({ item, locale }: CartItemProps) {
 
           <div className="flex items-center gap-3">
             <span className="font-bold text-rose-700 text-sm">
-              {(price * quantity).toLocaleString()} AMD
+              {(price * quantity).toLocaleString()} ₽
             </span>
             <button
               onClick={() => removeItem(product.id)}

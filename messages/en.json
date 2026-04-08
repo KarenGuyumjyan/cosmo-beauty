@@ -146,13 +146,62 @@
       "sent": "Thank you! We'll be in touch. 🌸"
     }
   },
+  "checkout": {
+    "title": "Checkout",
+    "contact": "Contact Information",
+    "name": "Full Name",
+    "namePlaceholder": "John Doe",
+    "phone": "Phone",
+    "phonePlaceholder": "+7 999 123 45 67",
+    "email": "Email",
+    "emailPlaceholder": "john@example.com",
+    "emailOptional": "optional",
+    "shipping": "Shipping Method",
+    "yandexDelivery": "Yandex Delivery",
+    "selfPickup": "Self-pickup (free)",
+    "pickupAddress": "Pickup address",
+    "deliveryAddress": "Delivery Address",
+    "city": "City",
+    "cityPlaceholder": "Moscow",
+    "address": "Address",
+    "addressPlaceholder": "Street, building, apartment",
+    "deliveryCost": "Delivery cost",
+    "calculating": "Calculating…",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "buyNow": "Buy Now",
+    "processing": "Processing…",
+    "securePayment": "Secure payment via YooKassa",
+    "emptyCart": "Your cart is empty",
+    "goToCart": "Go to Cart",
+    "errors": {
+      "nameRequired": "Name is required",
+      "phoneRequired": "Phone is required",
+      "phoneInvalid": "Enter a valid 10-digit mobile number",
+      "cityRequired": "City is required for delivery",
+      "addressRequired": "Address is required for delivery",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "thankYou": {
+    "title": "Thank You!",
+    "subtitle": "Your order has been placed successfully",
+    "orderNumber": "Order number",
+    "pending": "Payment is being processed…",
+    "paid": "Payment confirmed",
+    "items": "Items",
+    "shipping": "Shipping",
+    "total": "Total",
+    "continueShopping": "Continue Shopping"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
     "back": "Back",
     "close": "Close",
     "search": "Search",
-    "currency": "AMD",
+    "currency": "₽",
     "addedToCart": "Added to cart",
     "viewCart": "View Cart"
   }

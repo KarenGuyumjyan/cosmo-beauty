@@ -25,16 +25,20 @@ export default function Header({ locale }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
+
+  // Close mobile menu when navigating to a new page
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    if (mobileOpen) setMobileOpen(false);
+    if (langOpen) setLangOpen(false);
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   const navLinks = [
     { href: '/', label: t('home') },
@@ -74,7 +78,7 @@ export default function Header({ locale }: HeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-stone-600 hover:text-rose-600 transition-colors relative after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-[2px] after:bg-rose-600 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
+                className="text-sm font-medium text-stone-600 hover:text-rose-600 transition-colors relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:bg-rose-600 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
               >
                 {link.label}
               </Link>
@@ -94,7 +98,7 @@ export default function Header({ locale }: HeaderProps) {
                 <ChevronDown size={13} className={`transition-transform ${langOpen ? 'rotate-180' : ''}`} />
               </button>
               {langOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-stone-100 py-1 min-w-[80px] z-50">
+                <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-stone-100 py-1 min-w-20 z-50">
                   {routing.locales.map((l) => (
                     <button
                       key={l}

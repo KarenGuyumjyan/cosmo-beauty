@@ -11,14 +11,12 @@ interface CartPageClientProps {
   locale: Locale;
 }
 
-const SHIPPING_THRESHOLD = 15000;
+const CURRENCY = '₽';
 
 export default function CartPageClient({ locale }: CartPageClientProps) {
   const t = useTranslations('cart');
   const { items, subtotal } = useCart();
 
-  const shipping = subtotal >= SHIPPING_THRESHOLD ? 0 : 1500;
-  const total = subtotal + shipping;
   const savingsTotal = items.reduce(
     (sum, item) =>
       sum +
@@ -89,37 +87,29 @@ export default function CartPageClient({ locale }: CartPageClientProps) {
             <div className="space-y-3 text-sm mb-5">
               <div className="flex justify-between text-stone-600">
                 <span>{t('subtotal')}</span>
-                <span className="font-medium text-stone-800">{subtotal.toLocaleString()} AMD</span>
+                <span className="font-medium text-stone-800">{subtotal.toLocaleString()} {CURRENCY}</span>
               </div>
               {savingsTotal > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>{t('discount')}</span>
-                  <span className="font-medium">-{savingsTotal.toLocaleString()} AMD</span>
+                  <span className="font-medium">-{savingsTotal.toLocaleString()} {CURRENCY}</span>
                 </div>
-              )}
-              <div className="flex justify-between text-stone-600">
-                <span>{t('shipping')}</span>
-                <span className={`font-medium ${shipping === 0 ? 'text-green-600' : 'text-stone-800'}`}>
-                  {shipping === 0 ? t('free') : `${shipping.toLocaleString()} AMD`}
-                </span>
-              </div>
-              {shipping > 0 && (
-                <p className="text-xs text-stone-400 bg-amber-50 rounded-lg p-2.5 border border-amber-100">
-                  Add {(SHIPPING_THRESHOLD - subtotal).toLocaleString()} AMD more for free shipping
-                </p>
               )}
             </div>
 
             <div className="border-t border-stone-100 pt-4 mb-6">
               <div className="flex justify-between font-bold text-stone-900 text-lg">
-                <span>{t('total')}</span>
-                <span className="text-rose-700">{total.toLocaleString()} AMD</span>
+                <span>{t('subtotal')}</span>
+                <span className="text-rose-700">{subtotal.toLocaleString()} {CURRENCY}</span>
               </div>
             </div>
 
-            <button className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2">
+            <Link
+              href="/checkout"
+              className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2"
+            >
               {t('checkout')} <ArrowRight size={18} />
-            </button>
+            </Link>
 
             <p className="text-center text-xs text-stone-400 mt-4">
               🔒 Secure checkout · Encrypted payment

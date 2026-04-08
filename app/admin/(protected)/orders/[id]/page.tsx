@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { OrderStatus } from '@prisma/client'
+import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations'
 import OrderStatusForm from '@/app/admin/_components/OrderStatusForm'
 import Link from 'next/link'
 
@@ -16,10 +17,10 @@ type Props = { params: Promise<{ id: string }> }
 
 export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params
-  const order = await prisma.order.findUnique({
+  const order = (await prisma.order.findUnique({
     where: { id },
     include: { items: { include: { product: true } } },
-  })
+  })) as OrderWithItemsAndProduct | null
   if (!order) notFound()
 
   return (
@@ -71,6 +72,45 @@ export default async function OrderDetailPage({ params }: Props) {
         </div>
       </div>
 
+      {/* Shipping & Payment */}
+      <div className='bg-white rounded-2xl border border-stone-100 p-6 mb-5'>
+        <h2 className='font-semibold text-stone-900 mb-4'>Shipping &amp; Payment</h2>
+        <div className='grid grid-cols-2 gap-4 text-sm'>
+          <div>
+            <p className='text-stone-400 text-xs mb-0.5'>Method</p>
+            <p className='font-medium text-stone-800'>
+              {order.shippingMethod === 'YANDEX_DELIVERY' ? 'Yandex Delivery' : 'Self-pickup'}
+            </p>
+          </div>
+          <div>
+            <p className='text-stone-400 text-xs mb-0.5'>Shipping Cost</p>
+            <p className='font-medium text-stone-800'>
+              {order.shippingCost > 0 ? `${order.shippingCost.toLocaleString()} ₽` : 'Free'}
+            </p>
+          </div>
+          {order.address && (
+            <div className='col-span-2'>
+              <p className='text-stone-400 text-xs mb-0.5'>Address</p>
+              <p className='font-medium text-stone-800'>
+                {order.city ? `${order.city}, ` : ''}{order.address}
+              </p>
+            </div>
+          )}
+          {order.yookassaId && (
+            <div>
+              <p className='text-stone-400 text-xs mb-0.5'>YooKassa ID</p>
+              <p className='font-medium text-stone-800 font-mono text-xs'>{order.yookassaId}</p>
+            </div>
+          )}
+          {order.yookassaStatus && (
+            <div>
+              <p className='text-stone-400 text-xs mb-0.5'>Payment Status</p>
+              <p className='font-medium text-stone-800'>{order.yookassaStatus}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Items */}
       <div className='bg-white rounded-2xl border border-stone-100 overflow-hidden mb-5'>
         <div className='px-6 py-4 border-b border-stone-100'>
@@ -102,13 +142,20 @@ export default async function OrderDetailPage({ params }: Props) {
             ))}
           </tbody>
           <tfoot>
+            {order.shippingCost > 0 && (
+              <tr className='border-t border-stone-100'>
+                <td colSpan={3} className='px-6 py-2 text-right text-sm text-stone-500'>Subtotal</td>
+                <td className='px-6 py-2 text-right text-sm font-medium'>{order.subtotal.toLocaleString()} ₽</td>
+              </tr>
+            )}
+            {order.shippingCost > 0 && (
+              <tr>
+                <td colSpan={3} className='px-6 py-2 text-right text-sm text-stone-500'>Shipping</td>
+                <td className='px-6 py-2 text-right text-sm font-medium'>{order.shippingCost.toLocaleString()} ₽</td>
+              </tr>
+            )}
             <tr className='border-t border-stone-200'>
-              <td
-                colSpan={3}
-                className='px-6 py-4 text-right font-semibold text-stone-700'
-              >
-                Total
-              </td>
+              <td colSpan={3} className='px-6 py-4 text-right font-semibold text-stone-700'>Total</td>
               <td className='px-6 py-4 text-right font-bold text-rose-600 text-base'>
                 {order.total.toLocaleString()} ₽
               </td>
