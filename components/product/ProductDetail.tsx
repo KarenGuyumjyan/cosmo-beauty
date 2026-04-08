@@ -100,7 +100,7 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
               disabled={!product.inStock}
               className={`flex items-center justify-center gap-3 py-4 px-8 rounded-2xl font-bold text-base transition-all duration-200 mb-8 ${
                 added
-                  ? 'bg-green-500 text-white scale-95'
+                  ? 'bg-rose-950 text-white scale-95'
                   : product.inStock
                   ? 'bg-rose-600 hover:bg-rose-700 active:scale-95 text-white shadow-lg shadow-rose-200'
                   : 'bg-stone-100 text-stone-400 cursor-not-allowed'

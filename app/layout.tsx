@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Inter } from 'next/font/google';
 import { getLocale } from 'next-intl/server';
 import './globals.css';
@@ -15,6 +15,10 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  viewportFit: 'cover',
+};
+
 export const metadata: Metadata = {
   title: {
     default: 'Morena Cosmetics',
@@ -24,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  let locale = 'en';
+  let locale = 'ru';
   try {
     locale = await getLocale();
   } catch {

@@ -112,7 +112,7 @@ export default function ProductCard({ product, locale, priority = false }: Produ
               disabled={!product.inStock}
               className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 text-[10px] md:text-xs font-semibold w-7 h-7 md:w-auto md:h-auto md:px-3.5 md:py-2 rounded-full transition-all duration-200 ${
                 added
-                  ? 'bg-green-500 text-white scale-95'
+                  ? 'bg-rose-950 text-white scale-95'
                   : product.inStock
                   ? 'bg-rose-600 hover:bg-rose-700 active:scale-95 text-white shadow-sm'
                   : 'bg-stone-100 text-stone-400 cursor-not-allowed'
