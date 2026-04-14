@@ -46,7 +46,7 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
           {t('backToCatalog')}
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
           {/* Gallery */}
           <div>
             <ImageGallery images={product.images} videos={product.videos} altBase={name} />

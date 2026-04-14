@@ -99,7 +99,7 @@ export default function ImageGallery({ images, videos = [], altBase }: ImageGall
 
         {/* Thumbnails */}
         {media.length > 1 && (
-          <div className="flex gap-3 overflow-x-auto pb-1">
+          <div className="flex gap-3 overflow-x-auto p-2">
             {media.map((item, i) => (
               <button
                 key={i}

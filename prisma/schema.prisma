@@ -75,21 +75,21 @@ model ContactApplication {
 // ─── Orders ────────────────────────────────────────────────────────────────
 
 model Order {
-  id              String         @id @default(cuid())
-  customerName    String
-  customerPhone   String
-  customerEmail   String?
-  address         String?
-  city            String?
-  shippingMethod  ShippingMethod @default(SELF_PICKUP)
-  shippingCost    Int            @default(0)
-  subtotal        Int            @default(0)
-  total           Int
-  status          OrderStatus    @default(PENDING)
-  yookassaId      String?        @unique
-  yookassaStatus  String?
-  createdAt       DateTime       @default(now())
-  items           OrderItem[]
+  id             String         @id @default(cuid())
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  address        String?
+  city           String?
+  shippingMethod ShippingMethod @default(SELF_PICKUP)
+  shippingCost   Int            @default(0)
+  subtotal       Int            @default(0)
+  total          Int
+  status         OrderStatus    @default(PENDING)
+  yookassaId     String?        @unique
+  yookassaStatus String?
+  createdAt      DateTime       @default(now())
+  items          OrderItem[]
 }
 
 model OrderItem {

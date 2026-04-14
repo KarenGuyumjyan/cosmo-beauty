@@ -21,15 +21,20 @@ export default function CartItem({ item, locale }: CartItemProps) {
 
   return (
     <div className="flex gap-4 py-5 border-b border-stone-100 last:border-0 animate-fade-in">
-      {/* Image */}
-      <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-stone-50 shrink-0">
-        <Image
-          src={product.images[0]}
-          alt={name}
-          fill
-          sizes="96px"
-          className="object-cover"
-        />
+      {/* Image + Price */}
+      <div className="shrink-0 flex flex-col items-center">
+        <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-stone-50">
+          <Image
+            src={product.images[0]}
+            alt={name}
+            fill
+            sizes="96px"
+            className="object-cover"
+          />
+        </div>
+        <span className="font-bold text-sm mt-2">
+          {(price * quantity).toLocaleString()} ₽
+        </span>
       </div>
 
       {/* Details */}
@@ -43,36 +48,31 @@ export default function CartItem({ item, locale }: CartItemProps) {
           {' · '}SKU: {product.sku}
         </p>
 
-        {/* Quantity controls + price */}
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-1 border border-stone-200 rounded-full overflow-hidden">
+        {/* Quantity controls */}
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-0.5 border border-stone-200 rounded-full overflow-hidden">
             <button
               onClick={() => updateQuantity(product.id, quantity - 1)}
-              className="w-8 h-8 flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-colors text-stone-600"
+              className="w-7 h-7 flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-colors text-stone-600"
             >
-              <Minus size={13} />
+              <Minus size={12} />
             </button>
-            <span className="w-8 text-center text-sm font-semibold text-stone-800">{quantity}</span>
+            <span className="w-7 text-center text-xs font-semibold text-stone-800">{quantity}</span>
             <button
               onClick={() => updateQuantity(product.id, quantity + 1)}
-              className="w-8 h-8 flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-colors text-stone-600"
+              className="w-7 h-7 flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 transition-colors text-stone-600"
             >
-              <Plus size={13} />
+              <Plus size={12} />
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="font-bold text-rose-700 text-sm">
-              {(price * quantity).toLocaleString()} ₽
-            </span>
-            <button
-              onClick={() => removeItem(product.id)}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-stone-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-              aria-label={t('remove')}
-            >
-              <Trash2 size={15} />
-            </button>
-          </div>
+          <button
+            onClick={() => removeItem(product.id)}
+            className="w-7 h-7 rounded-full flex items-center justify-center text-stone-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+            aria-label={t('remove')}
+          >
+            <Trash2 size={13} />
+          </button>
         </div>
       </div>
     </div>
