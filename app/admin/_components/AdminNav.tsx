@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Package, ShoppingBag, Mail, LogOut } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { adminSignOut } from '../_actions/auth';
 
 const NAV = [
   { href: '/admin',          label: 'Dashboard',  icon: LayoutDashboard },
@@ -47,13 +47,15 @@ export default function AdminNav({ email }: { email?: string | null }) {
 
       {/* Sign out */}
       <div className="px-3 py-4 border-t border-stone-800">
-        <button
-          onClick={() => signOut({ callbackUrl: '/admin/login' })}
-          className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-stone-400 hover:bg-stone-800 hover:text-white transition-colors"
-        >
-          <LogOut size={18} />
-          Sign Out
-        </button>
+        <form action={adminSignOut}>
+          <button
+            type="submit"
+            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-stone-400 hover:bg-stone-800 hover:text-white transition-colors"
+          >
+            <LogOut size={18} />
+            Sign Out
+          </button>
+        </form>
       </div>
     </aside>
   );
