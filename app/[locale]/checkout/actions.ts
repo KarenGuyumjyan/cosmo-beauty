@@ -31,7 +31,14 @@ export async function createOrder(
 
   const products = await prisma.product.findMany({
     where: { id: { in: items.map((i) => i.productId) } },
-    select: { id: true, price: true, discountedPrice: true, inStock: true, nameEn: true },
+    select: {
+      id: true,
+      price: true,
+      discountedPrice: true,
+      inStock: true,
+      stockQuantity: true,
+      nameEn: true,
+    },
   });
 
   const productMap = new Map(products.map((p) => [p.id, p]));
@@ -40,6 +47,9 @@ export async function createOrder(
     const p = productMap.get(item.productId);
     if (!p) return { error: `Product not found` };
     if (!p.inStock) return { error: `${p.nameEn} is out of stock` };
+    if (item.quantity > p.stockQuantity) {
+      return { error: `${p.nameEn}: only ${p.stockQuantity} in stock (requested ${item.quantity})` };
+    }
   }
 
   const orderItems = items.map((item) => {

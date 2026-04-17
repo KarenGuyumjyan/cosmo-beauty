@@ -3,13 +3,16 @@ import { prisma } from '@/lib/prisma';
 
 /** Middle segment after CSM- (matches existing seed data, e.g. blush → CSM-BL-001). */
 export const SKU_PREFIX_BY_CATEGORY: Record<ProductCategory, string> = {
-  cosmetic_sponges: 'SP',
-  lip_liner:        'LL',
-  blush:            'BL',
-  stick:            'ST',
-  lip_gloss:        'LG',
-  highlighter:      'LB',
-  concealer:        'CO',
+  cosmetic_sponges:  'SP',
+  lip_liner:         'LL',
+  blush:             'BL',
+  stick:             'ST',
+  lip_gloss:         'LG',
+  highlighter:       'LB',
+  concealer:         'CO',
+  eyeshadow_palette: 'EP',
+  setting_spray:     'SS',
+  false_eyelashes:   'FE',
 };
 
 function escapeRegExp(s: string) {

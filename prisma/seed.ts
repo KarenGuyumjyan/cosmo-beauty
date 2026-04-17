@@ -13,7 +13,7 @@ async function main() {
     await tx.contactApplication.deleteMany();
     await tx.product.deleteMany();
 
-    for (const p of products) {
+        for (const p of products) {
       await tx.product.create({
         data: {
           id: p.id,
@@ -29,10 +29,12 @@ async function main() {
           price: p.price,
           discountedPrice: p.discountedPrice ?? null,
           images: p.images,
+          videos: p.videos,
           category: p.category as ProductCategory,
           size: p.size,
           sku: p.sku,
           inStock: p.inStock,
+          stockQuantity: p.stockQuantity,
           includedItems: p.includedItems
             ? JSON.parse(JSON.stringify(p.includedItems))
             : null,

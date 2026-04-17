@@ -22,6 +22,11 @@ const PICKUP_ADDRESS = process.env.NEXT_PUBLIC_PICKUP_ADDRESS ?? '15 Baghramyan 
 export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const t = useTranslations('checkout');
   const { items, subtotal, clearCart } = useCart();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -110,6 +115,14 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
       setError(t('errors.generic'));
       setSubmitting(false);
     }
+  }
+
+  if (!mounted) {
+    return (
+      <div className="pt-32 pb-24 min-h-dvh flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-rose-400" />
+      </div>
+    );
   }
 
   if (items.length === 0) {

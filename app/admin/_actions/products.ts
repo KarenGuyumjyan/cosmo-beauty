@@ -20,6 +20,13 @@ function skuFromForm(formData: FormData): string {
   return String(formData.get('sku') ?? '').trim();
 }
 
+function stockQuantityFromForm(formData: FormData): number {
+  const raw = formData.get('stockQuantity');
+  const n = parseInt(String(raw ?? ''), 10);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return n;
+}
+
 function revalidateAll() {
   revalidateTag('products', 'max');
   revalidatePath('/admin/products');
@@ -68,6 +75,7 @@ export async function createProduct(
         images:          parseUrls(formData.get('images') as string),
         videos:          parseUrls(formData.get('videos') as string),
         inStock:         formData.get('inStock') === 'on',
+        stockQuantity:   stockQuantityFromForm(formData),
         featured:        formData.get('featured') === 'on',
         bestseller:      formData.get('bestseller') === 'on',
       },
@@ -127,6 +135,7 @@ export async function updateProduct(
         images:          parseUrls(formData.get('images') as string),
         videos:          parseUrls(formData.get('videos') as string),
         inStock:         formData.get('inStock') === 'on',
+        stockQuantity:   stockQuantityFromForm(formData),
         featured:        formData.get('featured') === 'on',
         bestseller:      formData.get('bestseller') === 'on',
       },

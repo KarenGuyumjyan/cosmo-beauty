@@ -14,7 +14,10 @@ export type Category =
   | 'stick'
   | 'lip_gloss'
   | 'highlighter'
-  | 'concealer';
+  | 'concealer'
+  | 'eyeshadow_palette'
+  | 'setting_spray'
+  | 'false_eyelashes';
 
 export interface Product {
   id: string;
@@ -29,6 +32,7 @@ export interface Product {
   size: string;
   sku: string;
   inStock: boolean;
+  stockQuantity: number;
   includedItems?: LocalizedString[];
   featured?: boolean;
   bestseller?: boolean;

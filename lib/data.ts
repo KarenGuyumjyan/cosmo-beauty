@@ -1,251 +1,309 @@
-import { Product, Category, CategoryOption, Locale } from './types';
+import { Product, Category, CategoryOption, Locale } from './types'
 
 export const products: Product[] = [
-  // ── Cosmetic Sponges ──────────────────────────────────────────────────────
   {
     id: '1',
     name: {
-      en: 'Velvet Blending Sponge',
-      hy: 'Velvet Խmboghich Spoнge',
-      ru: 'Спонж для блендинга Velvet',
+      en: 'Makeup Sponge in Case – Brown',
+      hy: 'Դիմահարդարման սպունգ պատյանով – Շագանակագույն',
+      ru: 'Спонж для макияжа в футляре Коричневый',
     },
     shortDescription: {
-      en: 'Seamless foundation blending for a flawless, airbrushed finish.',
-      hy: 'Bnakan artyun fondasioni hamar.',
+      en: 'Soft latex-free makeup sponge for smooth, even foundation application.',
+      hy: 'Լատեքս չպարունակող փափուկ սպունգ՝ տոնային քսուքը հարթ ու հավասար քսելու համար։',
       ru: 'Идеальное нанесение тонального крема без разводов.',
     },
     description: {
-      en: 'The Velvet Blending Sponge expands when wet for seamless, full-coverage blending. Its unique teardrop shape reaches every contour of the face — use the flat side for large areas and the pointed tip for under-eye and nose details. Works with liquid, cream, and powder products.',
-      hy: 'Velvet Blending Sponge-e urenum e khonavel lranum e anaratar, lriv ampichi hamar. Artsunakayner tsavorin hamar nayev knoyi norin hamar.',
-      ru: 'Спонж Velvet расширяется при намокании для равномерного нанесения с полным покрытием. Уникальная форма капли достигает каждого контура лица.',
+      en: 'Ultra-soft, latex-free makeup sponge for even foundation application without absorbing excess product. The beveled edge makes application easier and more precise.',
+      hy: 'Ուլտրափափուկ, լատեքս չպարունակող դիմահարդարման սպունգ, որն ապահովում է տոնային քսուքի հավասար բաշխում՝ առանց ավելորդ միջոցը ներծծելու։ Կտրված եզրը քսումը դարձնում է ավելի հարմար և ճշգրիտ։',
+      ru: 'Ультрамягкие спонжи для макияжа, в составе которых нет латекса, за счет этого тон распределяет равномерно, не впитывает в себя много продукта. Спонж с усеченным краем что даёт ещё более удобное нанесение.',
     },
-    price: 4900,
-    images: [
-      'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80',
-      'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80',
-    ],
+    price: 450,
+    images: [],
     videos: [],
     category: 'cosmetic_sponges',
-    size: '3 pc',
+    size: '1 pcs',
     sku: 'CSM-SP-001',
     inStock: true,
+    stockQuantity: 15,
     featured: true,
     bestseller: true,
   },
   {
     id: '2',
     name: {
-      en: 'Mini Contour Sponge Set',
-      hy: 'Mini Kontur Sponge Havakacu',
-      ru: 'Набор мини-спонжей для контуринга',
+      en: 'Makeup Sponge in Case – Black',
+      hy: 'Դիմահարդարման սպունգ պատյանով – Սև',
+      ru: 'Спонж для макияжа в футляре Черный',
     },
     shortDescription: {
-      en: 'Set of 3 precision sponges for contouring, highlighting, and concealing.',
-      hy: '3 mnatskin sponge-i havakacu konturingi hamar.',
-      ru: 'Набор из 3 точечных спонжей для контуринга, хайлайтинга и консилера.',
+      en: 'Soft latex-free makeup sponge for smooth, even foundation application.',
+      hy: 'Լատեքս չպարունակող փափուկ սպունգ՝ տոնային քսուքը հարթ ու հավասար քսելու համար։',
+      ru: 'Идеальное нанесение тонального крема без разводов.',
     },
     description: {
-      en: 'This set of 3 mini sponges is designed for precision application. Use the flat wedge for blush and bronzer, the small dome for under-eye concealer, and the pointed tip for detailed contouring around the nose and lips. Latex-free and non-absorbent formula wastes zero product.',
-      hy: 'Aуs 3 mini sponge-neri havakatsu nakhagitsvats е chap kirarum. Ogtagorts flat klini hamar blush ev bronzer-i, pokr dome-n akanjavoraki taraki konsileri hamar.',
-      ru: 'Набор из 3 мини-спонжей для точечного нанесения. Плоский клин — для румян и бронзера, маленький купол — для консилера под глаза, острый кончик — для детального контуринга.',
+      en: 'Ultra-soft, latex-free makeup sponge for even foundation application without absorbing excess product. The beveled edge makes application easier and more precise.',
+      hy: 'Ուլտրափափուկ, լատեքս չպարունակող դիմահարդարման սպունգ, որն ապահովում է տոնային քսուքի հավասար բաշխում՝ առանց ավելորդ միջոցը ներծծելու։ Կտրված եզրը քսումը դարձնում է ավելի հարմար և ճշգրիտ։',
+      ru: 'Ультрамягкие спонжи для макияжа, в составе которых нет латекса, за счет этого тон распределяет равномерно, не впитывает в себя много продукта. Спонж с усеченным краем что даёт ещё более удобное нанесение.',
     },
-    price: 6500,
-    discountedPrice: 4900,
-    images: [
-      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=600&q=80',
-      'https://images.unsplash.com/photo-1583241475880-083f84372725?w=600&q=80',
-    ],
+    price: 450,
+    images: [],
     videos: [],
     category: 'cosmetic_sponges',
-    size: '3 pcs',
+    size: '1 pcs',
     sku: 'CSM-SP-002',
     inStock: true,
+    stockQuantity: 15,
+    featured: true,
+    bestseller: true,
   },
-
-  // ── Lip Liner ───────────────────────────────────────────────────────────
   {
     id: '3',
     name: {
-      en: 'Define Lip Liner',
-      hy: 'Define Shafertaguyi Matok',
-      ru: 'Карандаш для губ Define',
+      en: 'Nude Lip Pencil-Lipstick 01',
+      hy: 'Շուրթերի նյուդ մատիտ-շրթներկ 01',
+      ru: 'Карандаш-помада для губ нюдовый 01',
     },
     shortDescription: {
-      en: 'Long-wear lip liner that defines, shapes, and prevents feathering.',
-      hy: 'Shafertagui matok, vor seghmnavoroum e shafertagoytnerov.',
+      en: 'Long-lasting nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
       ru: 'Стойкий карандаш для губ, чётко очерчивает контур и предотвращает растекание.',
     },
     description: {
-      en: 'Define Lip Liner has a creamy yet precise formula that glides on effortlessly and stays put all day. The retractable twist mechanism keeps the tip sharp without sharpening. Use to line, fill, or as a base to intensify your lipstick color. Available in 12 universally flattering shades.',
-      hy: 'Define Lip Liner-i kremanov, shakem bazmagrvel e, vor khangun e anc pahtav ev mnaum e amen or. Retractable mekhaniзmon pahum e skize sep.',
-      ru: 'Define Lip Liner имеет кремовую, но точную формулу, которая наносится легко и держится весь день. Выдвижной механизм сохраняет кончик острым без затачивания.',
+      en: 'Lip pencils in beautiful nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
     },
-    price: 5900,
-    images: [
-      'https://images.unsplash.com/photo-1586495777744-4e6232bf2919?w=600&q=80',
-    ],
+    price: 350,
+    images: [],
     videos: [],
     category: 'lip_liner',
-    size: '1.2g',
+    size: '5g',
     sku: 'CSM-LL-001',
     inStock: true,
+    stockQuantity: 20,
     featured: true,
   },
   {
     id: '4',
     name: {
-      en: 'Sculpt Ombré Lip Liner',
-      hy: 'Sculpt Ombré Shafertaguyi Matok',
-      ru: 'Карандаш для губ Sculpt Ombré',
+      en: 'Nude Lip Pencil 02',
+      hy: 'Շուրթերի նյուդ մատիտ 02',
+      ru: 'Карандаш для губ нюдовый 02',
     },
     shortDescription: {
-      en: 'Dual-tone liner for effortless ombré lips in seconds.',
-      hy: 'Erkguyn matok anhjard ombre shafertagoytnerи hamar.',
+      en: 'Long-lasting nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
       ru: 'Двухтонный карандаш для эффекта омбре на губах за секунды.',
     },
     description: {
-      en: 'The Sculpt Ombré Lip Liner features two complementary shades in one slim liner. Line with the darker shade and fill with the lighter tone to create a professionally graduated ombré look without any tools. Enriched with vitamin E for comfortable, all-day wear.',
-      hy: 'Sculpt Ombré Lip Liner-e parvum e yerku lerenaram erk mek nrnagits matoki mej. Shafertagoytner muter erkangov ev lrats tonov.',
-      ru: 'Карандаш Sculpt Ombré содержит два дополняющих друг друга оттенка в одном карандаше. Обведите более тёмным оттенком и залейте более светлым для профессионального эффекта омбре.',
+      en: 'Lip pencils in beautiful nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
     },
-    price: 7200,
-    discountedPrice: 5900,
-    images: [
-      'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80',
-      'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80',
-    ],
+    price: 350,
+    images: [],
     videos: [],
     category: 'lip_liner',
-    size: '1.4g',
+    size: '5g',
     sku: 'CSM-LL-002',
     inStock: true,
-    bestseller: true,
+    stockQuantity: 20,
+    featured: true,
   },
-
-  // ── Blush ────────────────────────────────────────────────────────────────
   {
     id: '5',
     name: {
-      en: 'Satin Flush Blush',
-      hy: 'Satin Flush Ereseski Eranger',
-      ru: 'Румяна Satin Flush',
+      en: 'Nude Lip Pencil 03',
+      hy: 'Շուրթերի նյուդ մատիտ 03',
+      ru: 'Карандаш для губ нюдовый 03',
     },
     shortDescription: {
-      en: 'Finely milled powder blush for a natural, healthy-looking flush.',
-      hy: 'Maнrik ereskerпneri ereseskin bnakan eranger.',
-      ru: 'Тонко измельчённые пудровые румяна для естественного, здорового румянца.',
+      en: 'Long-lasting nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
+      ru: 'Двухтонный карандаш для эффекта омбре на губах за секунды.',
     },
     description: {
-      en: 'Satin Flush Blush delivers a buildable, natural-looking flush with a satin finish. The ultra-finely milled formula blends seamlessly and lasts up to 12 hours. Available in 8 shades from soft peach to deep berry. Apply to the apples of cheeks and blend upward for a lifted effect.',
-      hy: 'Satin Flush Blush apahov e shertavorel, bnakan eranger satin artyunov. Ultra-marik ereskerp formula-e khaghayabar kerchoum e ev tevi е minchev 12 jam.',
-      ru: 'Satin Flush Blush обеспечивает наращиваемый, естественный румянец с атласным финишем. Тонко измельчённая формула легко растушёвывается и держится до 12 часов.',
+      en: 'Lip pencils in beautiful nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
     },
-    price: 8900,
-    images: [
-      'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80',
-      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=600&q=80',
-    ],
+    price: 350,
+    images: [],
     videos: [],
-    category: 'blush',
+    category: 'lip_liner',
     size: '5g',
-    sku: 'CSM-BL-001',
+    sku: 'CSM-LL-003',
     inStock: true,
+    stockQuantity: 20,
     featured: true,
   },
   {
     id: '6',
     name: {
-      en: 'Rosy Glow Blush',
-      hy: 'Rosy Glow Ereseski Eranger',
-      ru: 'Румяна Rosy Glow',
+      en: 'Nude Lip Pencil 04',
+      hy: 'Շուրթերի նյուդ մատիտ 04',
+      ru: 'Карандаш для губ нюдовый 04',
     },
     shortDescription: {
-      en: 'Sheer, buildable blush with a radiant finish that adapts to your skin tone.',
-      hy: 'Thinner, kertsveli eranger, maшki toni hamar harchvog.',
-      ru: 'Прозрачные, наращиваемые румяна с сияющим финишем, адаптирующиеся к тону кожи.',
+      en: 'Long-lasting nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
+      ru: 'Двухтонный карандаш для эффекта омбре на губах за секунды.',
     },
     description: {
-      en: 'Rosy Glow is a unique colour-revealing blush that reacts to your skin\'s natural pH to deliver a perfectly personalised flush of colour. The lightweight gel-powder texture feels invisible on skin and builds from a subtle hint of colour to a vibrant radiant flush.',
-      hy: 'Rosy Glow-e benzin erang batsahogh eranger e, vor arjanagrum e dzher maшkin bnorakin pH-in hamar katarelyal andznayin eranger.',
-      ru: 'Rosy Glow — уникальные румяна, раскрывающие цвет в зависимости от естественного pH вашей кожи, обеспечивая идеально персонализированный румянец.',
+      en: 'Lip pencils in beautiful nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
     },
-    price: 10500,
-    discountedPrice: 8900,
-    images: [
-      'https://images.unsplash.com/photo-1583241475880-083f84372725?w=600&q=80',
-    ],
+    price: 350,
+    images: [],
     videos: [],
-    category: 'blush',
-    size: '4.5g',
-    sku: 'CSM-BL-002',
+    category: 'lip_liner',
+    size: '5g',
+    sku: 'CSM-LL-004',
     inStock: true,
-    bestseller: true,
+    stockQuantity: 20,
+    featured: true,
   },
-
-  // ── Stick ────────────────────────────────────────────────────────────────
   {
     id: '7',
     name: {
-      en: 'Sculpt Contour Stick',
-      hy: 'Sculpt Kontur Stick',
-      ru: 'Стик для контуринга Sculpt',
+      en: 'Nude Lip Pencil 102',
+      hy: 'Շուրթերի նյուդ մատիտ 102',
+      ru: 'Карандаш для губ нюдовый 102',
     },
     shortDescription: {
-      en: 'Cream contour stick for effortless sculpting and blending.',
-      hy: 'Krem kontur stick anjard skulpting ev blendingi hamar.',
-      ru: 'Кремовый стик для контуринга для лёгкого скульптирования и растушёвки.',
+      en: 'Long-lasting nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
+      ru: 'Двухтонный карандаш для эффекта омбре на губах за секунды.',
     },
     description: {
-      en: 'The Sculpt Contour Stick delivers a creamy, blendable formula that defines cheekbones, jawline, and temples with ease. The double-ended design features a contour shade on one side and a highlighting shade on the other. Buildable coverage that looks natural under any lighting.',
-      hy: 'Sculpt Contour Stick-e apahov e kremov, kerchogh formula, vor seghmnavoroum e ereseskneri oske, erakhakhagits ev kangnakhits.',
-      ru: 'Sculpt Contour Stick обеспечивает кремовую, растушёвываемую формулу, которая чётко очерчивает скулы, линию челюсти и виски.',
+      en: 'Lip pencils in beautiful nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
     },
-    price: 9800,
-    images: [
-      'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&q=80',
-      'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&q=80',
-    ],
+    price: 350,
+    images: [],
     videos: [],
-    category: 'stick',
-    size: '8g',
-    sku: 'CSM-ST-001',
+    category: 'lip_liner',
+    size: '5g',
+    sku: 'CSM-LL-005',
     inStock: true,
+    stockQuantity: 20,
     featured: true,
   },
   {
     id: '8',
     name: {
-      en: 'Glow Highlight Stick',
-      hy: 'Glow Highlight Stick',
-      ru: 'Хайлайтер Glow Highlight Stick',
+      en: 'Nude Lip Pencil 104',
+      hy: 'Շուրթերի նյուդ մատիտ 104',
+      ru: 'Карандаш для губ нюдовый 104',
     },
     shortDescription: {
-      en: 'Buttery highlighter stick with an intense lit-from-within glow.',
-      hy: 'Kremov highlighter stick metsatsvats shinov.',
-      ru: 'Кремовый хайлайтер-стик с интенсивным сиянием изнутри.',
+      en: 'Long-lasting nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
+      ru: 'Двухтонный карандаш для эффекта омбре на губах за секунды.',
     },
     description: {
-      en: 'The Glow Highlight Stick has a silky, creamy formula that glides onto skin to deliver a blinding, lit-from-within glow. Swipe onto the high points of the face — cheekbones, brow bone, cupid\'s bow, and inner corners of eyes. Buildable from natural sheen to full-on sparkle.',
-      hy: 'Glow Highlight Stick-i metsatsvats kremov formula-e khangun e maшkin vra lavsatsun apahov e.',
-      ru: 'Glow Highlight Stick имеет шелковистую кремовую формулу, которая наносится на кожу, обеспечивая ослепительное сияние изнутри.',
+      en: 'Lip pencils in beautiful nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
     },
-    price: 11200,
-    discountedPrice: 8900,
-    images: [
-      'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&q=80',
-      'https://images.unsplash.com/photo-1619994403073-2cec844b8e63?w=600&q=80',
-    ],
+    price: 350,
+    images: [],
     videos: [],
-    category: 'stick',
-    size: '6.5g',
-    sku: 'CSM-ST-002',
+    category: 'lip_liner',
+    size: '5g',
+    sku: 'CSM-LL-006',
     inStock: true,
-    bestseller: true,
+    stockQuantity: 20,
+    featured: true,
+  },
+  {
+    id: '9',
+    name: {
+      en: 'Nude Lip Pencil 106',
+      hy: 'Շուրթերի նյուդ մատիտ 106',
+      ru: 'Карандаш для губ нюдовый 106',
+    },
+    shortDescription: {
+      en: 'Long-lasting nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
+      ru: 'Двухтонный карандаш для эффекта омбре на губах за секунды.',
+    },
+    description: {
+      en: 'Lip pencils in beautiful nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
+    },
+    price: 350,
+    images: [],
+    videos: [],
+    category: 'lip_liner',
+    size: '5g',
+    sku: 'CSM-LL-007',
+    inStock: true,
+    stockQuantity: 20,
+    featured: true,
+  },
+  {
+    id: '10',
+    name: {
+      en: 'Nude Lip Pencil 107',
+      hy: 'Շուրթերի նյուդ մատիտ 107',
+      ru: 'Карандаш для губ нюдовый 107',
+    },
+    shortDescription: {
+      en: 'Long-lasting nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
+      ru: 'Двухтонный карандаш для эффекта омбре на губах за секунды.',
+    },
+    description: {
+      en: 'Lip pencils in beautiful nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
+    },
+    price: 350,
+    images: [],
+    videos: [],
+    category: 'lip_liner',
+    size: '5g',
+    sku: 'CSM-LL-008',
+    inStock: true,
+    stockQuantity: 20,
+    featured: true,
+  },
+    {
+    id: '11',
+    name: {
+      en: 'Nude Matte Lip Pencil 108',
+      hy: 'Շուրթերի մատտե նյուդ մատիտ 108',
+      ru: 'Карандаш для губ нюдовый матовый 108',
+    },
+    shortDescription: {
+      en: 'Long-lasting matte nude lip pencil for precise contouring and smooth blending.',
+      hy: 'Երկարակյաց մատտե նյուդ շուրթերի մատիտ՝ հստակ ուրվագծման և նուրբ շերտավորման համար։',
+      ru: 'Двухтонный карандаш для эффекта омбре на губах за секунды.',
+    },
+    description: {
+      en: 'Lip pencils in beautiful matte nude shades that do not dry out your lips. They can be used for both precise contouring and soft blending. The waxy texture glides on smoothly, while the versatile shades suit most users. They perfectly complement both daytime and evening makeup.',
+      hy: 'Շուրթերի մատիտներ գեղեցիկ մատտե նյուդ երանգներով, որոնք չեն չորացնում շուրթերը։ Դրանք կարելի է օգտագործել ինչպես հստակ ուրվագծման, այնպես էլ նուրբ շերտավորման համար։ Մատիտներն ունեն մոմային հյուսվածք, փափուկ են քսվում, իսկ ունիվերսալ երանգները կհամապատասխանեն շատերին։ Դրանք հիանալի լրացնում են ինչպես առօրյա, այնպես էլ երեկոյան դիմահարդարումը։',
+      ru: 'Карандаш для губ в самых красивых нюдовых матовых оттенках, не сушат губы. Можно использовать как просто контур, так и в растушевке. Карандаши для губ Morena cosmetics в самых красивых нюдовых оттенках, не сушат губы.\nМожно использовать как просто контур, так и в растушевке. Карандаши имеют восковую текстуру, очень мягкие в нанесении, все оттенки универсальны и подойдут большинству пользователей. Идеально дополнят макияж как вечерний, так и дневной.',
+    },
+    price: 350,
+    images: [],
+    videos: [],
+    category: 'lip_liner',
+    size: '5g',
+    sku: 'CSM-LL-009',
+    inStock: true,
+    stockQuantity: 20,
+    featured: true,
   },
 
   // ── Lip Gloss ────────────────────────────────────────────────────────────
   {
-    id: '9',
+    id: '91',
     name: {
       en: 'Crystal Shine Lip Gloss',
       hy: 'Crystal Shine Shafertaguy Blesk',
@@ -271,11 +329,12 @@ export const products: Product[] = [
     size: '5.5ml',
     sku: 'CSM-LG-001',
     inStock: true,
+    stockQuantity: 18,
     featured: true,
     bestseller: true,
   },
   {
-    id: '10',
+    id: '101',
     name: {
       en: 'Tinted Plump Gloss',
       hy: 'Tinted Plump Shafertaguy Blesk',
@@ -301,11 +360,12 @@ export const products: Product[] = [
     size: '4ml',
     sku: 'CSM-LG-002',
     inStock: true,
+    stockQuantity: 9,
   },
 
   // ── Highlighter ──────────────────────────────────────────────────────────
   {
-    id: '11',
+    id: '111',
     name: {
       en: 'Aurora Highlighter',
       hy: 'Aurora Lavsatsun Ereseski Eranger',
@@ -332,11 +392,12 @@ export const products: Product[] = [
     size: '6g',
     sku: 'CSM-LB-001',
     inStock: true,
+    stockQuantity: 7,
     featured: true,
     bestseller: true,
   },
   {
-    id: '12',
+    id: '121',
     name: {
       en: 'Golden Hour Highlighter',
       hy: 'Golden Hour Lavsatsun Ereseski Eranger',
@@ -361,11 +422,12 @@ export const products: Product[] = [
     size: '7g',
     sku: 'CSM-LB-002',
     inStock: true,
+    stockQuantity: 11,
   },
 
   // ── Concealer ────────────────────────────────────────────────────────────
   {
-    id: '13',
+    id: '131',
     name: {
       en: 'Full Cover Concealer',
       hy: 'Full Cover Konsilyator',
@@ -392,11 +454,12 @@ export const products: Product[] = [
     size: '6ml',
     sku: 'CSM-CO-001',
     inStock: true,
+    stockQuantity: 16,
     featured: true,
     bestseller: true,
   },
   {
-    id: '14',
+    id: '141',
     name: {
       en: 'Brightening Eye Concealer',
       hy: 'Brightening Akanjavoraki Konsilyator',
@@ -422,28 +485,55 @@ export const products: Product[] = [
     size: '5ml',
     sku: 'CSM-CO-002',
     inStock: true,
+    stockQuantity: 13,
   },
-];
+]
 
 export const categories: CategoryOption[] = [
-  { value: 'cosmetic_sponges', label: { en: 'Cosmetic Sponges', hy: 'Kosmetik Spongeнер',    ru: 'Косметические спонжи' } },
-  { value: 'lip_liner',        label: { en: 'Lip Liner',         hy: 'Shafertaguyi Matok',   ru: 'Карандаш для губ' } },
-  { value: 'blush',            label: { en: 'Blush',             hy: 'Ereseski Eranger',     ru: 'Румяна' } },
-  { value: 'stick',            label: { en: 'Stick',             hy: 'Stick',                ru: 'Стик' } },
-  { value: 'lip_gloss',        label: { en: 'Lip Gloss',         hy: 'Shafertaguy Blesk',    ru: 'Блеск для губ' } },
-  { value: 'highlighter',      label: { en: 'Highlighter',       hy: 'Lavsatsun Eranger',    ru: 'Сияющие румяна' } },
-  { value: 'concealer',        label: { en: 'Concealer',         hy: 'Konsilyator',          ru: 'Консилер' } },
-];
+  {
+    value: 'cosmetic_sponges',
+    label: {
+      en: 'Cosmetic Sponges',
+      hy: 'Kosmetik Spongeнер',
+      ru: 'Косметические спонжи',
+    },
+  },
+  {
+    value: 'lip_liner',
+    label: {
+      en: 'Lip Liner',
+      hy: 'Shafertaguyi Matok',
+      ru: 'Карандаш для губ',
+    },
+  },
+  {
+    value: 'blush',
+    label: { en: 'Blush', hy: 'Ereseski Eranger', ru: 'Румяна' },
+  },
+  { value: 'stick', label: { en: 'Stick', hy: 'Stick', ru: 'Стик' } },
+  {
+    value: 'lip_gloss',
+    label: { en: 'Lip Gloss', hy: 'Shafertaguy Blesk', ru: 'Блеск для губ' },
+  },
+  {
+    value: 'highlighter',
+    label: { en: 'Highlighter', hy: 'Lavsatsun Eranger', ru: 'Сияющие румяна' },
+  },
+  {
+    value: 'concealer',
+    label: { en: 'Concealer', hy: 'Konsilyator', ru: 'Консилер' },
+  },
+]
 
-export const allSizes = [...new Set(products.map((p) => p.size))].sort();
+export const allSizes = [...new Set(products.map((p) => p.size))].sort()
 
 /** Returns the localized display label for a category value */
 export function getCategoryLabel(value: Category, locale: Locale): string {
-  return categories.find((c) => c.value === value)?.label[locale] ?? value;
+  return categories.find((c) => c.value === value)?.label[locale] ?? value
 }
 
-export const getFeaturedProducts = () => products.filter((p) => p.featured);
-export const getBestsellers = () => products.filter((p) => p.bestseller);
-export const getProductById = (id: string) => products.find((p) => p.id === id);
+export const getFeaturedProducts = () => products.filter((p) => p.featured)
+export const getBestsellers = () => products.filter((p) => p.bestseller)
+export const getProductById = (id: string) => products.find((p) => p.id === id)
 export const getProductsByCategory = (category: Category) =>
-  products.filter((p) => p.category === category);
+  products.filter((p) => p.category === category)

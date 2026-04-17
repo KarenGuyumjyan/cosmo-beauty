@@ -18,6 +18,9 @@ enum ProductCategory {
   lip_gloss
   highlighter
   concealer
+  eyeshadow_palette
+  setting_spray
+  false_eyelashes
 }
 
 enum OrderStatus {
@@ -54,6 +57,7 @@ model Product {
   size            String
   sku             String          @unique
   inStock         Boolean         @default(true)
+  stockQuantity   Int             @default(10)
   includedItems   Json?
   featured        Boolean         @default(false)
   bestseller      Boolean         @default(false)

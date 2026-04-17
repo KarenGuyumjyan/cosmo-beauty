@@ -66,9 +66,12 @@ export default async function AdminProductsPage() {
                     </td>
                     <td className="px-6 py-4 text-stone-400 font-mono text-xs">{p.sku}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${p.inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {p.inStock ? 'In Stock' : 'Out of Stock'}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium w-fit ${p.inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {p.inStock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                        <span className="text-xs text-stone-500">{p.stockQuantity} qty</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-1">

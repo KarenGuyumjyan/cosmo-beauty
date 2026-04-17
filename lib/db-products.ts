@@ -19,6 +19,7 @@ function toProduct(p: DbProduct): Product {
     size: p.size,
     sku: p.sku,
     inStock: p.inStock,
+    stockQuantity: p.stockQuantity,
     includedItems: p.includedItems ? (p.includedItems as unknown as LocalizedString[]) : undefined,
     featured: p.featured,
     bestseller: p.bestseller,
@@ -57,3 +58,11 @@ export const getProductById = cache(
   ['product-by-id'],
   { revalidate: REVALIDATE }
 );
+
+/** Uncached — cart sync API and any dynamic id list (not unstable_cache). */
+export async function fetchProductsByIdsForCart(ids: string[]): Promise<Product[]> {
+  const unique = [...new Set(ids)].filter(Boolean);
+  if (unique.length === 0) return [];
+  const rows = await prisma.product.findMany({ where: { id: { in: unique } } });
+  return rows.map(toProduct);
+}

@@ -204,6 +204,18 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
             </label>
             <input name="discountedPrice" type="number" min={0} defaultValue={v?.discountedPrice ?? ''} className="input" />
           </div>
+          <div>
+            <label className="label">Stock quantity</label>
+            <input
+              name="stockQuantity"
+              type="number"
+              required
+              min={0}
+              defaultValue={v?.stockQuantity ?? 10}
+              className="input"
+            />
+            <p className="text-xs text-stone-400 mt-1.5">Max units a customer can order for this SKU.</p>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-6 mt-5">
