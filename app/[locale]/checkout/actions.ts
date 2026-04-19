@@ -35,7 +35,6 @@ export async function createOrder(
       id: true,
       price: true,
       discountedPrice: true,
-      inStock: true,
       stockQuantity: true,
       nameEn: true,
     },
@@ -46,7 +45,7 @@ export async function createOrder(
   for (const item of items) {
     const p = productMap.get(item.productId);
     if (!p) return { error: `Product not found` };
-    if (!p.inStock) return { error: `${p.nameEn} is out of stock` };
+    if (p.stockQuantity <= 0) return { error: `${p.nameEn} is out of stock` };
     if (item.quantity > p.stockQuantity) {
       return { error: `${p.nameEn}: only ${p.stockQuantity} in stock (requested ${item.quantity})` };
     }

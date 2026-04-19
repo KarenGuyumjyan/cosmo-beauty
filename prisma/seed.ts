@@ -33,7 +33,6 @@ async function main() {
           category: p.category as ProductCategory,
           size: p.size,
           sku: p.sku,
-          inStock: p.inStock,
           stockQuantity: p.stockQuantity,
           includedItems: p.includedItems
             ? JSON.parse(JSON.stringify(p.includedItems))

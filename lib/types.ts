@@ -31,7 +31,6 @@ export interface Product {
   category: Category;
   size: string;
   sku: string;
-  inStock: boolean;
   stockQuantity: number;
   includedItems?: LocalizedString[];
   featured?: boolean;

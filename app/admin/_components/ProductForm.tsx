@@ -219,12 +219,12 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
         </div>
 
         <div className="flex flex-wrap gap-6 mt-5">
-          {(['inStock', 'featured', 'bestseller'] as const).map((flag) => (
+          {(['featured', 'bestseller'] as const).map((flag) => (
             <label key={flag} className="flex items-center gap-2.5 cursor-pointer">
               <input
                 name={flag}
                 type="checkbox"
-                defaultChecked={v ? Boolean(v[flag]) : flag === 'inStock'}
+                defaultChecked={v ? Boolean(v[flag]) : false}
                 className="w-4 h-4 accent-rose-600"
               />
               <span className="text-sm font-medium text-stone-700 capitalize">{flag}</span>

@@ -23,12 +23,13 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
   const description = product.description[locale];
   const hasDiscount = !!product.discountedPrice;
   const price = product.discountedPrice ?? product.price;
+  const isAvailable = product.stockQuantity > 0;
   const discountPercent = hasDiscount
     ? Math.round(((product.price - product.discountedPrice!) / product.price) * 100)
     : 0;
 
   const handleAddToCart = () => {
-    if (!product.inStock) return;
+    if (!isAvailable) return;
     addItem(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 2200);
@@ -84,10 +85,10 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
             {/* Stock + size badge */}
             <div className="flex items-center gap-3 mb-6">
               <span
-                className={`flex items-center gap-1.5 text-sm font-medium ${product.inStock ? 'text-green-700' : 'text-stone-500'}`}
+                className={`flex items-center gap-1.5 text-sm font-medium ${isAvailable ? 'text-green-700' : 'text-stone-500'}`}
               >
-                <span className={`w-2.5 h-2.5 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-stone-300'}`} />
-                {product.inStock ? t('inStock') : t('outOfStock')}
+                <span className={`w-2.5 h-2.5 rounded-full ${isAvailable ? 'bg-green-500' : 'bg-stone-300'}`} />
+                {isAvailable ? t('inStock') : t('outOfStock')}
               </span>
               <span className="px-3 py-1 bg-stone-100 text-stone-600 text-sm font-medium rounded-full">
                 {product.size}
@@ -97,19 +98,21 @@ export default function ProductDetail({ product, locale }: ProductDetailProps) {
             {/* Add to cart */}
             <button
               onClick={handleAddToCart}
-              disabled={!product.inStock}
+              disabled={!isAvailable}
               className={`flex items-center justify-center gap-3 py-4 px-8 rounded-2xl font-bold text-base transition-all duration-200 mb-8 ${
                 added
                   ? 'bg-rose-950 text-white scale-95'
-                  : product.inStock
+                  : isAvailable
                   ? 'bg-rose-600 hover:bg-rose-700 active:scale-95 text-white shadow-lg shadow-rose-200'
                   : 'bg-stone-100 text-stone-400 cursor-not-allowed'
               }`}
             >
               {added ? (
                 <><Check size={20} /> Added to Cart</>
-              ) : (
+              ) : isAvailable ? (
                 <><ShoppingBag size={20} /> {t('addToCart')}</>
+              ) : (
+                <>{t('outOfStock')}</>
               )}
             </button>
 

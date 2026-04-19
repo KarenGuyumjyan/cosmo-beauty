@@ -2,6 +2,7 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { del } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { nextSkuForCategory } from '@/lib/product-sku';
 import { Prisma, ProductCategory } from '@prisma/client';
@@ -12,7 +13,8 @@ async function requireAdmin() {
   if (!session) throw new Error('Unauthorized');
 }
 
-function parseUrls(raw: string): string[] {
+function parseUrls(raw: string | null): string[] {
+  if (!raw) return [];
   return raw.split('\n').map((s) => s.trim()).filter(Boolean);
 }
 
@@ -25,6 +27,11 @@ function stockQuantityFromForm(formData: FormData): number {
   const n = parseInt(String(raw ?? ''), 10);
   if (!Number.isFinite(n) || n < 0) return 0;
   return n;
+}
+
+async function deleteBlobUrls(urls: string[]) {
+  if (urls.length === 0) return;
+  await Promise.allSettled(urls.map((url) => del(url)));
 }
 
 function revalidateAll() {
@@ -74,7 +81,6 @@ export async function createProduct(
         descriptionRu:   formData.get('descriptionRu') as string,
         images:          parseUrls(formData.get('images') as string),
         videos:          parseUrls(formData.get('videos') as string),
-        inStock:         formData.get('inStock') === 'on',
         stockQuantity:   stockQuantityFromForm(formData),
         featured:        formData.get('featured') === 'on',
         bestseller:      formData.get('bestseller') === 'on',
@@ -102,15 +108,17 @@ export async function updateProduct(
 ): Promise<{ error: string } | void> {
   await requireAdmin();
 
+  const existing = await prisma.product.findUnique({
+    where: { id },
+    select: { sku: true, images: true, videos: true },
+  });
+
   let sku = skuFromForm(formData);
-  if (!sku) {
-    const row = await prisma.product.findUnique({
-      where: { id },
-      select: { sku: true },
-    });
-    sku = row?.sku ?? '';
-  }
+  if (!sku) sku = existing?.sku ?? '';
   if (!sku) return { error: 'SKU is required.' };
+
+  const nextImages = parseUrls(formData.get('images') as string);
+  const nextVideos = parseUrls(formData.get('videos') as string);
 
   try {
     await prisma.product.update({
@@ -132,9 +140,8 @@ export async function updateProduct(
         descriptionEn:   formData.get('descriptionEn') as string,
         descriptionHy:   formData.get('descriptionHy') as string,
         descriptionRu:   formData.get('descriptionRu') as string,
-        images:          parseUrls(formData.get('images') as string),
-        videos:          parseUrls(formData.get('videos') as string),
-        inStock:         formData.get('inStock') === 'on',
+        images:          { set: nextImages },
+        videos:          { set: nextVideos },
         stockQuantity:   stockQuantityFromForm(formData),
         featured:        formData.get('featured') === 'on',
         bestseller:      formData.get('bestseller') === 'on',
@@ -152,12 +159,26 @@ export async function updateProduct(
     throw e;
   }
 
+  const kept = new Set([...nextImages, ...nextVideos]);
+  const removed = [
+    ...(existing?.images ?? []),
+    ...(existing?.videos ?? []),
+  ].filter((url) => !kept.has(url));
+  await deleteBlobUrls(removed);
+
   revalidateAll();
   redirect('/admin/products');
 }
 
 export async function deleteProduct(id: string) {
   await requireAdmin();
+  const product = await prisma.product.findUnique({
+    where: { id },
+    select: { images: true, videos: true },
+  });
   await prisma.product.delete({ where: { id } });
+  if (product) {
+    await deleteBlobUrls([...product.images, ...product.videos]);
+  }
   revalidateAll();
 }

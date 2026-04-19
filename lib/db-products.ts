@@ -18,7 +18,6 @@ function toProduct(p: DbProduct): Product {
     category: p.category as Product['category'],
     size: p.size,
     sku: p.sku,
-    inStock: p.inStock,
     stockQuantity: p.stockQuantity,
     includedItems: p.includedItems ? (p.includedItems as unknown as LocalizedString[]) : undefined,
     featured: p.featured,
@@ -28,18 +27,18 @@ function toProduct(p: DbProduct): Product {
 
 export const getAllProducts = cache(
   async (): Promise<Product[]> => {
-    const rows = await prisma.product.findMany({ orderBy: { createdAt: 'asc' } });
+    const rows = await prisma.product.findMany({ where: { stockQuantity: { gt: 0 } }, orderBy: { createdAt: 'asc' } });
     return rows.map(toProduct);
   },
   ['all-products'],
-  { revalidate: REVALIDATE }
+  { revalidate: REVALIDATE, tags: ['products'] }
 );
 
 export const getFeaturedAndBestsellers = cache(
   async (): Promise<{ featured: Product[]; bestsellers: Product[] }> => {
     const [featuredRows, bestsellersRows] = await Promise.all([
-      prisma.product.findMany({ where: { featured: true }, orderBy: { createdAt: 'asc' } }),
-      prisma.product.findMany({ where: { bestseller: true }, orderBy: { createdAt: 'asc' } }),
+      prisma.product.findMany({ where: { featured: true, stockQuantity: { gt: 0 } }, orderBy: { createdAt: 'asc' } }),
+      prisma.product.findMany({ where: { bestseller: true, stockQuantity: { gt: 0 } }, orderBy: { createdAt: 'asc' } }),
     ]);
     return {
       featured: featuredRows.map(toProduct),
@@ -47,7 +46,7 @@ export const getFeaturedAndBestsellers = cache(
     };
   },
   ['featured-bestsellers'],
-  { revalidate: REVALIDATE }
+  { revalidate: REVALIDATE, tags: ['products'] }
 );
 
 export const getProductById = cache(
@@ -56,7 +55,7 @@ export const getProductById = cache(
     return row ? toProduct(row) : null;
   },
   ['product-by-id'],
-  { revalidate: REVALIDATE }
+  { revalidate: REVALIDATE, tags: ['products'] }
 );
 
 /** Uncached — cart sync API and any dynamic id list (not unstable_cache). */

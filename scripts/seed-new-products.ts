@@ -62,7 +62,6 @@ async function main() {
         category:        p.category as ProductCategory,
         size:            p.size ?? '',
         sku,
-        inStock:         true,
         featured:        false,
         bestseller:      false,
       },

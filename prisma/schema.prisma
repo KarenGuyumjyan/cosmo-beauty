@@ -56,7 +56,6 @@ model Product {
   category        ProductCategory
   size            String
   sku             String          @unique
-  inStock         Boolean         @default(true)
   stockQuantity   Int             @default(10)
   includedItems   Json?
   featured        Boolean         @default(false)

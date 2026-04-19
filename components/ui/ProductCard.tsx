@@ -30,7 +30,7 @@ export default function ProductCard({ product, locale, priority = false }: Produ
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!product.inStock) return;
+    if (!product.stockQuantity) return;
     addItem(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -79,7 +79,7 @@ export default function ProductCard({ product, locale, priority = false }: Produ
           </button>
 
           {/* Out of stock overlay */}
-          {!product.inStock && (
+          {!product.stockQuantity && (
             <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
               <span className="text-stone-500 font-medium text-xs md:text-sm">{t('outOfStock')}</span>
             </div>
@@ -109,11 +109,11 @@ export default function ProductCard({ product, locale, priority = false }: Produ
             </div>
             <button
               onClick={handleAddToCart}
-              disabled={!product.inStock}
+              disabled={!product.stockQuantity}
               className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 text-[10px] md:text-xs font-semibold w-7 h-7 md:w-auto md:h-auto md:px-3.5 md:py-2 rounded-full transition-all duration-200 ${
                 added
                   ? 'bg-rose-950 text-white scale-95'
-                  : product.inStock
+                  : product.stockQuantity
                   ? 'bg-rose-600 hover:bg-rose-700 active:scale-95 text-white shadow-sm'
                   : 'bg-stone-100 text-stone-400 cursor-not-allowed'
               }`}
