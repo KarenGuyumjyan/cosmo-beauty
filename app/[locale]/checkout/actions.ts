@@ -87,8 +87,12 @@ export async function createOrder(
       amountRub: total,
       orderId: order.id,
       returnUrl,
-      description: `Cosmo order #${order.id.slice(0, 8)}`,
+      description: `Morena Cosmetics order #${order.id.slice(0, 8)}`,
     });
+
+    if(!payment){
+      throw new Error('Payment creation failed: no response from payment gateway');
+    }
 
     await prisma.order.update({
       where: { id: order.id },

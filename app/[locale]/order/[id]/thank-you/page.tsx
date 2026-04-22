@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
+import { fetchPayment } from '@/lib/yookassa';
 import type { Metadata } from 'next';
 import ThankYouClient from './ThankYouClient';
 
@@ -21,6 +22,28 @@ export default async function ThankYouPage({ params }: Props) {
   });
 
   if (!order) notFound();
+
+  // If order is still PENDING and has a yookassaId, check payment status directly
+  if (order.status === 'PENDING' && order.yookassaId) {
+    try {
+      const payment = await fetchPayment(order.yookassaId);
+      if (payment && payment.status === 'succeeded') {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'PAID', yookassaStatus: 'succeeded' },
+        });
+        order.status = 'PAID';
+      } else if (payment && payment.status === 'canceled') {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'CANCELLED', yookassaStatus: 'canceled' },
+        });
+        order.status = 'CANCELLED';
+      }
+    } catch (e) {
+      console.error('Failed to check payment status:', e);
+    }
+  }
 
   const serialized = {
     id: order.id,

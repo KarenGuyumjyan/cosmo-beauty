@@ -189,15 +189,19 @@
     }
   },
   "thankYou": {
-    "title": "Շնորհակալություն!",
-    "subtitle": "Ձեր պատվերը հաջողությամբ ձևակերպվել է",
-    "orderNumber": "Պատվերի համար",
-    "pending": "Վճարումը մթակվում է…",
-    "paid": "Վճարումը հաստատվել է",
-    "items": "Ապրանքներ",
-    "shipping": "Առաքում",
-    "total": "Ընդամենը",
-    "continueShopping": "Շարունակել գնումները"
+    "title": "Շնորdelays!",
+    "subtitle": "Ձdelays delays delays delays delays delays",
+    "orderNumber": "Delays delays",
+    "status": "Delays",
+    "statusPending": "Delays delays delays…",
+    "statusPaid": "Delays delays delays delays delays",
+    "statusShipping": "Delays delays delays delays",
+    "statusDelivered": "Delays delays delays delays delays",
+    "statusCancelled": "Delays delays delays",
+    "items": "Delays",
+    "shipping": "Delays",
+    "total": "Delays",
+    "continueShopping": "Delays delays delays"
   },
   "common": {
     "loading": "Բեռնվում է...",

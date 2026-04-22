@@ -1,26 +1,28 @@
-const SHOP_ID = process.env.YOOKASSA_SHOP_ID!;
-const SECRET = process.env.YOOKASSA_SECRET_KEY!;
-const API = 'https://api.yookassa.ru/v3';
+const SHOP_ID = process.env.YOOKASSA_SHOP_ID!
+const SECRET = process.env.YOOKASSA_SECRET_KEY!
+const API = 'https://api.yookassa.ru/v3'
 
 function headers(idempotencyKey: string) {
+  const credentials = btoa(`${SECRET}:${SHOP_ID}`)
+  
   return {
     'Content-Type': 'application/json',
     'Idempotence-Key': idempotencyKey,
-    Authorization: `Basic ${Buffer.from(`${SHOP_ID}:${SECRET}`).toString('base64')}`,
-  };
+    Authorization: `Basic ${credentials}`,
+  }
 }
 
 export interface CreatePaymentParams {
-  amountRub: number;
-  orderId: string;
-  returnUrl: string;
-  description?: string;
+  amountRub: number
+  orderId: string
+  returnUrl: string
+  description?: string
 }
 
 export interface YooKassaPayment {
-  id: string;
-  status: string;
-  confirmation?: { confirmation_url: string };
+  id: string
+  status: string
+  confirmation?: { confirmation_url: string }
 }
 
 export async function createPayment({
@@ -39,22 +41,24 @@ export async function createPayment({
       description: description ?? `Order ${orderId}`,
       metadata: { order_id: orderId },
     }),
-  });
+  })
 
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`YooKassa ${res.status}: ${body}`);
+    const body = await res.text()
+    throw new Error(`YooKassa ${res.status}: ${body}`)
   }
 
-  return res.json();
+  return res.json()
 }
 
-export async function fetchPayment(paymentId: string): Promise<YooKassaPayment> {
+export async function fetchPayment(
+  paymentId: string,
+): Promise<YooKassaPayment> {
   const res = await fetch(`${API}/payments/${paymentId}`, {
     headers: {
       Authorization: `Basic ${Buffer.from(`${SHOP_ID}:${SECRET}`).toString('base64')}`,
     },
-  });
-  if (!res.ok) throw new Error(`YooKassa fetch ${res.status}`);
-  return res.json();
+  })
+  if (!res.ok) throw new Error(`YooKassa fetch ${res.status}`)
+  return res.json()
 }
