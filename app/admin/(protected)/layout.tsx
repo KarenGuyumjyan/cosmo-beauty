@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-dvh bg-gray-50">
       <AdminNav email={session.user?.email} />
-      <main className="flex-1 ml-64 min-h-dvh">
+      <main className="flex-1 md:ml-64 min-h-dvh">
         {children}
       </main>
     </div>
