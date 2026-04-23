@@ -37,7 +37,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
       </div>
 
       {/* Status tabs */}
-      <div className="flex gap-1 mb-6 bg-white border border-stone-100 rounded-xl p-1 w-fit">
+      <div className="flex flex-wrap gap-1 mb-6 bg-white border border-stone-100 rounded-xl p-1 w-fit">
         {tabs.map((tab) => {
           const active = (status ?? '') === tab.value;
           return (
