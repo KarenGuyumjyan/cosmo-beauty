@@ -93,7 +93,7 @@ export async function createProduct(
       Array.isArray(e.meta?.target) &&
       (e.meta.target as string[]).includes('sku')
     ) {
-      return { error: 'A product with this SKU already exists. Use a different SKU.' };
+      return { error: 'Товар с таким артикулом (SKU) уже есть. Укажите другой SKU.' };
     }
     throw e;
   }
@@ -115,7 +115,7 @@ export async function updateProduct(
 
   let sku = skuFromForm(formData);
   if (!sku) sku = existing?.sku ?? '';
-  if (!sku) return { error: 'SKU is required.' };
+  if (!sku) return { error: 'Укажите артикул (SKU).' };
 
   const nextImages = parseUrls(formData.get('images') as string);
   const nextVideos = parseUrls(formData.get('videos') as string);
@@ -154,7 +154,7 @@ export async function updateProduct(
       Array.isArray(e.meta?.target) &&
       (e.meta.target as string[]).includes('sku')
     ) {
-      return { error: 'Another product already uses this SKU.' };
+      return { error: 'Этот SKU уже занят другим товаром.' };
     }
     throw e;
   }

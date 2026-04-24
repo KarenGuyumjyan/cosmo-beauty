@@ -17,12 +17,12 @@ export default async function EditProductPage({ params }: Props) {
     <div className="p-8 max-w-4xl">
       <div className="mb-8">
         <Link href="/admin/products" className="text-sm text-stone-400 hover:text-rose-600 transition-colors">
-          ← Back to Products
+          ← К списку товаров
         </Link>
-        <h1 className="text-2xl font-bold text-stone-900 mt-2">Edit Product</h1>
+        <h1 className="text-2xl font-bold text-stone-900 mt-2">Редактирование товара</h1>
         <p className="text-stone-400 text-sm">{product.nameEn}</p>
       </div>
-      <ProductForm action={action} product={product} submitLabel="Save Changes" />
+      <ProductForm action={action} product={product} submitLabel="Сохранить" />
     </div>
   );
 }

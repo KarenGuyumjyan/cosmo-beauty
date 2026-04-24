@@ -27,7 +27,7 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError('Invalid email or password.');
+      setError('Неверный email или пароль.');
       setLoading(false);
     } else {
       router.push('/admin');
@@ -42,8 +42,8 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-rose-600 rounded-2xl mb-4 shadow-lg">
             <Lock size={28} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Morena Admin</h1>
-          <p className="text-stone-400 text-sm mt-1">Sign in to manage your store</p>
+          <h1 className="text-2xl font-bold text-white">Админка Morena</h1>
+          <p className="text-stone-400 text-sm mt-1">Войдите, чтобы управлять магазином</p>
         </div>
 
         {/* Card */}
@@ -51,7 +51,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Email
+                Электронная почта
               </label>
               <input
                 name="email"
@@ -65,7 +65,7 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Password
+                Пароль
               </label>
               <div className="relative">
                 <input
@@ -96,7 +96,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-rose-600 hover:bg-rose-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
             >
-              {loading ? 'Signing in…' : 'Sign In'}
+              {loading ? 'Вход…' : 'Войти'}
             </button>
           </form>
         </div>

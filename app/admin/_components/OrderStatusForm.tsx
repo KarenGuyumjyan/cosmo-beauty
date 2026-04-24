@@ -3,6 +3,7 @@
 import { OrderStatus } from '@prisma/client';
 import { updateOrderStatus } from '../_actions/orders';
 import { useState } from 'react';
+import { orderStatusLabelRu } from '../_lib/order-status-ru';
 
 const STATUSES = Object.values(OrderStatus);
 
@@ -27,7 +28,7 @@ export default function OrderStatusForm({
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {
-      setError('Failed to update status. Please try again.');
+      setError('Не удалось обновить статус. Попробуйте снова.');
     } finally {
       setSaving(false);
     }
@@ -42,7 +43,7 @@ export default function OrderStatusForm({
           className="input w-auto"
         >
           {STATUSES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>{orderStatusLabelRu[s]}</option>
           ))}
         </select>
         <button
@@ -51,7 +52,7 @@ export default function OrderStatusForm({
           disabled={saving || status === current}
           className="bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
         >
-          {saving ? 'Saving…' : saved ? '✓ Saved' : 'Update Status'}
+          {saving ? 'Сохранение…' : saved ? '✓ Сохранено' : 'Обновить статус'}
         </button>
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}

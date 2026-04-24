@@ -10,11 +10,11 @@ export default function NewProductPage() {
           href='/admin/products'
           className='text-sm text-stone-400 hover:text-rose-600 transition-colors'
         >
-          ← Back to Products
+          ← К списку товаров
         </Link>
-        <h1 className='text-2xl font-bold text-stone-900 mt-2'>New Product</h1>
+        <h1 className='text-2xl font-bold text-stone-900 mt-2'>Новый товар</h1>
       </div>
-      <ProductForm action={createProduct} submitLabel='Create Product' />
+      <ProductForm action={createProduct} submitLabel='Создать товар' />
     </div>
   )
 }

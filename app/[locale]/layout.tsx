@@ -2,7 +2,6 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { CartProvider } from '@/context/CartContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import type { Metadata } from 'next';
@@ -41,12 +40,10 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <CartProvider>
-        <Header locale={locale} />
-        <main className="min-h-dvh">{children}</main>
-        <Footer />
-        <SpeedInsights />
-      </CartProvider>
+      <Header locale={locale} />
+      <main className="min-h-dvh">{children}</main>
+      <Footer />
+      <SpeedInsights />
     </NextIntlClientProvider>
   );
 }

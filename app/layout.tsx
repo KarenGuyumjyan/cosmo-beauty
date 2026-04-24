@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Inter } from 'next/font/google';
 import { getLocale } from 'next-intl/server';
+import { CartProvider } from '@/context/CartContext';
 import './globals.css';
 
 const inter = Inter({
@@ -41,7 +42,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <body className="antialiased pb-[env(safe-area-inset-bottom)]">
-        {children}
+        <CartProvider>{children}</CartProvider>
       </body>
     </html>
   );

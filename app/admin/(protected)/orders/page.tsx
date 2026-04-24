@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { OrderStatus } from '@prisma/client';
+import { orderStatusLabelRu } from '@/app/admin/_lib/order-status-ru';
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   PENDING:   'bg-yellow-100 text-yellow-800',
@@ -25,15 +26,15 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
   });
 
   const tabs: { label: string; value: string }[] = [
-    { label: 'All', value: '' },
-    ...Object.values(OrderStatus).map((s) => ({ label: s, value: s })),
+    { label: 'Все', value: '' },
+    ...Object.values(OrderStatus).map((s) => ({ label: orderStatusLabelRu[s], value: s })),
   ];
 
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-stone-900">Orders</h1>
-        <p className="text-stone-500 text-sm mt-1">{orders.length} orders</p>
+        <h1 className="text-2xl font-bold text-stone-900">Заказы</h1>
+        <p className="text-stone-500 text-sm mt-1">Заказов: {orders.length}</p>
       </div>
 
       {/* Status tabs */}
@@ -56,20 +57,20 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
 
       <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
         {orders.length === 0 ? (
-          <div className="text-center py-16 text-stone-400">No orders found.</div>
+          <div className="text-center py-16 text-stone-400">Заказов не найдено.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-xs font-medium text-stone-500 uppercase tracking-wider bg-stone-50 border-b border-stone-100">
                   <th className="text-left px-6 py-3">ID</th>
-                  <th className="text-left px-6 py-3">Customer</th>
-                  <th className="text-left px-6 py-3">Phone</th>
-                  <th className="text-left px-6 py-3">Items</th>
-                  <th className="text-left px-6 py-3">Total</th>
-                  <th className="text-left px-6 py-3">Status</th>
-                  <th className="text-left px-6 py-3">Date</th>
-                  <th className="text-right px-6 py-3">Action</th>
+                  <th className="text-left px-6 py-3">Клиент</th>
+                  <th className="text-left px-6 py-3">Телефон</th>
+                  <th className="text-left px-6 py-3">Позиции</th>
+                  <th className="text-left px-6 py-3">Сумма</th>
+                  <th className="text-left px-6 py-3">Статус</th>
+                  <th className="text-left px-6 py-3">Дата</th>
+                  <th className="text-right px-6 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-50">
@@ -82,7 +83,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
                     <td className="px-6 py-4 font-medium">{order.total.toLocaleString()} ₽</td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[order.status]}`}>
-                        {order.status}
+                        {orderStatusLabelRu[order.status]}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-stone-400">
@@ -93,7 +94,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
                         href={`/admin/orders/${order.id}`}
                         className="text-xs font-medium text-rose-600 hover:underline"
                       >
-                        View →
+                        Подробнее →
                       </Link>
                     </td>
                   </tr>

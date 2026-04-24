@@ -11,14 +11,14 @@ export default async function AdminProductsPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Products</h1>
-          <p className="text-stone-500 text-sm mt-1">{products.length} products total</p>
+          <h1 className="text-2xl font-bold text-stone-900">Товары</h1>
+          <p className="text-stone-500 text-sm mt-1">Всего товаров: {products.length}</p>
         </div>
         <Link
           href="/admin/products/new"
           className="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
         >
-          <Plus size={16} /> Add Product
+          <Plus size={16} /> Добавить товар
         </Link>
       </div>
 
@@ -27,18 +27,18 @@ export default async function AdminProductsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-xs font-medium text-stone-500 uppercase tracking-wider bg-stone-50 border-b border-stone-100">
-                <th className="text-left px-6 py-3">Product</th>
-                <th className="text-left px-6 py-3">Category</th>
-                <th className="text-left px-6 py-3">Price</th>
-                <th className="text-left px-6 py-3">SKU</th>
-                <th className="text-left px-6 py-3">Stock</th>
-                <th className="text-left px-6 py-3">Flags</th>
-                <th className="text-right px-6 py-3">Actions</th>
+                <th className="text-left px-6 py-3">Товар</th>
+                <th className="text-left px-6 py-3">Категория</th>
+                <th className="text-left px-6 py-3">Цена</th>
+                <th className="text-left px-6 py-3">Артикул</th>
+                <th className="text-left px-6 py-3">Склад</th>
+                <th className="text-left px-6 py-3">Метки</th>
+                <th className="text-right px-6 py-3">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-50">
               {products.map((p) => {
-                const catLabel = categories.find((c) => c.value === p.category)?.label.en ?? p.category;
+                const catLabel = categories.find((c) => c.value === p.category)?.label.ru ?? p.category;
                 return (
                   <tr key={p.id} className="hover:bg-stone-50 transition-colors">
                     <td className="px-6 py-4">
@@ -68,15 +68,15 @@ export default async function AdminProductsPage() {
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium w-fit whitespace-nowrap ${p.stockQuantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {p.stockQuantity > 0 ? 'In Stock' : 'Out of Stock'}
+                          {p.stockQuantity > 0 ? 'В наличии' : 'Нет в наличии'}
                         </span>
-                        <span className="text-xs text-stone-500">{p.stockQuantity} qty</span>
+                        <span className="text-xs text-stone-500">{p.stockQuantity} шт.</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-1">
-                        {p.featured && <span className="px-2 py-0.5 bg-rose-100 text-rose-700 text-xs rounded-full">Featured</span>}
-                        {p.bestseller && <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Best</span>}
+                        {p.featured && <span className="px-2 py-0.5 bg-rose-100 text-rose-700 text-xs rounded-full">Избранное</span>}
+                        {p.bestseller && <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Хит</span>}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -85,7 +85,7 @@ export default async function AdminProductsPage() {
                           href={`/admin/products/${p.id}/edit`}
                           className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-600 hover:text-rose-600 px-3 py-1.5 border border-stone-200 rounded-lg hover:border-rose-300 transition-colors"
                         >
-                          <Pencil size={13} /> Edit
+                          <Pencil size={13} /> Изменить
                         </Link>
                         <DeleteProductButton productId={p.id} />
                       </div>

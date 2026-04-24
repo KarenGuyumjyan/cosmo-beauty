@@ -14,7 +14,12 @@ interface ProductFormProps {
   submitLabel: string;
 }
 
-const CATEGORY_OPTIONS = categories.map((c) => ({ value: c.value, label: c.label.en }));
+const CATEGORY_OPTIONS = categories.map((c) => ({ value: c.value, label: c.label.ru }));
+
+const FLAG_LABELS: Record<'featured' | 'bestseller', string> = {
+  featured: 'Избранное',
+  bestseller: 'Хит продаж',
+};
 
 const DEFAULT_CATEGORY = CATEGORY_OPTIONS[0]!.value as ProductCategory;
 
@@ -24,7 +29,7 @@ async function uploadFiles(files: FileList): Promise<string[]> {
     const body = new FormData();
     body.append('file', file);
     const res = await fetch('/api/blob/upload', { method: 'POST', body });
-    if (!res.ok) throw new Error('Upload failed');
+    if (!res.ok) throw new Error('Ошибка загрузки');
     const data = await res.json();
     urls.push(data.url);
   }
@@ -62,7 +67,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
       const urls = await uploadFiles(files);
       setImages((prev) => [...prev, ...urls]);
     } catch {
-      setImageError('Image upload failed. Please try again.');
+      setImageError('Не удалось загрузить изображения. Попробуйте снова.');
     } finally {
       setUploadingImages(false);
       if (imageRef.current) imageRef.current.value = '';
@@ -77,7 +82,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
       const urls = await uploadFiles(files);
       setVideos((prev) => [...prev, ...urls]);
     } catch {
-      setVideoError('Video upload failed. Please try again.');
+      setVideoError('Не удалось загрузить видео. Попробуйте снова.');
     } finally {
       setUploadingVideos(false);
       if (videoRef.current) videoRef.current.value = '';
@@ -146,7 +151,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
       }
     } catch (e) {
       if (isRedirectError(e)) throw e;
-      setSubmitError('Something went wrong. Please try again.');
+      setSubmitError('Что-то пошло не так. Попробуйте снова.');
     }
   }
 
@@ -157,10 +162,10 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
 
       {/* Basic info */}
       <div className="bg-white rounded-2xl border border-stone-100 p-6">
-        <h2 className="font-semibold text-stone-900 mb-5">Basic Info</h2>
+        <h2 className="font-semibold text-stone-900 mb-5">Основная информация</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="label">Category</label>
+            <label className="label">Категория</label>
             <select
               name="category"
               required
@@ -174,38 +179,38 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
             </select>
           </div>
           <div>
-            <label className="label">SKU</label>
+            <label className="label">Артикул (SKU)</label>
             <input
               name="sku"
               value={sku}
               onChange={(e) => setSku(e.target.value)}
               className="input"
-              placeholder="e.g. CSM-BL-003"
+              placeholder="напр. CSM-BL-003"
               autoComplete="off"
             />
             {!isEdit && (
               <p className="text-xs text-stone-400 mt-1.5">
-                Filled automatically from category (e.g. Blush → CSM-BL-###). Leave blank or edit as needed.
+                Подставляется по категории (например румяна → CSM-BL-###). Можно изменить вручную.
               </p>
             )}
           </div>
           <div>
-            <label className="label">Size</label>
-            <input name="size" required defaultValue={v?.size} className="input" placeholder="e.g. 5g, 5ml, 3 pcs" />
+            <label className="label">Размер / фасовка</label>
+            <input name="size" required defaultValue={v?.size} className="input" placeholder="напр. 5 г, 5 мл, 3 шт." />
           </div>
           <div>
-            <label className="label">Price (₽)</label>
+            <label className="label">Цена (₽)</label>
             <input name="price" type="number" required min={0} defaultValue={v?.price} className="input" />
           </div>
           <div>
             <label className="label">
-              Discounted Price (₽){' '}
-              <span className="text-stone-400 font-normal">optional</span>
+              Цена со скидкой (₽){' '}
+              <span className="text-stone-400 font-normal">необязательно</span>
             </label>
             <input name="discountedPrice" type="number" min={0} defaultValue={v?.discountedPrice ?? ''} className="input" />
           </div>
           <div>
-            <label className="label">Stock quantity</label>
+            <label className="label">Количество на складе</label>
             <input
               name="stockQuantity"
               type="number"
@@ -214,7 +219,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
               defaultValue={v?.stockQuantity ?? 10}
               className="input"
             />
-            <p className="text-xs text-stone-400 mt-1.5">Max units a customer can order for this SKU.</p>
+            <p className="text-xs text-stone-400 mt-1.5">Максимум единиц в одном заказе для этого артикула.</p>
           </div>
         </div>
 
@@ -227,7 +232,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
                 defaultChecked={v ? Boolean(v[flag]) : false}
                 className="w-4 h-4 accent-rose-600"
               />
-              <span className="text-sm font-medium text-stone-700 capitalize">{flag}</span>
+              <span className="text-sm font-medium text-stone-700">{FLAG_LABELS[flag]}</span>
             </label>
           ))}
         </div>
@@ -235,9 +240,9 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
 
       {/* Images (drag-and-drop reorder — first image = main) */}
       <div className="bg-white rounded-2xl border border-stone-100 p-6">
-        <h2 className="font-semibold text-stone-900 mb-1">Images</h2>
+        <h2 className="font-semibold text-stone-900 mb-1">Изображения</h2>
         <p className="text-stone-400 text-xs mb-4">
-          Upload JPG / PNG / WebP. Drag to reorder — first image is the main product image.
+          JPG, PNG или WebP. Перетаскивайте для порядка — первое фото будет главным на витрине.
         </p>
 
         {images.length > 0 && (
@@ -260,13 +265,13 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
                 } ${dragIdx === i ? 'opacity-40' : ''}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={`image ${i + 1}`} className="w-full h-full object-cover pointer-events-none" />
+                <img src={url} alt={`Фото ${i + 1}`} className="w-full h-full object-cover pointer-events-none" />
                 <div className="absolute top-1 left-1 bg-black/50 text-white rounded p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <GripVertical size={12} />
                 </div>
                 {i === 0 && (
                   <span className="absolute bottom-0 left-0 right-0 text-center text-[10px] font-semibold bg-rose-600 text-white py-0.5">
-                    Main
+                    Главное
                   </span>
                 )}
                 <button
@@ -297,9 +302,9 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
             className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-stone-300 hover:border-rose-400 rounded-xl text-sm text-stone-500 hover:text-rose-600 transition-colors disabled:opacity-50"
           >
             {uploadingImages ? (
-              <><Loader2 size={16} className="animate-spin" /> Uploading…</>
+              <><Loader2 size={16} className="animate-spin" /> Загрузка…</>
             ) : (
-              <><ImagePlus size={16} /> Choose images</>
+              <><ImagePlus size={16} /> Выбрать изображения</>
             )}
           </button>
           {imageError && <p className="mt-2 text-xs text-red-600">{imageError}</p>}
@@ -308,8 +313,8 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
 
       {/* Videos */}
       <MediaSection
-        title="Videos"
-        hint="Upload MP4 / WebM / MOV (max 50 MB). Used for product demo."
+        title="Видео"
+        hint="MP4, WebM или MOV (до 50 МБ). Для демонстрации товара на странице."
         accept="video/mp4,video/webm,video/quicktime"
         items={videos}
         uploading={uploadingVideos}
@@ -318,7 +323,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
         onFiles={handleVideoFiles}
         onRemove={(url) => setVideos((prev) => prev.filter((u) => u !== url))}
         icon={<Film size={16} />}
-        chooseLabel="Choose videos"
+        chooseLabel="Выбрать видео"
         renderPreview={(url, i) => (
           <div key={url} className="relative group w-48 h-28 rounded-xl overflow-hidden border border-stone-200 bg-black">
             <video src={url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
@@ -330,18 +335,16 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
               <X size={12} />
             </button>
             <span className="absolute bottom-1 left-1 text-[10px] font-medium bg-black/60 text-white px-1.5 py-0.5 rounded">
-              Video {i + 1}
+              Видео {i + 1}
             </span>
           </div>
         )}
       />
 
       {/* English */}
-      <LocalizedSection lang="English" prefix="En" product={v} />
-      {/* Armenian */}
-      <LocalizedSection lang="Armenian (HY)" prefix="Hy" product={v} />
-      {/* Russian */}
-      <LocalizedSection lang="Russian (RU)" prefix="Ru" product={v} />
+      <LocalizedSection lang="Английский (EN)" prefix="En" product={v} />
+      <LocalizedSection lang="Армянский (HY)" prefix="Hy" product={v} />
+      <LocalizedSection lang="Русский (RU)" prefix="Ru" product={v} />
 
       {/* Submit */}
       {submitError && (
@@ -361,7 +364,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
           href="/admin/products"
           className="px-8 py-3 border border-stone-200 text-stone-600 font-medium rounded-xl hover:bg-stone-50 transition-colors"
         >
-          Cancel
+          Отмена
         </Link>
       </div>
     </form>
@@ -426,7 +429,7 @@ function MediaSection({
           className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-stone-300 hover:border-rose-400 rounded-xl text-sm text-stone-500 hover:text-rose-600 transition-colors disabled:opacity-50"
         >
           {uploading ? (
-            <><Loader2 size={16} className="animate-spin" /> Uploading…</>
+            <><Loader2 size={16} className="animate-spin" /> Загрузка…</>
           ) : (
             <>{icon} {chooseLabel}</>
           )}
@@ -453,7 +456,7 @@ function LocalizedSection({
       <h2 className="font-semibold text-stone-900 mb-5">{lang}</h2>
       <div className="space-y-4">
         <div>
-          <label className="label">Name</label>
+          <label className="label">Название</label>
           <input
             name={`name${prefix}`}
             required
@@ -462,7 +465,7 @@ function LocalizedSection({
           />
         </div>
         <div>
-          <label className="label">Short Description</label>
+          <label className="label">Краткое описание</label>
           <input
             name={`shortDesc${prefix}`}
             required
@@ -471,7 +474,7 @@ function LocalizedSection({
           />
         </div>
         <div>
-          <label className="label">Full Description</label>
+          <label className="label">Полное описание</label>
           <textarea
             name={`description${prefix}`}
             required

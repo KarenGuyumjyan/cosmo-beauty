@@ -15,10 +15,10 @@ import {
 import { adminSignOut } from '../_actions/auth';
 
 const NAV = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/products', label: 'Products', icon: Package },
-  { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
-  { href: '/admin/contacts', label: 'Contacts', icon: Mail },
+  { href: '/admin', label: 'Панель', icon: LayoutDashboard },
+  { href: '/admin/products', label: 'Товары', icon: Package },
+  { href: '/admin/orders', label: 'Заказы', icon: ShoppingBag },
+  { href: '/admin/contacts', label: 'Обращения', icon: Mail },
 ];
 
 export default function AdminNav({ email }: { email?: string | null }) {
@@ -43,7 +43,7 @@ export default function AdminNav({ email }: { email?: string | null }) {
         type="button"
         onClick={() => setOpen(true)}
         className="md:hidden fixed top-22 -left-3 z-50 inline-flex items-center justify-center w-11 h-11 rounded-xl bg-stone-900 text-white shadow-lg"
-        aria-label="Open admin menu"
+        aria-label="Открыть меню админки"
       >
         <ArrowRightFromLine size={20} />
       </button>
@@ -52,7 +52,7 @@ export default function AdminNav({ email }: { email?: string | null }) {
       {open && (
         <button
           type="button"
-          aria-label="Close admin menu"
+          aria-label="Закрыть меню админки"
           onClick={() => setOpen(false)}
           className="md:hidden fixed inset-0 bg-black/40 z-40"
         />
@@ -69,7 +69,7 @@ export default function AdminNav({ email }: { email?: string | null }) {
         {/* Brand */}
         <div className="px-6 py-5 border-b border-stone-800 flex items-start justify-between gap-3">
           <div>
-            <p className="text-white font-bold text-lg tracking-tight">Morena Admin</p>
+            <p className="text-white font-bold text-lg tracking-tight">Админка Morena</p>
             <p className="text-stone-500 text-xs mt-0.5 truncate">{email}</p>
           </div>
 
@@ -77,7 +77,7 @@ export default function AdminNav({ email }: { email?: string | null }) {
             type="button"
             onClick={() => setOpen(false)}
             className="md:hidden text-stone-400 hover:text-white"
-            aria-label="Close admin menu"
+            aria-label="Закрыть меню админки"
           >
             <X size={20} />
           </button>
@@ -114,7 +114,7 @@ export default function AdminNav({ email }: { email?: string | null }) {
               className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-stone-400 hover:bg-stone-800 hover:text-white transition-colors"
             >
               <LogOut size={18} />
-              Sign Out
+              Выйти
             </button>
           </form>
         </div>

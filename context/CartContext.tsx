@@ -1,9 +1,17 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
-import { mergeCartWithCatalog } from '@/lib/cart-merge-catalog';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from 'react';
 import { maxOrderQuantity } from '@/lib/max-order-quantity';
 import { CartItem, CartState, Product } from '@/lib/types';
+import { mergeCartWithCatalog } from '@/lib/cart-merge-catalog';
 
 type CartAction =
   | { type: 'ADD_ITEM'; product: Product }
@@ -60,16 +68,25 @@ function loadCartFromStorage(): CartItem[] {
 const CartContext = createContext<CartState | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, dispatch] = useReducer(cartReducer, undefined, loadCartFromStorage);
+  // Always start empty so SSR + first client paint match; hydrate from localStorage in useLayoutEffect.
+  const [items, dispatch] = useReducer(cartReducer, [] as CartItem[]);
   const itemsRef = useRef(items);
   itemsRef.current = items;
+
+  const canPersist = useRef(false);
 
   const idsKey = useMemo(
     () => [...new Set(items.map((i) => i.product.id))].sort().join(','),
     [items]
   );
 
+  useLayoutEffect(() => {
+    dispatch({ type: 'HYDRATE', items: loadCartFromStorage() });
+    canPersist.current = true;
+  }, []);
+
   useEffect(() => {
+    if (!canPersist.current) return;
     localStorage.setItem('cosmo-cart', JSON.stringify(items));
   }, [items]);
 
