@@ -1,4 +1,5 @@
 import { cdekRequest } from './client';
+import { expandCdekCityQueries } from './translit';
 import type {
   CdekCity,
   CdekCreateOrderResult,
@@ -14,10 +15,11 @@ const SENDER_PHONE = process.env.CDEK_SENDER_PHONE ?? '+79999999999';
 const SENDER_ADDRESS = process.env.CDEK_SENDER_ADDRESS ?? 'Sender warehouse';
 
 type CdekCityApiRow = {
-  code: number;
+  code: number | string;
   city: string;
   region?: string;
   country?: string;
+  country_code?: string;
 };
 
 type CdekPickupApiRow = {
@@ -40,22 +42,61 @@ export async function searchCities(query: string): Promise<CdekCity[]> {
   const q = query.trim();
   if (q.length < 2) return [];
 
-  const params = new URLSearchParams({
-    country_codes: 'RU',
-    size: '20',
-    city: q,
-  });
+  const candidates = expandCdekCityQueries(q);
+  const seen = new Set<number>();
+  const results: CdekCity[] = [];
 
-  const rows = await cdekRequest<CdekCityApiRow[]>(
-    `location/cities?${params.toString()}`
-  );
+  for (const candidate of candidates) {
+    if (results.length >= 20) break;
 
-  return rows.map((row) => ({
-    code: row.code,
-    city: row.city,
-    region: row.region,
-    country: row.country,
-  }));
+    // Try the suggest endpoint first (returns fast prefix-match results).
+    // If it returns nothing, fall back to the standard cities listing endpoint.
+    let rows: CdekCityApiRow[] = [];
+    let fetchError: unknown = null;
+
+    for (const attempt of [
+      `/location/suggest/cities?name=${encodeURIComponent(candidate)}&country_code=RU`,
+      `/location/cities?city=${encodeURIComponent(candidate)}&country_codes=RU&size=20`,
+    ]) {
+      try {
+        const raw = await cdekRequest<unknown>(attempt);
+        if (Array.isArray(raw)) {
+          rows = raw as CdekCityApiRow[];
+        } else if (raw && typeof raw === 'object') {
+          // Some CDEK responses wrap the array: { cities: [...] }
+          const asObj = raw as Record<string, unknown>;
+          const inner = asObj.cities ?? asObj.data ?? asObj.items;
+          rows = Array.isArray(inner) ? (inner as CdekCityApiRow[]) : [];
+        }
+        console.log(`[CDEK cities] ${attempt} → ${rows.length} rows`);
+        if (rows.length > 0) break;
+      } catch (err) {
+        fetchError = err;
+        console.warn(`[CDEK cities] ${attempt} failed:`, err instanceof Error ? err.message : err);
+      }
+    }
+
+    if (rows.length === 0 && fetchError !== null && results.length === 0) {
+      throw fetchError;
+    }
+
+    for (const row of rows) {
+      if (!row.city) continue;
+      const code = Number(row.code);
+      if (!Number.isFinite(code) || code === 0) continue;
+      if (seen.has(code)) continue;
+      seen.add(code);
+      results.push({
+        code,
+        city: row.city,
+        region: row.region,
+        country: row.country ?? row.country_code,
+      });
+      if (results.length >= 20) break;
+    }
+  }
+
+  return results;
 }
 
 export async function getPickupPoints(cityCode: number): Promise<CdekPickupPoint[]> {

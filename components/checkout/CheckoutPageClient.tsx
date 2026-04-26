@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -38,12 +38,19 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const shippingCost = delivery?.finalPrice ?? 0;
   const total = subtotal + shippingCost;
 
-  const parcels: CdekParcel[] = items.map((item) => ({
-    weight: Math.max(1, (item.product.weightGrams ?? 100) * item.quantity),
-    length: Math.max(1, item.product.lengthCm ?? 20),
-    width: Math.max(1, item.product.widthCm ?? 20),
-    height: Math.max(1, item.product.heightCm ?? 10),
-  }));
+  // Stable reference: only recompute when cart contents actually change.
+  // Without this, every parent re-render produced a fresh array reference,
+  // which retriggered the CDEK delivery effect and wiped the selected pickup point.
+  const parcels = useMemo<CdekParcel[]>(
+    () =>
+      items.map((item) => ({
+        weight: Math.max(1, (item.product.weightGrams ?? 100) * item.quantity),
+        length: Math.max(1, item.product.lengthCm ?? 20),
+        width: Math.max(1, item.product.widthCm ?? 20),
+        height: Math.max(1, item.product.heightCm ?? 10),
+      })),
+    [items],
+  );
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

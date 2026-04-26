@@ -9,9 +9,10 @@ export async function GET(req: Request) {
 
   try {
     const cities = await searchCities(query);
+    console.log(`[CDEK cities route] query="${query}" → ${cities.length} result(s)`);
     return NextResponse.json(cities);
   } catch (error) {
-    console.error('CDEK cities error', error);
+    console.error('[CDEK cities route] error for query="%s":', query, error);
     return cdekErrorResponse(error, 'Failed to load cities');
   }
 }

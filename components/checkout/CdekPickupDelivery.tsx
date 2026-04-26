@@ -10,10 +10,6 @@ import type {
   CdekPickupPoint,
 } from '@/lib/cdek/types';
 import CdekPickupSelector from '@/components/checkout/cdek/CdekPickupSelector';
-import {
-  fetchYandexGeocodeCenter,
-  fetchYandexSuggestAddresses,
-} from '@/lib/yandex-maps/suggest';
 
 type Props = {
   parcels: CdekParcel[];
@@ -23,29 +19,42 @@ type Props = {
 const PACKAGING = 0;
 const MARKUP = 0;
 
-async function resolveCdekCitiesFromFormatted(formatted: string): Promise<CdekCity[]> {
-  const parts = formatted.split(',').map((s) => s.trim()).filter(Boolean);
-  const skip = new Set(['россия', 'russia', 'рф', 'the russian federation']);
-  const candidates = parts.filter((p) => !skip.has(p.toLowerCase()));
-  const ordered = [...candidates, formatted.trim()];
-  const tried = new Set<string>();
-  for (const q of ordered) {
-    const key = q.slice(0, 80);
-    if (key.length < 2 || tried.has(key)) continue;
-    tried.add(key);
-    const res = await fetch(`/api/delivery/cdek/cities?query=${encodeURIComponent(key)}`);
-    if (!res.ok) continue;
-    const data: unknown = await res.json();
-    if (!Array.isArray(data) || data.length === 0) continue;
-    return data as CdekCity[];
+type CdekUpstreamError = {
+  error?: string;
+  hint?: string;
+  upstreamStatus?: number;
+  upstreamPath?: string;
+  details?: string;
+};
+
+async function readErrorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  try {
+    const data = (await response.clone().json()) as CdekUpstreamError;
+    const parts = [
+      data.error,
+      data.upstreamStatus ? `(${data.upstreamStatus})` : null,
+      data.hint,
+    ].filter(Boolean);
+    if (parts.length > 0) return parts.join(' ');
+  } catch {
+    /* fall through to text */
   }
-  return [];
+  try {
+    const text = await response.text();
+    if (text) return text.slice(0, 400);
+  } catch {
+    /* ignore */
+  }
+  return fallback;
 }
 
 export default function CdekPickupDelivery({ parcels, onChange }: Props) {
   const t = useTranslations('checkout');
+
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [cities, setCities] = useState<CdekCity[]>([]);
   const [selectedCity, setSelectedCity] = useState<CdekCity | null>(null);
   const [loadingCities, setLoadingCities] = useState(false);
@@ -56,97 +65,69 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
   const [points, setPoints] = useState<CdekPickupPoint[]>([]);
   const [selectedPointCode, setSelectedPointCode] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [hintCenter, setHintCenter] = useState<[number, number] | null>(null);
-  const [loadingSuggest, setLoadingSuggest] = useState(false);
-  const suggestRequestId = useRef(0);
-  /** After picking a Yandex line we set `query` programmatically — do not re-fetch suggest until the user types again. */
-  const suppressSuggestUntilEditRef = useRef(false);
+
+  const cityRequestId = useRef(0);
 
   function handleQueryChange(value: string) {
-    suppressSuggestUntilEditRef.current = false;
     setQuery(value);
     setSelectedCity(null);
     setCities([]);
     setError(null);
-    if (value.trim().length <= 7) {
-      setHintCenter(null);
-    }
   }
 
+  // Debounced direct call to CDEK city search.
   useEffect(() => {
-    const trimmed = query.trim();
-    if (!trimmed) {
-      setSuggestions([]);
-      setHintCenter(null);
+    const trimmed = (query ?? '').trim();
+    if (selectedCity && trimmed === (selectedCity.city ?? '').trim()) {
+      setCities([]);
       return;
     }
-    if (suppressSuggestUntilEditRef.current) {
-      setSuggestions([]);
-      setLoadingSuggest(false);
-      return;
-    }
-    if (selectedCity && trimmed === selectedCity.city.trim()) {
-      setSuggestions([]);
+    if (trimmed.length < 2) {
+      setCities([]);
+      setLoadingCities(false);
       return;
     }
 
     const handle = setTimeout(() => {
-      const requestId = ++suggestRequestId.current;
+      const requestId = ++cityRequestId.current;
       void (async () => {
-        setLoadingSuggest(true);
+        setLoadingCities(true);
         try {
-          const nextSuggestions = await fetchYandexSuggestAddresses(trimmed);
-          if (requestId !== suggestRequestId.current) return;
-          setSuggestions(nextSuggestions);
-          if (trimmed.length > 7) {
-            const coords = await fetchYandexGeocodeCenter(trimmed);
-            if (requestId !== suggestRequestId.current) return;
-            setHintCenter(coords);
+          const res = await fetch(
+            `/api/delivery/cdek/cities?query=${encodeURIComponent(trimmed)}`,
+          );
+          if (requestId !== cityRequestId.current) return;
+          if (!res.ok) {
+            setCities([]);
+            setError(await readErrorMessage(res, t('cdek.errors.resolveFailed')));
+            return;
+          }
+          const data = (await res.json()) as CdekCity[];
+          if (requestId !== cityRequestId.current) return;
+          setCities(Array.isArray(data) ? data : []);
+          if (Array.isArray(data) && data.length === 0) {
+            setError(t('cdek.errors.cityNotFound'));
           } else {
-            setHintCenter(null);
+            setError(null);
+          }
+        } catch {
+          if (requestId === cityRequestId.current) {
+            setError(t('cdek.errors.resolveFailed'));
           }
         } finally {
-          if (requestId === suggestRequestId.current) {
-            setLoadingSuggest(false);
+          if (requestId === cityRequestId.current) {
+            setLoadingCities(false);
           }
         }
       })();
-    }, 400);
+    }, 350);
 
     return () => clearTimeout(handle);
-  }, [query, selectedCity]);
+  }, [query, selectedCity, t]);
 
-  async function handleSuggestionPick(formatted: string) {
-    suggestRequestId.current += 1;
-    suppressSuggestUntilEditRef.current = true;
-    setLoadingSuggest(false);
-    setSuggestions([]);
-    setQuery(formatted);
-    setSelectedCity(null);
-    setCities([]);
-    setLoadingCities(true);
-    setError(null);
-    try {
-      const list = await resolveCdekCitiesFromFormatted(formatted);
-      if (list.length === 1) {
-        setSelectedCity(list[0]);
-        setQuery(list[0].city);
-        setCities([]);
-      } else if (list.length > 1) {
-        setCities(list);
-      } else {
-        setError(t('cdek.errors.cityNotFound'));
-      }
-    } catch (e) {
-      console.error('CDEK city resolve:', e);
-      setError(t('cdek.errors.resolveFailed'));
-    } finally {
-      setLoadingCities(false);
-    }
-  }
-
+  // Reset & load pickup points ONLY when the chosen city changes.
+  // Parcels changes (cart edits) must not wipe the user's pickup-point selection.
   useEffect(() => {
-    onChange(null);
     setError(null);
     setQuote(null);
     setPoints([]);
@@ -154,51 +135,78 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
     if (!selectedCity) return;
 
     let cancelled = false;
-    setLoadingQuote(true);
     setLoadingPoints(true);
 
-    void Promise.all([
-      fetch('/api/delivery/cdek/quote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cityCode: selectedCity.code, parcels }),
-      }),
-      fetch('/api/delivery/cdek/pickup-points', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cityCode: selectedCity.code }),
-      }),
-    ])
-      .then(async ([qRes, pRes]) => {
+    void (async () => {
+      try {
+        const res = await fetch('/api/delivery/cdek/pickup-points', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cityCode: selectedCity.code }),
+        });
         if (cancelled) return;
-        if (!qRes.ok || !pRes.ok) throw new Error('load');
-        const q = (await qRes.json()) as { tariffCode: number; cdekPrice: number };
-        const p = (await pRes.json()) as CdekPickupPoint[];
-        setQuote(q);
+        if (!res.ok) {
+          setError(await readErrorMessage(res, t('cdek.errors.loadFailed')));
+          return;
+        }
+        const p = (await res.json()) as CdekPickupPoint[];
+        if (cancelled) return;
         setPoints(p);
-        setHintCenter(null);
-        if (p.length === 0) {
-          setError(t('cdek.errors.noPickupPoints'));
-        }
-      })
-      .catch(() => {
+        if (p.length === 0) setError(t('cdek.errors.noPickupPoints'));
+      } catch {
         if (!cancelled) setError(t('cdek.errors.loadFailed'));
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoadingQuote(false);
-          setLoadingPoints(false);
-        }
-      });
+      } finally {
+        if (!cancelled) setLoadingPoints(false);
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [selectedCity, parcels, onChange, t]);
+  }, [selectedCity, t]);
+
+  // Recalculate the quote when city or cart parcels change.
+  // Importantly, this does NOT reset `selectedPointCode` — the pickup point
+  // stays selected while we re-quote.
+  useEffect(() => {
+    if (!selectedCity) return;
+    let cancelled = false;
+    setLoadingQuote(true);
+
+    void (async () => {
+      try {
+        const res = await fetch('/api/delivery/cdek/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cityCode: selectedCity.code, parcels }),
+        });
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(await readErrorMessage(res, t('cdek.errors.loadFailed')));
+          setQuote(null);
+          return;
+        }
+        const q = (await res.json()) as { tariffCode: number; cdekPrice: number };
+        if (cancelled) return;
+        setQuote(q);
+      } catch {
+        if (!cancelled) {
+          setError(t('cdek.errors.loadFailed'));
+          setQuote(null);
+        }
+      } finally {
+        if (!cancelled) setLoadingQuote(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCity, parcels, t]);
 
   const selectedPoint = useMemo(
     () => points.find((point) => point.code === selectedPointCode) ?? null,
-    [points, selectedPointCode]
+    [points, selectedPointCode],
   );
 
   useEffect(() => {
@@ -233,50 +241,32 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
 
       <div>
         <label className="block text-sm font-medium text-stone-700 mb-1.5">
-          {t('cdek.addressLabel')}
+          {t('cdek.cityLabel')}
         </label>
         <input
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
-          placeholder={t('cdek.addressPlaceholder')}
+          placeholder={t('cdek.cityPlaceholder')}
           className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors"
         />
-        {loadingSuggest && query.trim().length > 0 && (
-          <p className="mt-2 text-xs text-stone-500">{t('cdek.suggestLoading')}</p>
-        )}
-        {loadingCities && !loadingSuggest && (
+        {loadingCities && (
           <p className="mt-2 text-xs text-stone-500">{t('cdek.resolvingCity')}</p>
         )}
-        {suggestions.length > 0 && !selectedCity && cities.length === 0 && (
-          <div className="mt-2 border border-stone-200 rounded-xl overflow-hidden">
-            {suggestions.map((line) => (
-              <button
-                key={line}
-                type="button"
-                onClick={() => void handleSuggestionPick(line)}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-stone-50 border-b border-stone-100 last:border-b-0 text-stone-800"
-              >
-                {line}
-              </button>
-            ))}
-          </div>
-        )}
         {cities.length > 0 && !selectedCity && (
-          <div className="mt-2 border border-stone-200 rounded-xl overflow-hidden">
-            <p className="px-3 py-2 text-xs text-stone-500 bg-stone-50 border-b border-stone-100">
-              {t('cdek.multiCityTitle')}
-            </p>
+          <div className="mt-2 border border-stone-200 rounded-xl overflow-hidden max-h-72 overflow-y-auto">
+            {cities.length > 1 && (
+              <p className="px-3 py-2 text-xs text-stone-500 bg-stone-50 border-b border-stone-100">
+                {t('cdek.multiCityTitle')}
+              </p>
+            )}
             {cities.map((city) => (
               <button
-                key={city.code}
+                key={`${city.code}-${city.region ?? ''}`}
                 type="button"
                 onClick={() => {
-                  suggestRequestId.current += 1;
-                  suppressSuggestUntilEditRef.current = true;
-                  setLoadingSuggest(false);
-                  setSuggestions([]);
+                  cityRequestId.current += 1;
                   setSelectedCity(city);
-                  setQuery(city.city);
+                  setQuery(city.city ?? '');
                   setCities([]);
                 }}
                 className="w-full text-left px-3 py-2 text-sm hover:bg-stone-50 border-b border-stone-100 last:border-b-0"
@@ -287,6 +277,9 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
             ))}
           </div>
         )}
+        {!loadingCities && !selectedCity && cities.length === 0 && error && (
+          <p className="mt-2 text-xs text-red-600">{error}</p>
+        )}
       </div>
 
       {selectedCity && (
@@ -296,7 +289,7 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
           onSelect={setSelectedPointCode}
           loading={loadingPoints}
           error={!loadingPoints ? error : null}
-          hintCenter={hintCenter}
+          hintCenter={null}
         />
       )}
 

@@ -61,7 +61,8 @@ export async function cdekRequest<T>(
   init: Omit<RequestInit, 'headers'> & { headers?: HeadersInit } = {}
 ): Promise<T> {
   const token = await fetchToken();
-  const res = await fetch(`${getBaseUrl()}${path}`, {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const res = await fetch(`${getBaseUrl()}${normalizedPath}`, {
     ...init,
     headers: {
       Authorization: `Bearer ${token}`,
@@ -85,10 +86,10 @@ export async function cdekRequest<T>(
         : 'CDEK returned ' +
           res.status +
           ' on the sandbox (api.edu.cdek.ru). Verify CDEK_CLIENT_ID and CDEK_CLIENT_SECRET in .env match the integration account.';
-      throw new Error(`CDEK request failed (${path}): ${res.status} ${text}\n${hint}`);
+      throw new Error(`CDEK request failed (${normalizedPath}): ${res.status} ${text}\n${hint}`);
     }
 
-    throw new Error(`CDEK request failed (${path}): ${res.status} ${text}`);
+    throw new Error(`CDEK request failed (${normalizedPath}): ${res.status} ${text}`);
   }
 
   return (await res.json()) as T;
