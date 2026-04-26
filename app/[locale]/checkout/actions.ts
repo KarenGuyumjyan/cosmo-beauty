@@ -87,7 +87,7 @@ export async function createOrder(
   });
 
   const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000';
-  const returnUrl = `${baseUrl}/${locale}/order/${order.id}/thank-you`;
+  const returnUrl = `${baseUrl}/${locale}/order/${order.id}`;
 
   try {
     const payment = await createPayment({

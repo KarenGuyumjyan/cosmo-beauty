@@ -7,8 +7,6 @@
  * server can match against.
  */
 
-const LATIN_RX = /^[\sA-Za-z.\-']+$/;
-
 const ALIAS_MAP: Record<string, string> = {
   // Capitals & big cities
   moscow: 'Москва',
@@ -49,6 +47,10 @@ const ALIAS_MAP: Record<string, string> = {
   yerevan: 'Ереван',
   minsk: 'Минск',
 };
+
+function isLatinishForTranslit(s: string): boolean {
+  return /[A-Za-z]/.test(s) && !/[\u0400-\u04FF]/.test(s);
+}
 
 /** Two-letter digraphs first so they win against single-letter mappings. */
 const DIGRAPHS: Array<[string, string]> = [
@@ -122,34 +124,47 @@ function transliterate(input: string): string {
 }
 
 /**
- * For an arbitrary user query, return one or more probable Cyrillic prefixes
- * to try against CDEK suggest. Order = priority (best matches first).
+ * For an arbitrary user query, return one or more search strings
+ * to try against CDEK. Order = priority (best matches first).
+ *
+ * `ALIAS_MAP` is always evaluated (so commas / extra text like "Moscow, RU" still resolve).
+ * Latin transliteration runs only for Latin (non-Cyrillic) text.
  */
 export function expandCdekCityQueries(rawQuery: string): string[] {
   const trimmed = rawQuery.trim();
   if (!trimmed) return [];
 
-  const candidates = new Set<string>();
-  candidates.add(trimmed);
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const add = (s: string) => {
+    if (!s || seen.has(s)) return;
+    seen.add(s);
+    out.push(s);
+  };
 
-  if (LATIN_RX.test(trimmed)) {
-    const lower = trimmed.toLowerCase();
+  add(trimmed);
+  const lower = trimmed.toLowerCase();
 
-    const alias = ALIAS_MAP[lower];
-    if (alias) candidates.add(alias);
+  const fromAlias = (k: string) => {
+    const a = ALIAS_MAP[k];
+    if (a) add(a);
+  };
+  fromAlias(lower);
 
-    const collapsed = lower.replace(/\s+/g, ' ');
-    if (ALIAS_MAP[collapsed]) candidates.add(ALIAS_MAP[collapsed]);
+  fromAlias(lower.replace(/\s+/g, ' ').trim());
+  for (const w of lower.split(/[\s,/;]+/)) {
+    if (w) fromAlias(w);
+  }
+  const firstSeg = lower.split(/[,/;]/)[0]?.replace(/\s+/g, ' ').trim() ?? '';
+  if (firstSeg) fromAlias(firstSeg);
 
-    const transliterated = transliterate(trimmed);
-    if (transliterated) candidates.add(transliterated);
-
-    // Also try a shorter Cyrillic prefix (helps for full words like "moscow"
-    // → "москов" not matching, but "моск" matching "Москва").
-    if (transliterated.length > 4) {
-      candidates.add(transliterated.slice(0, 4));
+  if (isLatinishForTranslit(trimmed)) {
+    const t = transliterate(trimmed);
+    if (t) {
+      add(t);
+      if (t.length > 4) add(t.slice(0, 4));
     }
   }
 
-  return Array.from(candidates);
+  return out;
 }

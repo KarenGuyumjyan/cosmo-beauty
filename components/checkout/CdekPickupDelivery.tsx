@@ -10,6 +10,7 @@ import type {
   CdekPickupPoint,
 } from '@/lib/cdek/types';
 import CdekPickupSelector from '@/components/checkout/cdek/CdekPickupSelector';
+import { DEFAULT_CHECKOUT_CITY } from '@/lib/cdek/default-city';
 
 type Props = {
   parcels: CdekParcel[];
@@ -54,9 +55,9 @@ async function readErrorMessage(
 export default function CdekPickupDelivery({ parcels, onChange }: Props) {
   const t = useTranslations('checkout');
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(DEFAULT_CHECKOUT_CITY.city);
   const [cities, setCities] = useState<CdekCity[]>([]);
-  const [selectedCity, setSelectedCity] = useState<CdekCity | null>(null);
+  const [selectedCity, setSelectedCity] = useState<CdekCity | null>(DEFAULT_CHECKOUT_CITY);
   const [loadingCities, setLoadingCities] = useState(false);
 
   const [loadingQuote, setLoadingQuote] = useState(false);
