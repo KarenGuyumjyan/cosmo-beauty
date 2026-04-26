@@ -80,9 +80,23 @@ export default async function OrderDetailPage({ params }: Props) {
           <div>
             <p className='text-stone-400 text-xs mb-0.5'>Способ</p>
             <p className='font-medium text-stone-800'>
-              {order.shippingMethod === 'YANDEX_DELIVERY' ? 'Доставка Яндекс' : 'Самовывоз'}
+              {order.shippingMethod.trim() || '—'}
             </p>
           </div>
+          {order.pickupPointName && (
+            <div className='col-span-2'>
+              <p className='text-stone-400 text-xs mb-0.5'>Пункт выдачи</p>
+              <p className='font-medium text-stone-800'>
+                {order.pickupPointName} — {order.pickupPointAddress ?? '—'}
+              </p>
+            </div>
+          )}
+          {order.cdekTrackingNumber && (
+            <div>
+              <p className='text-stone-400 text-xs mb-0.5'>CDEK трек-номер</p>
+              <p className='font-medium text-stone-800 font-mono text-xs'>{order.cdekTrackingNumber}</p>
+            </div>
+          )}
           <div>
             <p className='text-stone-400 text-xs mb-0.5'>Стоимость доставки</p>
             <p className='font-medium text-stone-800'>

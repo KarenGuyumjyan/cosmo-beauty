@@ -20,10 +20,9 @@ export async function sendOrderNotification(order: OrderNotification) {
     return;
   }
 
-  const shippingLabel =
-    order.shippingMethod === 'YANDEX_DELIVERY'
-      ? `Yandex Delivery → ${order.city ?? ''}, ${order.address ?? ''}`
-      : 'Self-pickup';
+  const shippingLabel = [order.shippingMethod.trim(), order.city, order.address]
+    .filter(Boolean)
+    .join(' · ') || '—';
 
   const itemLines = order.items
     .map((i) => `  • ${i.name} x${i.quantity} — ${(i.price * i.quantity).toLocaleString('ru-RU')} ₽`)

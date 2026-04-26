@@ -32,6 +32,10 @@ export interface Product {
   size: string;
   sku: string;
   stockQuantity: number;
+  weightGrams?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
   includedItems?: LocalizedString[];
   featured?: boolean;
   bestseller?: boolean;

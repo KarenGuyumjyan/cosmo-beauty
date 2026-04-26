@@ -3,6 +3,8 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations';
 import { sendOrderNotification } from '@/lib/telegram';
+import { buildParcelsFromOrderLines } from '@/lib/cdek/build-parcels';
+import { createCdekOrder } from '@/lib/cdek/service';
 
 export async function POST(req: Request) {
   try {
@@ -32,6 +34,32 @@ export async function POST(req: Request) {
         where: { id: order.id },
         data: { status: 'PAID', yookassaStatus: 'succeeded' } as Prisma.OrderUpdateInput,
       });
+
+      if (!order.cdekUuid && order.cityCode && order.pickupPointCode && order.tariffCode) {
+        try {
+          const cdek = await createCdekOrder({
+            orderNumber: order.id.slice(0, 12),
+            cityCode: order.cityCode,
+            pickupPointCode: order.pickupPointCode,
+            tariffCode: order.tariffCode,
+            recipientName: order.customerName,
+            recipientPhone: order.customerPhone,
+            recipientEmail: order.customerEmail,
+            parcels: buildParcelsFromOrderLines(order.items),
+          });
+
+          await prisma.order.update({
+            where: { id: order.id },
+            data: {
+              cdekUuid: cdek.uuid,
+              cdekTrackingNumber: cdek.trackingNumber,
+              cdekRawResponse: cdek.rawResponse as Prisma.InputJsonValue,
+            },
+          });
+        } catch (cdekError) {
+          console.error(`CDEK order creation failed for ${order.id}`, cdekError);
+        }
+      }
 
       await sendOrderNotification({
         orderId: order.id,

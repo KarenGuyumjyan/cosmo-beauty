@@ -1,4 +1,4 @@
-import type { OrderStatus, Product, ShippingMethod } from '@prisma/client';
+import type { OrderStatus, Product } from '@prisma/client';
 
 /**
  * Order row with line items and product rows — matches prisma.order.findFirst/findUnique
@@ -23,13 +23,22 @@ export type OrderWithItemsAndProduct = {
   customerEmail: string | null;
   address: string | null;
   city: string | null;
-  shippingMethod: ShippingMethod;
+  cityCode: number | null;
+  shippingMethod: string;
+  pickupPointCode: string | null;
+  pickupPointName: string | null;
+  pickupPointAddress: string | null;
+  tariffCode: number | null;
+  cdekPrice: number | null;
+  finalPrice: number | null;
   shippingCost: number;
   subtotal: number;
   total: number;
   status: OrderStatus;
   yookassaId: string | null;
   yookassaStatus: string | null;
+  cdekUuid: string | null;
+  cdekTrackingNumber: string | null;
   createdAt: Date;
   items: OrderItemWithProduct[];
 };

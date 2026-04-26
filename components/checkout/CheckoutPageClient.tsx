@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { ShoppingBag, ArrowRight, Truck, Store, Loader2, MapPin } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useCart } from '@/context/CartContext';
 import { createOrder } from '@/app/[locale]/checkout/actions';
 import type { Locale } from '@/lib/types';
-import type { ShippingMethod } from '@prisma/client';
+import type { CdekDeliverySelection, CdekParcel } from '@/lib/cdek/types';
+import CdekPickupDelivery from '@/components/checkout/CdekPickupDelivery';
 import {
   formatPhone,
   isValidRuPhone,
@@ -17,7 +18,6 @@ import {
 } from '@/lib/utils/phone';
 
 const CURRENCY = '₽';
-const PICKUP_ADDRESS = process.env.NEXT_PUBLIC_PICKUP_ADDRESS ?? '15 Baghramyan Ave, Yerevan';
 
 export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const t = useTranslations('checkout');
@@ -31,51 +31,19 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [shipping, setShipping] = useState<ShippingMethod>('SELF_PICKUP');
-  const [city, setCity] = useState('');
-  const [address, setAddress] = useState('');
-  const [deliveryCost, setDeliveryCost] = useState<number | null>(null);
-  const [calculatingDelivery, setCalculatingDelivery] = useState(false);
+  const [delivery, setDelivery] = useState<CdekDeliverySelection | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  const estimateDelivery = useCallback(async (c: string, a: string) => {
-    if (!c.trim() || !a.trim()) {
-      setDeliveryCost(null);
-      return;
-    }
-    setCalculatingDelivery(true);
-    try {
-      const res = await fetch('/api/delivery/estimate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ city: c, address: a }),
-      });
-      const data = await res.json();
-      setDeliveryCost(data.price ?? null);
-    } catch {
-      setDeliveryCost(null);
-    } finally {
-      setCalculatingDelivery(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (shipping !== 'YANDEX_DELIVERY') {
-      setDeliveryCost(null);
-      return;
-    }
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      estimateDelivery(city, address);
-    }, 600);
-    return () => clearTimeout(debounceRef.current);
-  }, [city, address, shipping, estimateDelivery]);
-
-  const shippingCost = shipping === 'SELF_PICKUP' ? 0 : (deliveryCost ?? 0);
+  const shippingCost = delivery?.finalPrice ?? 0;
   const total = subtotal + shippingCost;
+
+  const parcels: CdekParcel[] = items.map((item) => ({
+    weight: Math.max(1, (item.product.weightGrams ?? 100) * item.quantity),
+    length: Math.max(1, item.product.lengthCm ?? 20),
+    width: Math.max(1, item.product.widthCm ?? 20),
+    height: Math.max(1, item.product.heightCm ?? 10),
+  }));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -84,10 +52,8 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
     if (!name.trim()) return setError(t('errors.nameRequired'));
     if (!phone.trim()) return setError(t('errors.phoneRequired'));
     if (!isValidRuPhone(phone)) return setError(t('errors.phoneInvalid'));
-    if (shipping === 'YANDEX_DELIVERY') {
-      if (!city.trim()) return setError(t('errors.cityRequired'));
-      if (!address.trim()) return setError(t('errors.addressRequired'));
-    }
+    if (!delivery) return setError(t('errors.deliveryRequired'));
+    if (delivery.finalPrice <= 0) return setError(t('errors.deliveryPriceInvalid'));
 
     setSubmitting(true);
     try {
@@ -95,10 +61,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
         customerName: name,
         customerPhone: phone,
         customerEmail: email || undefined,
-        shippingMethod: shipping,
-        city: shipping === 'YANDEX_DELIVERY' ? city : undefined,
-        address: shipping === 'YANDEX_DELIVERY' ? address : undefined,
-        shippingCost,
+        delivery,
         items: items.map((i) => ({ productId: i.product.id, quantity: i.quantity })),
         locale,
       });
@@ -155,9 +118,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            {/* Left column: form */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Contact */}
               <div className="bg-white rounded-2xl border border-stone-100 p-6">
                 <h2 className="font-bold text-stone-900 text-lg mb-5">{t('contact')}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -203,94 +164,9 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                 </div>
               </div>
 
-              {/* Shipping method */}
-              <div className="bg-white rounded-2xl border border-stone-100 p-6">
-                <h2 className="font-bold text-stone-900 text-lg mb-5">{t('shipping')}</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShipping('YANDEX_DELIVERY')}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
-                      shipping === 'YANDEX_DELIVERY'
-                        ? 'border-rose-500 bg-rose-50'
-                        : 'border-stone-200 hover:border-stone-300'
-                    }`}
-                  >
-                    <Truck size={20} className={shipping === 'YANDEX_DELIVERY' ? 'text-rose-600' : 'text-stone-400'} />
-                    <div>
-                      <p className="font-semibold text-sm text-stone-800">{t('yandexDelivery')}</p>
-                      {deliveryCost !== null && shipping === 'YANDEX_DELIVERY' && (
-                        <p className="text-xs text-stone-500 mt-0.5">{deliveryCost.toLocaleString()} {CURRENCY}</p>
-                      )}
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShipping('SELF_PICKUP')}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
-                      shipping === 'SELF_PICKUP'
-                        ? 'border-rose-500 bg-rose-50'
-                        : 'border-stone-200 hover:border-stone-300'
-                    }`}
-                  >
-                    <Store size={20} className={shipping === 'SELF_PICKUP' ? 'text-rose-600' : 'text-stone-400'} />
-                    <div>
-                      <p className="font-semibold text-sm text-stone-800">{t('selfPickup')}</p>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Yandex Delivery address fields */}
-                {shipping === 'YANDEX_DELIVERY' && (
-                  <div className="mt-5 space-y-4">
-                    <h3 className="text-sm font-semibold text-stone-700">{t('deliveryAddress')}</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1.5">{t('city')} *</label>
-                        <input
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          placeholder={t('cityPlaceholder')}
-                          className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-1.5">{t('address')} *</label>
-                        <input
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          placeholder={t('addressPlaceholder')}
-                          className="w-full px-4 py-3 border border-stone-200 rounded-xl text-sm focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors"
-                        />
-                      </div>
-                    </div>
-                    {calculatingDelivery && (
-                      <p className="flex items-center gap-2 text-sm text-stone-500">
-                        <Loader2 size={14} className="animate-spin" /> {t('calculating')}
-                      </p>
-                    )}
-                    {!calculatingDelivery && deliveryCost !== null && (
-                      <p className="text-sm text-stone-700">
-                        {t('deliveryCost')}: <strong>{deliveryCost.toLocaleString()} {CURRENCY}</strong>
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Self-pickup address */}
-                {shipping === 'SELF_PICKUP' && (
-                  <div className="mt-5 flex items-start gap-3 bg-stone-50 rounded-xl p-4">
-                    <MapPin size={18} className="text-rose-500 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-stone-800">{t('pickupAddress')}</p>
-                      <p className="text-sm text-stone-500 mt-0.5">{PICKUP_ADDRESS}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <CdekPickupDelivery parcels={parcels} onChange={setDelivery} />
             </div>
 
-            {/* Right column: order summary */}
             <div className="bg-white rounded-2xl border border-stone-100 p-6 sticky top-24">
               <h2 className="font-bold text-stone-900 text-lg mb-5">{t('orderSummary')}</h2>
 
@@ -329,14 +205,19 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                 </div>
                 {shippingCost > 0 && (
                   <div className="flex justify-between text-stone-600">
-                    <span>{t('yandexDelivery')}</span>
+                    <span>CDEK (ПВЗ)</span>
                     <span className="font-medium">{shippingCost.toLocaleString()} {CURRENCY}</span>
                   </div>
                 )}
-                {shipping === 'SELF_PICKUP' && (
-                  <div className="flex justify-between text-stone-600">
-                    <span>{t('selfPickup')}</span>
-                    <span className="font-medium text-green-600">0 {CURRENCY}</span>
+                {delivery && (
+                  <div className="text-xs text-stone-500 border-t border-dashed border-stone-100 pt-2 mt-2">
+                    <p className="font-medium text-stone-600">{delivery.pickupPointName}</p>
+                    {delivery.pickupPointAddress && (
+                      <p className="leading-snug">{delivery.pickupPointAddress}</p>
+                    )}
+                    <p className="mt-1 text-stone-400">
+                      {delivery.city} · код ПВЗ: {delivery.pickupPointCode}
+                    </p>
                   </div>
                 )}
               </div>
@@ -356,8 +237,8 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
 
               <button
                 type="submit"
-                disabled={submitting || (shipping === 'YANDEX_DELIVERY' && calculatingDelivery)}
-                className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 disabled:opacity-60 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2"
+                disabled={submitting || !delivery || shippingCost <= 0}
+                className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed disabled:hover:bg-rose-600 disabled:active:scale-100 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <><Loader2 size={18} className="animate-spin" /> {t('processing')}</>
