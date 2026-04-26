@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { calculateQuote } from '@/lib/cdek/service';
+import { cdekErrorResponse } from '@/lib/cdek/errors';
 import type { CdekParcel } from '@/lib/cdek/types';
 
 type Body = {
@@ -40,6 +41,6 @@ export async function POST(req: Request) {
     return NextResponse.json(quote);
   } catch (error) {
     console.error('CDEK quote error', error);
-    return NextResponse.json({ error: 'Failed to calculate delivery' }, { status: 500 });
+    return cdekErrorResponse(error, 'Failed to calculate delivery');
   }
 }

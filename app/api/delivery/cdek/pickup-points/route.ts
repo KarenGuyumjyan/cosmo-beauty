@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPickupPoints } from '@/lib/cdek/service';
+import { cdekErrorResponse } from '@/lib/cdek/errors';
 
 export async function POST(req: Request) {
   let body: { cityCode?: unknown };
@@ -19,6 +20,6 @@ export async function POST(req: Request) {
     return NextResponse.json(points);
   } catch (error) {
     console.error('CDEK pickup points error', error);
-    return NextResponse.json({ error: 'Failed to load pickup points' }, { status: 500 });
+    return cdekErrorResponse(error, 'Failed to load pickup points');
   }
 }
