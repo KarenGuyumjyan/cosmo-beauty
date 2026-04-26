@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { searchCities } from '@/lib/cdek/service';
+import { cdekErrorResponse } from '@/lib/cdek/errors';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -11,6 +12,6 @@ export async function GET(req: Request) {
     return NextResponse.json(cities);
   } catch (error) {
     console.error('CDEK cities error', error);
-    return NextResponse.json({ error: 'Failed to load cities' }, { status: 500 });
+    return cdekErrorResponse(error, 'Failed to load cities');
   }
 }

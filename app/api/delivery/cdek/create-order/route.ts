@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createCdekOrder } from '@/lib/cdek/service';
+import { cdekErrorResponse } from '@/lib/cdek/errors';
 import type { CdekParcel } from '@/lib/cdek/types';
 
 type Body = {
@@ -65,6 +66,6 @@ export async function POST(req: Request) {
     return NextResponse.json(created);
   } catch (error) {
     console.error('CDEK create order error', error);
-    return NextResponse.json({ error: 'Failed to create CDEK order' }, { status: 500 });
+    return cdekErrorResponse(error, 'Failed to create CDEK order');
   }
 }

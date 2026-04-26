@@ -73,6 +73,21 @@ export async function cdekRequest<T>(
 
   if (!res.ok) {
     const text = await res.text();
+    const baseUrl = getBaseUrl();
+    const isProdHost = /api\.cdek\.ru/.test(baseUrl) && !/edu\.cdek\.ru/.test(baseUrl);
+
+    if (res.status === 410 || res.status === 401 || res.status === 403) {
+      const hint = isProdHost
+        ? 'CDEK returned ' +
+          res.status +
+          ' on production (api.cdek.ru). This typically means the CDEK_CLIENT_ID/SECRET are sandbox credentials, or the production contract is not active. ' +
+          'Switch CDEK_BASE_URL to https://api.edu.cdek.ru/v2 for the sandbox, or contact CDEK to provision production access for these credentials.'
+        : 'CDEK returned ' +
+          res.status +
+          ' on the sandbox (api.edu.cdek.ru). Verify CDEK_CLIENT_ID and CDEK_CLIENT_SECRET in .env match the integration account.';
+      throw new Error(`CDEK request failed (${path}): ${res.status} ${text}\n${hint}`);
+    }
+
     throw new Error(`CDEK request failed (${path}): ${res.status} ${text}`);
   }
 
