@@ -81,7 +81,7 @@ export default function Header({ locale }: HeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-stone-600 hover:text-rose-600 transition-colors relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:bg-rose-600 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
+                className="text-mg font-medium text-stone-600 hover:text-rose-600 transition-colors relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:bg-rose-600 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
               >
                 {link.label}
               </Link>

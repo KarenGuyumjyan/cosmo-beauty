@@ -149,6 +149,10 @@
   "checkout": {
     "title": "Checkout",
     "contact": "Contact Information",
+    "contactCdekIntro": "For CDEK pickup, the recipient at the counter must match these details: full name as on your ID, a valid Russian mobile number (+7), and email is recommended for order updates.",
+    "cdekNameHint": "Full name — as for CDEK / pickup verification.",
+    "cdekPhoneHint": "Russian mobile +7 — required by CDEK for SMS and pickup.",
+    "cdekEmailHint": "Recommended — receipts and tracking from CDEK / the store.",
     "name": "Full Name",
     "namePlaceholder": "John Doe",
     "phone": "Phone",
@@ -181,7 +185,33 @@
       "phoneInvalid": "Enter a valid 10-digit mobile number",
       "cityRequired": "City is required for delivery",
       "addressRequired": "Address is required for delivery",
+      "deliveryRequired": "Select a city or address, a CDEK pickup point, and wait for the delivery price.",
+      "deliveryPriceInvalid": "Delivery price must be greater than zero.",
       "generic": "Something went wrong. Please try again."
+    },
+    "cdek": {
+      "title": "CDEK delivery (pickup point)",
+      "priceLabel": "Cost:",
+      "addressLabel": "Address or city *",
+      "addressPlaceholder": "Enter address or city",
+      "suggestLoading": "Suggestions…",
+      "resolvingCity": "Matching city in CDEK…",
+      "multiCityTitle": "Several cities in CDEK — choose one:",
+      "shippingLabel": "CDEK (pickup)",
+      "pickupCodeLine": "{city} · PVZ code: {code}",
+      "pointsTitle": "Pickup points",
+      "searchPlaceholder": "Search by address or code",
+      "loadingPoints": "Loading pickup points…",
+      "noPoints": "No pickup points found.",
+      "noSearchMatches": "No points match your search.",
+      "mapUnavailable": "Map unavailable: {reason}",
+      "mapApiKeyMissing": "NEXT_PUBLIC_YANDEX_MAPS_API_KEY is not set",
+      "errors": {
+        "loadFailed": "Could not load CDEK data. Please try again.",
+        "cityNotFound": "City not found in CDEK for this address. Try another address or enter the city name.",
+        "resolveFailed": "Could not match a CDEK city.",
+        "noPickupPoints": "No pickup points for this city."
+      }
     }
   },
   "thankYou": {

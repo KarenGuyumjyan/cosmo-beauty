@@ -31,11 +31,6 @@ enum OrderStatus {
   CANCELLED
 }
 
-enum ShippingMethod {
-  YANDEX_DELIVERY
-  SELF_PICKUP
-}
-
 // ─── Catalog ───────────────────────────────────────────────────────────────
 
 model Product {
@@ -84,13 +79,23 @@ model Order {
   customerEmail  String?
   address        String?
   city           String?
-  shippingMethod ShippingMethod @default(SELF_PICKUP)
+  shippingMethod String         @default("")
+  cityCode       Int?
+  pickupPointCode String?
+  pickupPointName String?
+  pickupPointAddress String?
+  tariffCode     Int?
+  cdekPrice      Int?
+  finalPrice     Int?
   shippingCost   Int            @default(0)
   subtotal       Int            @default(0)
   total          Int
   status         OrderStatus    @default(PENDING)
   yookassaId     String?        @unique
   yookassaStatus String?
+  cdekUuid       String?
+  cdekTrackingNumber String?
+  cdekRawResponse Json?
   createdAt      DateTime       @default(now())
   items          OrderItem[]
 }

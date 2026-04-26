@@ -1,17 +1,14 @@
 'use server';
 
+import type { CdekDeliverySelection } from '@/lib/cdek/types';
 import { prisma } from '@/lib/prisma';
 import { createPayment } from '@/lib/yookassa';
-import type { ShippingMethod } from '@prisma/client';
 
 interface CheckoutInput {
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
-  shippingMethod: ShippingMethod;
-  city?: string;
-  address?: string;
-  shippingCost: number;
+  delivery: CdekDeliverySelection;
   items: { productId: string; quantity: number }[];
   locale: string;
 }
@@ -19,13 +16,15 @@ interface CheckoutInput {
 export async function createOrder(
   input: CheckoutInput
 ): Promise<{ error: string } | { paymentUrl: string; orderId: string }> {
-  const { customerName, customerPhone, customerEmail, shippingMethod, city, address, shippingCost, items, locale } =
-    input;
+  const { customerName, customerPhone, customerEmail, delivery, items, locale } = input;
 
   if (!customerName.trim()) return { error: 'Name is required' };
   if (!customerPhone.trim()) return { error: 'Phone is required' };
-  if (shippingMethod === 'YANDEX_DELIVERY' && (!city?.trim() || !address?.trim())) {
-    return { error: 'Address is required for delivery' };
+  if (!delivery.city || !delivery.pickupPointCode) {
+    return { error: 'CDEK pickup point is required' };
+  }
+  if (delivery.finalPrice <= 0) {
+    return { error: 'Delivery price must be greater than 0' };
   }
   if (!items.length) return { error: 'Cart is empty' };
 
@@ -61,6 +60,7 @@ export async function createOrder(
   });
 
   const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const shippingCost = delivery.finalPrice;
   const total = subtotal + shippingCost;
 
   const order = await prisma.order.create({
@@ -68,9 +68,16 @@ export async function createOrder(
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
       customerEmail: customerEmail?.trim() || null,
-      shippingMethod,
-      city: city?.trim() || null,
-      address: address?.trim() || null,
+      shippingMethod: 'CDEK_PICKUP',
+      city: delivery.city,
+      cityCode: delivery.cityCode,
+      address: delivery.pickupPointAddress,
+      pickupPointCode: delivery.pickupPointCode,
+      pickupPointName: delivery.pickupPointName,
+      pickupPointAddress: delivery.pickupPointAddress,
+      tariffCode: delivery.tariffCode,
+      cdekPrice: delivery.cdekPrice,
+      finalPrice: delivery.finalPrice,
       shippingCost,
       subtotal,
       total,
