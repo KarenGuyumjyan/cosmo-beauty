@@ -60,9 +60,7 @@ export default function CartPageClient({ locale }: CartPageClientProps) {
         >
           {t('title')}
         </h1>
-        <p className="text-stone-500 mb-10 text-sm">
-          {items.reduce((s, i) => s + i.quantity, 0)} {items.reduce((s, i) => s + i.quantity, 0) === 1 ? t('item', { count: 1 }) : t('items', { count: items.reduce((s, i) => s + i.quantity, 0) })}
-        </p>
+        <p className="text-stone-500 mb-10 text-sm">{t('items', { count: items.reduce((s, i) => s + i.quantity, 0) })}</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Items list */}

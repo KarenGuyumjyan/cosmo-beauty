@@ -142,7 +142,6 @@ export default function FilterPanel({
       {/* Results count */}
       <div className="pt-4 border-t border-stone-100">
         <p className="text-sm text-stone-500">
-          <span className="font-semibold text-rose-600">{totalResults}</span>{' '}
           {t('results', { count: totalResults })}
         </p>
       </div>
