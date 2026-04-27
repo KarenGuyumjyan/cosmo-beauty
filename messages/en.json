@@ -23,10 +23,22 @@
       "subtitle": "Our most-loved products"
     },
     "values": {
-      "quality":  { "title": "High Quality",          "desc": "Premium products, made with love." },
-      "natural":  { "title": "Natural Ingredients",   "desc": "Ethically sourced, cruelty-free formulations." },
-      "derma":    { "title": "Dermatologist Tested",  "desc": "Clinically proven for all skin types." },
-      "shipping": { "title": "Fast Shipping",         "desc": "Orders ship within 24 hours." }
+      "quality": {
+        "title": "High Quality",
+        "desc": "Premium products, made with love."
+      },
+      "natural": {
+        "title": "Natural Ingredients",
+        "desc": "Ethically sourced, cruelty-free formulations."
+      },
+      "derma": {
+        "title": "Dermatologist Tested",
+        "desc": "Clinically proven for all skin types."
+      },
+      "shipping": {
+        "title": "Fast Shipping",
+        "desc": "Orders ship within 24 hours."
+      }
     }
   },
   "catalog": {
@@ -162,6 +174,8 @@
     "securePayment": "Secure payment via YooKassa",
     "emptyCart": "Your cart is empty",
     "goToCart": "Go to Cart",
+    "cdekPickupPoint": "CDEK Pickup Point",
+    "yandexPickupPoint": "Yandex Pickup Point",
     "errors": {
       "nameRequired": "Name is required",
       "phoneRequired": "Phone is required",

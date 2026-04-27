@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
-import { ShoppingBag, ArrowRight, Loader2 } from 'lucide-react'
+import { ShoppingBag, ArrowRight, Loader2, PackageCheck } from 'lucide-react'
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { useCart } from '@/context/CartContext'
@@ -29,6 +29,9 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const [delivery, setDelivery] = useState<CdekDeliverySelection | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [selectedPickupType, setSelectedPickupType] = useState<
+    'cdek' | 'yandex'
+  >('cdek')
 
   const shippingCost = delivery?.finalPrice ?? 0
   const total = subtotal + shippingCost
@@ -84,6 +87,12 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
     } catch {
       setError(t('errors.generic'))
       setSubmitting(false)
+    }
+  }
+  const togglePickupType = (type: 'cdek' | 'yandex') => {
+    if (type !== selectedPickupType) {
+      setSelectedPickupType(type)
+      setDelivery(null)
     }
   }
 
@@ -185,8 +194,46 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                   </div>
                 </div>
               </div>
+              <div className='bg-white rounded-2xl border border-stone-100 p-6 flex gap-5'>
+                <button
+                  type='button'
+                  onClick={() => togglePickupType('cdek')}
+                  className={`rounded-2xl bg-stone-50 p-4 w-fit flex items-center gap-3 border transition ${
+                    selectedPickupType === 'cdek'
+                      ? 'border-rose-700'
+                      : 'border-transparent'
+                  }`}
+                >
+                  <div className='w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-stone-200 shrink-0'>
+                    <PackageCheck size={18} className='text-rose-600' />
+                  </div>
 
-              <CdekPickupDelivery parcels={parcels} onChange={setDelivery} />
+                  <p className='font-semibold text-stone-800'>
+                    {t('cdekPickupPoint')}
+                  </p>
+                </button>
+
+                <button
+                  type='button'
+                  onClick={() => togglePickupType('yandex')}
+                  className={`rounded-2xl bg-stone-50 p-4 w-fit flex items-center gap-3 border transition ${
+                    selectedPickupType === 'yandex'
+                      ? 'border-rose-700'
+                      : 'border-transparent'
+                  }`}
+                >
+                  <div className='w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-stone-200 shrink-0'>
+                    <PackageCheck size={18} className='text-rose-600' />
+                  </div>
+
+                  <p className='font-semibold text-stone-800'>
+                    {t('yandexPickupPoint')}
+                  </p>
+                </button>
+              </div>
+              {selectedPickupType === 'cdek' ? (
+                <CdekPickupDelivery parcels={parcels} onChange={setDelivery} />
+              ) : null}
             </div>
 
             <div className='bg-white rounded-2xl border border-stone-100 p-6 sticky top-24'>
