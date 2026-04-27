@@ -158,7 +158,6 @@
     "phone": "Հեռախոսահամար",
     "email": "Էլ. փոստ",
     "emailPlaceholder": "example@mail.com",
-    "emailOptional": "ոչ պարտադիր",
     "orderSummary": "Պատվերի մանրամասներ",
     "subtotal": "Ենթագումար",
     "total": "Ընդամենը",
@@ -170,6 +169,7 @@
     "errors": {
       "nameRequired": "Մուտքագրեք անունը",
       "phoneRequired": "Մուտքագրեք հեռախոսահամարը",
+      "emailRequired": "Մուտքագրեք էլ. փոստը",
       "phoneInvalid": "Մուտքագրեք վավեր 10 նիշ հեռախոսահամար",
       "deliveryRequired": "Ընտրեք քաղաք կամ հասցե, CDEK վերցման կետը և սպասեք առաքման գնի հաշվարկին։",
       "deliveryPriceInvalid": "Առաքման արժեքը պետք է մեծ լինի զրոյից։",

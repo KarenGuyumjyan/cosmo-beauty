@@ -154,7 +154,6 @@
     "phone": "Phone",
     "email": "Email",
     "emailPlaceholder": "john@example.com",
-    "emailOptional": "optional",
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "total": "Total",
@@ -166,6 +165,7 @@
     "errors": {
       "nameRequired": "Name is required",
       "phoneRequired": "Phone is required",
+      "emailRequired": "Email is required",
       "phoneInvalid": "Enter a valid 10-digit mobile number",
       "deliveryRequired": "Select a city or address, a CDEK pickup point, and wait for the delivery price.",
       "deliveryPriceInvalid": "Delivery price must be greater than zero.",

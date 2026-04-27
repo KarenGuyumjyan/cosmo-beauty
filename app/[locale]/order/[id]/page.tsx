@@ -1,7 +1,12 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
-import { fetchPayment } from '@/lib/yookassa';
+import {
+  cancelPendingOrderFromYooKassa,
+  finalizeOrderPaidViaYooKassa,
+} from '@/lib/orders/finalize-yookassa-payment';
+import { fetchPayment, validatePaymentMatchesOrder } from '@/lib/yookassa';
+import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations';
 import type { Metadata } from 'next';
 import ThankYouClient from './ThankYouClient';
 
@@ -23,25 +28,28 @@ export default async function ThankYouPage({ params }: Props) {
 
   if (!order) notFound();
 
-  // If order is still PENDING and has a yookassaId, check payment status directly
+  // If user returns before the webhook runs, sync from YooKassa API (same rules as webhook).
   if (order.status === 'PENDING' && order.yookassaId) {
     try {
       const payment = await fetchPayment(order.yookassaId);
-      if (payment && payment.status === 'succeeded') {
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { status: 'PAID', yookassaStatus: 'succeeded' },
-        });
-        order.status = 'PAID';
-      } else if (payment && payment.status === 'canceled') {
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { status: 'CANCELLED', yookassaStatus: 'canceled' },
-        });
-        order.status = 'CANCELLED';
+      const match = validatePaymentMatchesOrder(payment, order);
+      if (!match.ok) {
+        console.warn(
+          `[yookassa:return] Order ${order.id}: payment verification failed — ${match.reason}`,
+        );
+      } else if (payment.status === 'succeeded') {
+        const outcome = await finalizeOrderPaidViaYooKassa(order as OrderWithItemsAndProduct);
+        if (outcome === 'paid' || outcome === 'already_paid') {
+          order.status = 'PAID';
+        }
+      } else if (payment.status === 'canceled') {
+        const cancelled = await cancelPendingOrderFromYooKassa(order.id);
+        if (cancelled) {
+          order.status = 'CANCELLED';
+        }
       }
     } catch (e) {
-      console.error('Failed to check payment status:', e);
+      console.error(`[yookassa:return] Order ${order.id}: failed to sync payment from YooKassa`, e);
     }
   }
 

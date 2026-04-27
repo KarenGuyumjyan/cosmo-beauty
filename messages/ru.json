@@ -146,7 +146,6 @@
     "phone": "Телефон",
     "email": "Электронная почта",
     "emailPlaceholder": "ivan@example.com",
-    "emailOptional": "необязательно",
     "orderSummary": "Ваш заказ",
     "subtotal": "Подытог",
     "total": "Итого",
@@ -158,6 +157,7 @@
     "errors": {
       "nameRequired": "Введите имя",
       "phoneRequired": "Введите телефон",
+      "emailRequired": "Введите электронную почту",
       "phoneInvalid": "Введите корректный 10-значный номер",
       "deliveryRequired": "Выберите город или адрес, пункт выдачи СДЭК и дождитесь расчёта стоимости.",
       "deliveryPriceInvalid": "Стоимость доставки должна быть больше 0.",

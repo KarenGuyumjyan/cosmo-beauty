@@ -76,12 +76,12 @@ export default function Header({ locale }: HeaderProps) {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-8 font-[Playfair_Display,Playfair_Display_Fallback]">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-mg font-medium text-stone-600 hover:text-rose-600 transition-colors relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:bg-rose-600 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
+                className="text-lg font-medium text-stone-700 hover:text-rose-600 transition-colors relative after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-0.5 after:bg-rose-600 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200"
               >
                 {link.label}
               </Link>
@@ -126,7 +126,7 @@ export default function Header({ locale }: HeaderProps) {
               <ShoppingBag size={22} />
               {mounted && totalItems > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-rose-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {totalItems > 9 ? '9+' : totalItems}
+                  {totalItems}
                 </span>
               )}
             </Link>
@@ -146,12 +146,12 @@ export default function Header({ locale }: HeaderProps) {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="md:hidden bg-white border-t border-stone-100 shadow-lg animate-fade-in">
-          <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
+          <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1 font-[Playfair_Display,Playfair_Display_Fallback]">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-base font-medium text-stone-700 hover:text-rose-600 hover:bg-rose-50 px-3 py-2.5 rounded-lg transition-colors"
+                className="text-lg font-bold text-stone-700 hover:text-rose-600 hover:bg-rose-50 px-3 py-2.5 rounded-lg transition-colors"
               >
                 {link.label}
               </Link>
