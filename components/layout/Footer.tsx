@@ -19,7 +19,7 @@ export default function Footer() {
                 className="text-2xl font-bold text-white"
                 style={{ fontFamily: 'var(--font-display)' }}
               >
-                COSMO
+                MORENA COSMETICS
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-stone-400">{t('description')}</p>
