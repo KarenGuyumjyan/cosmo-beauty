@@ -166,8 +166,8 @@
     "securePayment": "Անվտանգ վճարում YooKassa-ով",
     "emptyCart": "Ձեր զամբյուղը դատարկ է",
     "goToCart": "Անցնել զամբյուղ",
-    "cdekPickupPoint": "CDEK ստացման կետ",
-    "yandexPickupPoint": "Yandex ստացման կետ",
+    "cdekPickupPoint": "CDEK Հ.Կ.",
+    "yandexPickupPoint": "Yandex Հ.Կ.",
     "errors": {
       "nameRequired": "Մուտքագրեք անունը",
       "phoneRequired": "Մուտքագրեք հեռախոսահամարը",

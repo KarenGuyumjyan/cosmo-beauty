@@ -5,14 +5,21 @@ import ProductGrid from '@/components/catalog/ProductGrid';
 import { getAllProducts } from '@/lib/db-products';
 import { categories } from '@/lib/data';
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.ru';
+
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'catalog' });
+  const title = t('title');
+  const description = t('subtitle');
   return {
-    title: t('title'),
-    description: t('subtitle'),
+    title,
+    description,
+    alternates: { canonical: `${BASE_URL}/${locale}/catalog` },
+    openGraph: { title, description, url: `${BASE_URL}/${locale}/catalog` },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 

@@ -7,6 +7,8 @@ import Footer from '@/components/layout/Footer';
 import type { Metadata } from 'next';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.ru';
+
 type Props = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
@@ -17,14 +19,19 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  await params;
+  const { locale } = await params;
   return {
     title: {
       default: 'Morena Cosmetics',
       template: '%s | Morena Cosmetics',
     },
     alternates: {
-      languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])),
+      canonical: `${BASE_URL}/${locale}`,
+      languages: Object.fromEntries(routing.locales.map((l) => [l, `${BASE_URL}/${l}`])),
+    },
+    openGraph: {
+      siteName: 'Morena Cosmetics',
+      locale: locale === 'ru' ? 'ru_RU' : locale === 'hy' ? 'hy_AM' : 'en_US',
     },
   };
 }

@@ -8,14 +8,35 @@ import ContactForm from '@/components/home/ContactForm';
 import { getFeaturedAndBestsellers } from '@/lib/db-products';
 import { Locale } from '@/lib/types';
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.ru';
+
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'home.hero' });
+  const title = 'Morena Cosmetics — ' + t('title');
+  const description =
+    locale === 'ru'
+      ? 'Morena Cosmetics — интернет-магазин премиальной косметики. Блеск для губ, хайлайтер, румяна и многое другое с доставкой по России.'
+      : t('subtitle');
   return {
-    title: 'Morena Cosmetics – ' + t('title'),
-    description: t('subtitle'),
+    title,
+    description,
+    alternates: {
+      canonical: `${BASE_URL}/${locale}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${BASE_URL}/${locale}`,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   };
 }
 
@@ -24,8 +45,21 @@ export default async function HomePage({ params }: Props) {
   const l = locale as Locale;
   const { featured, bestsellers } = await getFeaturedAndBestsellers();
 
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Morena Cosmetics',
+    url: `${BASE_URL}/${locale}`,
+    inLanguage: locale,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+
       {/* Hero video banner */}
       <VideoHero />
 
