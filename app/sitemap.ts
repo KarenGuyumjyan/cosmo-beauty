@@ -7,14 +7,24 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.r
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const locales = routing.locales;
 
-  // Static pages
-  const staticPages = ['', '/catalog', '/about'];
-  const staticEntries: MetadataRoute.Sitemap = staticPages.flatMap((path) =>
+  // Static pages — one canonical entry per locale with hreflang alternates
+  const staticPages = [
+    { path: '', changeFrequency: 'daily' as const, priority: 1.0 },
+    { path: '/catalog', changeFrequency: 'weekly' as const, priority: 0.8 },
+    { path: '/about', changeFrequency: 'monthly' as const, priority: 0.6 },
+  ];
+
+  const staticEntries: MetadataRoute.Sitemap = staticPages.flatMap(({ path, changeFrequency, priority }) =>
     locales.map((locale) => ({
       url: `${BASE_URL}/${locale}${path}`,
       lastModified: new Date(),
-      changeFrequency: path === '' ? 'daily' : 'weekly',
-      priority: path === '' ? 1.0 : 0.8,
+      changeFrequency,
+      priority,
+      alternates: {
+        languages: Object.fromEntries(
+          locales.map((l) => [l, `${BASE_URL}/${l}${path}`])
+        ),
+      },
     }))
   );
 
@@ -28,8 +38,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     locales.map((locale) => ({
       url: `${BASE_URL}/${locale}/product/${p.id}`,
       lastModified: p.updatedAt,
-      changeFrequency: 'weekly',
+      changeFrequency: 'weekly' as const,
       priority: 0.7,
+      alternates: {
+        languages: Object.fromEntries(
+          locales.map((l) => [l, `${BASE_URL}/${l}/product/${p.id}`])
+        ),
+      },
     }))
   );
 

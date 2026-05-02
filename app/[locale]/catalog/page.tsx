@@ -30,7 +30,45 @@ export default async function CatalogPage({ params }: Props) {
   const products = await getAllProducts();
   const allSizes = [...new Set(products.map((p) => p.size))].sort();
 
+  const l = locale as Locale;
+  const homeUrl = `${BASE_URL}/${locale}`;
+  const catalogUrl = `${BASE_URL}/${locale}/catalog`;
+  const HOME_LABELS: Record<string, string> = { ru: '\u0413\u043b\u0430\u0432\u043d\u0430\u044f', en: 'Home', hy: '\u0533\u056c\u056d\u0561\u057e\u0578\u0580' };
+  const homeLabel = HOME_LABELS[locale] ?? 'Home';
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: homeLabel, item: homeUrl },
+      { '@type': 'ListItem', position: 2, name: t('title'), item: catalogUrl },
+    ],
+  };
+
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: t('title'),
+    url: catalogUrl,
+    numberOfItems: products.length,
+    itemListElement: products.slice(0, 20).map((product, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      url: `${BASE_URL}/${locale}/product/${product.id}`,
+      name: product.name[l],
+    })),
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
     <div className="pt-10">
       {/* Page header */}
       <div
@@ -57,5 +95,6 @@ export default async function CatalogPage({ params }: Props) {
         categories={categories}
       />
     </div>
+    </>
   );
 }

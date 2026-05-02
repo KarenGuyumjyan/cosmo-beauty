@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 import { Product, Locale } from '@/lib/types';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -93,13 +94,13 @@ export default function ProductCarousel({
 
         {/* View All CTA */}
         <div className="text-center mt-10">
-          <a
-            href={`/${locale}/catalog`}
+          <Link
+            href="/catalog"
             className="inline-flex items-center gap-2 border border-stone-200 hover:border-rose-400 hover:text-rose-600 text-stone-600 font-medium px-8 py-3 rounded-full text-sm transition-all duration-200"
           >
             {tHome('viewAll')}
             <ChevronRight size={16} />
-          </a>
+          </Link>
         </div>
       </div>
     </section>

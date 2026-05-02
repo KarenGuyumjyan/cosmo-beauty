@@ -35,7 +35,7 @@ export default function CategoryStrip({ locale }: CategoryStripProps) {
             <div className="relative w-full overflow-hidden rounded-t-2xl bg-stone-100" style={{ aspectRatio: '1 / 1' }}>
               <Image
                 src={cat.image}
-                alt={cat.label.en}
+                alt={cat.label[l as keyof typeof cat.label]}
                 fill
                 sizes="148px"
                 className="object-cover group-hover:scale-105 transition-transform duration-300"

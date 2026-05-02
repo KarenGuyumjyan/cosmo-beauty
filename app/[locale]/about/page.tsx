@@ -6,11 +6,17 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.r
 
 type Props = { params: Promise<{ locale: string }> };
 
+const ABOUT_DESCRIPTIONS: Record<string, string> = {
+  ru: 'Узнайте о Morena Cosmetics — бренде премиальной косметики. Наша миссия: доступная роскошь и уверенность в красоте для каждого.',
+  en: 'Learn about Morena Cosmetics — a premium beauty brand. Our mission: accessible luxury and confidence through ethically-sourced makeup.',
+  hy: 'Ծանոթացեք Morena Cosmetics-ին — պրեմիում կոսմետիկայի ապրանքանիշ, որի առաքելությունն է մատչելի շքեղությունն ու վստահությունն ամենքի համար։',
+};
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'about' });
   const title = t('title');
-  const description = t('story');
+  const description = ABOUT_DESCRIPTIONS[locale] ?? ABOUT_DESCRIPTIONS.en;
   return {
     title,
     description,
@@ -52,7 +58,35 @@ export default async function AboutPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: 'about' });
   const tBlog = await getTranslations({ locale, namespace: 'about.blog' });
 
+  const localBusinessJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'OnlineStore',
+    '@id': `${BASE_URL}/#organization`,
+    name: 'Morena Cosmetics',
+    url: BASE_URL,
+    telephone: '+37411234567',
+    email: 'hello@cosmo.beauty',
+    description: ABOUT_DESCRIPTIONS[locale] ?? ABOUT_DESCRIPTIONS.en,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '15 Baghramyan Ave',
+      addressLocality: 'Yerevan',
+      addressCountry: 'AM',
+    },
+    sameAs: [
+      'https://instagram.com',
+      'https://facebook.com',
+      'https://tiktok.com',
+    ],
+    priceRange: '₽₽',
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
     <div className="pt-10">
       {/* Hero */}
       <section
@@ -238,5 +272,6 @@ export default async function AboutPage({ params }: Props) {
         </div>
       </section>
     </div>
+    </>
   );
 }

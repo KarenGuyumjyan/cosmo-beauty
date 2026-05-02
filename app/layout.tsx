@@ -33,6 +33,21 @@ export const metadata: Metadata = {
   },
   description:
     'Morena Cosmetics — интернет-магазин премиальной косметики. Блеск для губ, хайлайтер, румяна, консилер и многое другое с доставкой по России.',
+  keywords: [
+    'Morena Cosmetics',
+    'косметика',
+    'блеск для губ',
+    'хайлайтер',
+    'румяна',
+    'консилер',
+    'карандаш для губ',
+    'cosmetics',
+    'makeup',
+    'lip gloss',
+    'highlighter',
+    'blush',
+    'concealer',
+  ],
   openGraph: {
     type: 'website',
     siteName: 'Morena Cosmetics',
@@ -45,6 +60,13 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large',
+      'max-video-preview': -1,
+    },
   },
 };
 
@@ -59,10 +81,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': `${BASE_URL}/#organization`,
     name: 'Morena Cosmetics',
     url: BASE_URL,
-    logo: `${BASE_URL}/logo.png`,
-    sameAs: [],
+    logo: {
+      '@type': 'ImageObject',
+      url: `${BASE_URL}/logo.png`,
+    },
+    description:
+      'Morena Cosmetics — premium makeup brand offering lip gloss, highlighters, blush, concealers and more.',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+37411234567',
+      contactType: 'customer service',
+      email: 'hello@cosmo.beauty',
+      availableLanguage: ['Russian', 'English', 'Armenian'],
+    },
+    sameAs: [
+      'https://instagram.com',
+      'https://facebook.com',
+      'https://tiktok.com',
+    ],
   };
 
   return (

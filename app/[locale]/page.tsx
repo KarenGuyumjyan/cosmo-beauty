@@ -48,9 +48,18 @@ export default async function HomePage({ params }: Props) {
   const websiteJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${BASE_URL}/#website`,
     name: 'Morena Cosmetics',
-    url: `${BASE_URL}/${locale}`,
-    inLanguage: locale,
+    url: BASE_URL,
+    inLanguage: locale === 'ru' ? 'ru-RU' : locale === 'hy' ? 'hy-AM' : 'en-US',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${BASE_URL}/${locale}/catalog?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
   };
 
   return (
