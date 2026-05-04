@@ -13,6 +13,7 @@ export const SKU_PREFIX_BY_CATEGORY: Record<ProductCategory, string> = {
   eyeshadow_palette: 'EP',
   setting_spray:     'SS',
   false_eyelashes:   'FE',
+  makeup_fixer:      'MF',
 };
 
 function escapeRegExp(s: string) {

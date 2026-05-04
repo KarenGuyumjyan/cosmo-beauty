@@ -14,6 +14,7 @@ const SKU_PREFIX: Record<string, string> = {
   eyeshadow_palette: 'EP',
   setting_spray:     'SS',
   false_eyelashes:   'FE',
+  makeup_fixer:      'MF',
 };
 
 async function nextSku(category: string): Promise<string> {

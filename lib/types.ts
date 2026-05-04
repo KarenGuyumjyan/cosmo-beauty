@@ -17,7 +17,8 @@ export type Category =
   | 'concealer'
   | 'eyeshadow_palette'
   | 'setting_spray'
-  | 'false_eyelashes';
+  | 'false_eyelashes'
+  | 'makeup_fixer';
 
 export interface Product {
   id: string;

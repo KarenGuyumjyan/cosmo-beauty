@@ -11,7 +11,7 @@ CREATE TYPE "public"."DeliveryProvider" AS ENUM ('CDEK');
 CREATE TYPE "public"."OrderStatus" AS ENUM ('PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED');
 
 -- CreateEnum
-CREATE TYPE "public"."ProductCategory" AS ENUM ('cosmetic_sponges', 'lip_liner', 'blush', 'stick', 'lip_gloss', 'highlighter', 'concealer', 'eyeshadow_palette', 'setting_spray', 'false_eyelashes');
+CREATE TYPE "public"."ProductCategory" AS ENUM ('cosmetic_sponges', 'lip_liner', 'blush', 'stick', 'lip_gloss', 'highlighter', 'concealer', 'eyeshadow_palette', 'setting_spray', 'false_eyelashes', 'makeup_fixer');
 
 -- CreateEnum
 CREATE TYPE "public"."ShippingMethod" AS ENUM ('YANDEX_DELIVERY', 'SELF_PICKUP', 'CDEK_PICKUP_POINT');

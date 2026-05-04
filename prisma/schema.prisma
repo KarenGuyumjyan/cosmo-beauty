@@ -21,6 +21,7 @@ enum ProductCategory {
   eyeshadow_palette
   setting_spray
   false_eyelashes
+  makeup_fixer
 }
 
 enum OrderStatus {
