@@ -94,7 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       '@type': 'ContactPoint',
       telephone: '+37411234567',
       contactType: 'customer service',
-      email: 'hello@cosmo.beauty',
+      email: 'morena_studio@mail.ru',
       availableLanguage: ['Russian', 'English', 'Armenian'],
     },
     sameAs: [

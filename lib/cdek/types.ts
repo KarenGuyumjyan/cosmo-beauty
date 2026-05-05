@@ -3,6 +3,7 @@ export type CdekCity = {
   city: string;
   region?: string;
   country?: string;
+  country_code?: string;
 };
 
 export type CdekPickupPoint = {

@@ -2,29 +2,32 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Phone, User, CheckCircle2 } from 'lucide-react';
+import { Phone, User, CheckCircle2, MessageSquare } from 'lucide-react';
 import {
   formatPhone,
   isValidRuPhone,
   RU_PHONE_DISPLAY_MAX_LENGTH,
   RU_PHONE_PREFIX,
 } from '@/lib/utils/phone';
+import { submitContactForm } from '@/app/[locale]/actions/contact';
 
 export default function ContactForm() {
   const t = useTranslations('contactForm');
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhone(formatPhone(e.target.value));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
     if (!isValidRuPhone(phone)) return;
+    await submitContactForm(name.trim(), phone.trim(), message.trim() || undefined);
     setSubmitted(true);
   };
 
@@ -93,6 +96,21 @@ export default function ContactForm() {
                 placeholder={`${RU_PHONE_PREFIX} (___) ___-__-__`}
                 maxLength={RU_PHONE_DISPLAY_MAX_LENGTH}
                 className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-stone-200 text-sm text-stone-800 placeholder-stone-400 bg-stone-50 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors"
+              />
+            </div>
+
+            {/* Message */}
+            <div className="relative">
+              <MessageSquare
+                size={16}
+                className="absolute left-4 top-4 text-stone-400 pointer-events-none"
+              />
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={t('messagePlaceholder')}
+                rows={3}
+                className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-stone-200 text-sm text-stone-800 placeholder-stone-400 bg-stone-50 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors resize-none"
               />
             </div>
 

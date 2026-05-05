@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { Instagram, Facebook, Youtube, Mail, Phone, MapPin } from 'lucide-react';
+import { Instagram, Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
   const t = useTranslations('footer');
@@ -33,27 +33,9 @@ export default function Footer() {
               >
                 <Instagram size={16} />
               </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-stone-800 flex items-center justify-center text-stone-400 hover:bg-rose-600 hover:text-white transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook size={16} />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-stone-800 flex items-center justify-center text-stone-400 hover:bg-rose-600 hover:text-white transition-colors"
-                aria-label="YouTube"
-              >
-                <Youtube size={16} />
-              </a>
               {/* TikTok icon (lucide doesn't have one) */}
               <a
-                href="https://tiktok.com"
+                href="https://www.tiktok.com/@morena_cosmetics_"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-stone-800 flex items-center justify-center text-stone-400 hover:bg-rose-600 hover:text-white transition-colors"
@@ -98,8 +80,8 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2.5 text-sm text-stone-400">
                 <Mail size={15} className="mt-0.5 shrink-0 text-rose-400" />
-                <a href="mailto:hello@cosmo.beauty" className="hover:text-rose-400 transition-colors">
-                  hello@cosmo.beauty
+                <a href="mailto:morena_studio@mail.ru" className="hover:text-rose-400 transition-colors">
+                  morena_studio@mail.ru
                 </a>
               </li>
               <li className="flex items-start gap-2.5 text-sm text-stone-400">
@@ -110,7 +92,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-2.5 text-sm text-stone-400">
                 <MapPin size={15} className="mt-0.5 shrink-0 text-rose-400" />
-                <span>15 Baghramyan Ave, Yerevan</span>
+                <span>Moscow</span>
               </li>
             </ul>
           </div>

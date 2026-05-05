@@ -22,13 +22,10 @@ export default function Header({ locale }: HeaderProps) {
   const { totalItems } = useCart();
   const pathname = usePathname();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
-
-  useEffect(() => { setMounted(true); }, []);
 
   // Close mobile menu when navigating to a new page
   if (prevPathname !== pathname) {
@@ -124,7 +121,7 @@ export default function Header({ locale }: HeaderProps) {
               aria-label="Cart"
             >
               <ShoppingBag size={22} />
-              {mounted && totalItems > 0 && (
+              {totalItems > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-rose-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {totalItems}
                 </span>

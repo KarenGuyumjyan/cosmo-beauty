@@ -43,6 +43,6 @@ export async function POST(req: Request) {
     return NextResponse.json(quote);
   } catch (error) {
     console.error('CDEK quote error', error);
-    return cdekErrorResponse(error, 'Failed to calculate delivery');
+    return cdekErrorResponse(error, 'Пункты выдачи для этого города не найдены.');
   }
 }

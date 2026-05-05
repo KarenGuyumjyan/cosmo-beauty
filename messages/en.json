@@ -104,6 +104,7 @@
     "story": "Morena Cosmetics was founded with a single belief: everyone deserves to feel confident and beautiful. We source only the finest ingredients and craft each product with care, ensuring luxury that's accessible to all.",
     "mission": {
       "title": "Our Mission",
+      "heading": "Beauty with Purpose",
       "text": "To empower people through premium, ethically-sourced beauty products that celebrate individuality."
     },
     "values": {
@@ -115,9 +116,12 @@
     },
     "contact": {
       "title": "Contact Us",
-      "email": "hello@cosmo.beauty",
+      "emailLabel": "Email",
+      "phoneLabel": "Phone",
+      "addressLabel": "Address",
+      "email": "morena_studio@mail.ru",
       "phone": "+374 11 234 567",
-      "address": "15 Baghramyan Ave, Yerevan, Armenia"
+      "address": "Moscow"
     },
     "social": {
       "title": "Follow Us",
@@ -138,6 +142,7 @@
     "subtitle": "Leave your name and phone number - our team will reach out to answer any questions.",
     "namePlaceholder": "Your full name",
     "phonePlaceholder": "Phone number",
+    "messagePlaceholder": "Your message (optional)",
     "submit": "Send Application",
     "success": "Your application has been accepted!",
     "successSub": "We'll get in touch with you very soon. 🌸"
@@ -191,6 +196,7 @@
       "priceLabel": "Delivery Cost:",
       "cityLabel": "City *",
       "cityPlaceholder": "Start typing a city, e.g. Moscow",
+      "citySearchPlaceholder": "Search city…",
       "resolvingCity": "Searching CDEK cities…",
       "multiCityTitle": "Several cities in CDEK — choose one:",
       "pointsTitle": "Pickup points",
@@ -222,6 +228,13 @@
     "shipping": "Shipping",
     "total": "Total",
     "continueShopping": "Continue Shopping"
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page Not Found",
+    "description": "Looks like this page has moved or no longer exists. You may have followed an outdated link.",
+    "backHome": "Back to Home",
+    "catalog": "Browse Catalog"
   },
   "common": {
     "loading": "Loading...",

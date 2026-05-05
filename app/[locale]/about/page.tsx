@@ -65,7 +65,7 @@ export default async function AboutPage({ params }: Props) {
     name: 'Morena Cosmetics',
     url: BASE_URL,
     telephone: '+37411234567',
-    email: 'hello@cosmo.beauty',
+    email: 'morena_studio@mail.ru',
     description: ABOUT_DESCRIPTIONS[locale] ?? ABOUT_DESCRIPTIONS.en,
     address: {
       '@type': 'PostalAddress',
@@ -118,7 +118,7 @@ export default async function AboutPage({ params }: Props) {
                 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-5"
                 style={{ fontFamily: 'var(--font-display)' }}
               >
-                Beauty with Purpose
+                {t('mission.heading')}
               </h2>
               <p className="text-stone-600 leading-relaxed text-lg">{t('mission.text')}</p>
             </div>
@@ -200,14 +200,14 @@ export default async function AboutPage({ params }: Props) {
               </h2>
               <div className="space-y-5">
                 <a
-                  href="mailto:hello@cosmo.beauty"
+                  href="mailto:morena_studio@mail.ru"
                   className="flex items-center gap-4 group"
                 >
                   <div className="w-12 h-12 rounded-xl bg-rose-600/20 flex items-center justify-center text-rose-400 group-hover:bg-rose-600 group-hover:text-white transition-colors shrink-0">
                     <Mail size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-stone-500 uppercase tracking-wider mb-0.5">Email</p>
+                    <p className="text-xs text-stone-500 uppercase tracking-wider mb-0.5">{t('contact.emailLabel')}</p>
                     <p className="text-stone-300 group-hover:text-rose-300 transition-colors">{t('contact.email')}</p>
                   </div>
                 </a>
@@ -216,7 +216,7 @@ export default async function AboutPage({ params }: Props) {
                     <Phone size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-stone-500 uppercase tracking-wider mb-0.5">Phone</p>
+                    <p className="text-xs text-stone-500 uppercase tracking-wider mb-0.5">{t('contact.phoneLabel')}</p>
                     <p className="text-stone-300 group-hover:text-rose-300 transition-colors">{t('contact.phone')}</p>
                   </div>
                 </a>
@@ -225,7 +225,7 @@ export default async function AboutPage({ params }: Props) {
                     <MapPin size={20} />
                   </div>
                   <div>
-                    <p className="text-xs text-stone-500 uppercase tracking-wider mb-0.5">Address</p>
+                    <p className="text-xs text-stone-500 uppercase tracking-wider mb-0.5">{t('contact.addressLabel')}</p>
                     <p className="text-stone-300">{t('contact.address')}</p>
                   </div>
                 </div>
@@ -243,7 +243,6 @@ export default async function AboutPage({ params }: Props) {
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { icon: <Instagram size={22} />, label: 'Instagram', href: 'https://www.instagram.com/morena_cosmetics__/', color: 'hover:bg-pink-600' },
-                  { icon: <Facebook size={22} />, label: 'Facebook', href: 'https://facebook.com', color: 'hover:bg-blue-600' },
                   {
                     icon: (
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
@@ -251,7 +250,7 @@ export default async function AboutPage({ params }: Props) {
                       </svg>
                     ),
                     label: 'TikTok',
-                    href: 'https://tiktok.com',
+                    href: 'https://www.tiktok.com/@morena_cosmetics_',
                     color: 'hover:bg-stone-700',
                   },
                 ].map(({ icon, label, href, color }) => (

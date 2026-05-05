@@ -102,6 +102,43 @@ export async function searchCities(query: string): Promise<CdekCity[]> {
   return results
 }
 
+export async function listCities(size = 200): Promise<CdekCity[]> {
+  const raw = await cdekRequest<unknown>(
+    `/location/cities?country_codes=RU&size=${Math.max(1, Math.min(size, 500))}`,
+  )
+
+  let rows: CdekCityApiRow[] = []
+  if (Array.isArray(raw)) {
+    rows = raw as CdekCityApiRow[]
+  } else if (raw && typeof raw === 'object') {
+    const asObj = raw as Record<string, unknown>
+    const inner = asObj.cities ?? asObj.data ?? asObj.items
+    rows = Array.isArray(inner) ? (inner as CdekCityApiRow[]) : []
+  }
+
+  const seen = new Set<number>()
+  const cities: CdekCity[] = []
+
+  for (const row of rows) {
+    if (!row.city) continue
+    const code = Number(row.code)
+    if (!Number.isFinite(code) || code === 0 || seen.has(code)) continue
+    seen.add(code)
+    cities.push({
+      code,
+      city: row.city,
+      region: row.region,
+      country: row.country ?? row.country_code,
+    })
+  }
+
+  return cities.sort((a, b) => {
+    const byCity = a.city.localeCompare(b.city, 'ru')
+    if (byCity !== 0) return byCity
+    return (a.region ?? '').localeCompare(b.region ?? '', 'ru')
+  })
+}
+
 export async function getPickupPoints(
   cityCode: number,
 ): Promise<CdekPickupPoint[]> {

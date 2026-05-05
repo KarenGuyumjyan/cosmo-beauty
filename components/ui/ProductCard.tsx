@@ -23,7 +23,6 @@ export default function ProductCard({
   const t = useTranslations('catalog')
   const { addItem } = useCart()
   const [added, setAdded] = useState(false)
-  const [wishlisted, setWishlisted] = useState(false)
 
   const name = product.name[locale]
   const price = product.discountedPrice ?? product.price
@@ -75,23 +74,6 @@ export default function ProductCard({
               </span>
             )}
           </div>
-
-          {/* Wishlist */}
-          <button
-            onClick={(e) => {
-              e.preventDefault()
-              setWishlisted(!wishlisted)
-            }}
-            className='absolute top-1.5 right-1.5 md:top-3 md:right-3 w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white'
-            aria-label='Add to wishlist'
-          >
-            <Heart
-              size={12}
-              className={
-                wishlisted ? 'fill-rose-500 text-rose-500' : 'text-stone-400'
-              }
-            />
-          </button>
 
           {/* Out of stock overlay */}
           {!product.stockQuantity && (
