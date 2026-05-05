@@ -1,32 +1,40 @@
-'use server';
+'use server'
 
-import type { CdekDeliverySelection } from '@/lib/cdek/types';
-import { prisma } from '@/lib/prisma';
-import { createPayment } from '@/lib/yookassa';
+import type { CdekDeliverySelection } from '@/lib/cdek/types'
+import { createCdekOrder } from '@/lib/cdek'
+import { prisma } from '@/lib/prisma'
+import { createPayment } from '@/lib/yookassa'
 
 interface CheckoutInput {
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
-  delivery: CdekDeliverySelection;
-  items: { productId: string; quantity: number }[];
-  locale: string;
+  customerName: string
+  customerPhone: string
+  customerEmail: string
+  delivery: CdekDeliverySelection
+  items: { productId: string; quantity: number }[]
+  locale: string
 }
 
 export async function createOrder(
-  input: CheckoutInput
+  input: CheckoutInput,
 ): Promise<{ error: string } | { paymentUrl: string; orderId: string }> {
-  const { customerName, customerPhone, customerEmail, delivery, items, locale } = input;
+  const {
+    customerName,
+    customerPhone,
+    customerEmail,
+    delivery,
+    items,
+    locale,
+  } = input
 
-  if (!customerName.trim()) return { error: 'Name is required' };
-  if (!customerPhone.trim()) return { error: 'Phone is required' };
+  if (!customerName.trim()) return { error: 'Name is required' }
+  if (!customerPhone.trim()) return { error: 'Phone is required' }
   if (!delivery.city || !delivery.pickupPointCode) {
-    return { error: 'CDEK pickup point is required' };
+    return { error: 'CDEK pickup point is required' }
   }
   if (delivery.finalPrice <= 0) {
-    return { error: 'Delivery price must be greater than 0' };
+    return { error: 'Delivery price must be greater than 0' }
   }
-  if (!items.length) return { error: 'Cart is empty' };
+  if (!items.length) return { error: 'Cart is empty' }
 
   const products = await prisma.product.findMany({
     where: { id: { in: items.map((i) => i.productId) } },
@@ -37,37 +45,39 @@ export async function createOrder(
       stockQuantity: true,
       nameEn: true,
     },
-  });
+  })
 
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  const productMap = new Map(products.map((p) => [p.id, p]))
 
   for (const item of items) {
-    const p = productMap.get(item.productId);
-    if (!p) return { error: `Product not found` };
-    if (p.stockQuantity <= 0) return { error: `${p.nameEn} is out of stock` };
+    const p = productMap.get(item.productId)
+    if (!p) return { error: `Product not found` }
+    if (p.stockQuantity <= 0) return { error: `${p.nameEn} is out of stock` }
     if (item.quantity > p.stockQuantity) {
-      return { error: `${p.nameEn}: only ${p.stockQuantity} in stock (requested ${item.quantity})` };
+      return {
+        error: `${p.nameEn}: only ${p.stockQuantity} in stock (requested ${item.quantity})`,
+      }
     }
   }
 
   const orderItems = items.map((item) => {
-    const p = productMap.get(item.productId)!;
+    const p = productMap.get(item.productId)!
     return {
       productId: p.id,
       quantity: item.quantity,
       price: p.discountedPrice ?? p.price,
-    };
-  });
+    }
+  })
 
-  const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const shippingCost = delivery.finalPrice;
-  const total = subtotal + shippingCost;
+  const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const shippingCost = delivery.finalPrice
+  const total = subtotal + shippingCost
 
   const order = await prisma.order.create({
     data: {
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
-      customerEmail: customerEmail?.trim() || null,
+      customerEmail: customerEmail.trim(),
       shippingMethod: 'CDEK_PICKUP',
       city: delivery.city,
       cityCode: delivery.cityCode,
@@ -84,10 +94,10 @@ export async function createOrder(
       status: 'PENDING',
       items: { create: orderItems },
     },
-  });
+  })
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000';
-  const returnUrl = `${baseUrl}/${locale}/order/${order.id}`;
+  const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
+  const returnUrl = `${baseUrl}/${locale}/order/${order.id}`
 
   try {
     const payment = await createPayment({
@@ -95,29 +105,76 @@ export async function createOrder(
       orderId: order.id,
       returnUrl,
       description: `Morena Cosmetics order #${order.id.slice(0, 8)}`,
-    });
+    })
 
-    if(!payment){
-      throw new Error('Payment creation failed: no response from payment gateway');
+    if (!payment) {
+      throw new Error(
+        'Payment creation failed: no response from payment gateway',
+      )
     }
 
     await prisma.order.update({
       where: { id: order.id },
       data: { yookassaId: payment.id, yookassaStatus: payment.status },
-    });
+    })
 
-    const confirmUrl = payment.confirmation?.confirmation_url;
-    if (!confirmUrl) {
-      return { error: 'Payment gateway did not return a redirect URL' };
+    // Register order with CDEK
+    try {
+      const cdekResponse = await createCdekOrder({
+        tariff_code: delivery.tariffCode,
+        delivery_point: delivery.pickupPointCode,
+        recipient: {
+          name: customerName.trim(),
+          phones: [{ number: customerPhone.trim() }],
+          email: customerEmail?.trim(),
+        },
+        from_location: {
+          address: process.env.CDEK_SENDER_ADDRESS ?? 'Москва',
+          code: Number(process.env.CDEK_SENDER_CITY_CODE) || 44,
+        },
+        services: [{ code: 'INSURANCE', parameter: 0 }],
+        packages: [
+          {
+            number: order.id.slice(0, 8),
+            weight: orderItems.reduce((sum, i) => sum + i.quantity * 100, 0), // grams
+            items: orderItems.map((item) => {
+              const p = productMap.get(item.productId)!
+              return {
+                name: p.nameEn,
+                ware_key: item.productId.slice(0, 20),
+                weight: 100,
+                amount: item.quantity,
+                cost: item.price,
+                payment: { value: 0 },
+              }
+            }),
+          },
+        ],
+      })
+
+      const cdekUuid = cdekResponse.entity?.uuid
+      if (cdekUuid) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { cdekUuid },
+        })
+      }
+    } catch (cdekErr) {
+      console.error('CDEK order registration failed (non-blocking)', cdekErr)
     }
 
-    return { paymentUrl: confirmUrl, orderId: order.id };
+    const confirmUrl = payment.confirmation?.confirmation_url
+    if (!confirmUrl) {
+      return { error: 'Payment gateway did not return a redirect URL' }
+    }
+
+    return { paymentUrl: confirmUrl, orderId: order.id }
   } catch (e) {
-    console.error('Payment creation failed', e);
+    console.error('Payment creation failed', e)
     await prisma.order.update({
       where: { id: order.id },
       data: { status: 'CANCELLED' },
-    });
-    return { error: 'Payment failed. Please try again.' };
+    })
+    return { error: 'Payment failed. Please try again.' }
   }
 }

@@ -63,7 +63,8 @@
     "noResults": "No products found. Try adjusting your filters.",
     "addToCart": "Add to Cart",
     "outOfStock": "Out of Stock",
-    "added": "Added!"
+    "added": "Added!",
+    "bestseller": "Best"
   },
   "product": {
     "sku": "SKU",
@@ -135,7 +136,7 @@
     "badge": "Contacts",
     "title": "We'll Call You Back",
     "subtitle": "Leave your name and phone number - our team will reach out to answer any questions.",
-    "namePlaceholder": "Your name",
+    "namePlaceholder": "Your full name",
     "phonePlaceholder": "Phone number",
     "submit": "Send Application",
     "success": "Your application has been accepted!",

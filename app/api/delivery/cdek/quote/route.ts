@@ -6,6 +6,7 @@ import type { CdekParcel } from '@/lib/cdek/types';
 type Body = {
   cityCode?: unknown;
   parcels?: unknown;
+  totalPrice?: unknown;
 };
 
 function isParcel(value: unknown): value is CdekParcel {
@@ -29,6 +30,7 @@ export async function POST(req: Request) {
 
   const cityCode = Number(body.cityCode);
   const parcels = Array.isArray(body.parcels) ? body.parcels.filter(isParcel) : [];
+  const totalPrice = Number(body.totalPrice) || 0;
   if (!Number.isFinite(cityCode)) {
     return NextResponse.json({ error: 'cityCode is required' }, { status: 400 });
   }
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const quote = await calculateQuote(cityCode, parcels);
+    const quote = await calculateQuote(cityCode, parcels, totalPrice);
     return NextResponse.json(quote);
   } catch (error) {
     console.error('CDEK quote error', error);

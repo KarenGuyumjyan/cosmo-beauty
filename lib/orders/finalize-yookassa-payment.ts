@@ -18,9 +18,6 @@ export async function finalizeOrderPaidViaYooKassa(
     data: { status: 'PAID', yookassaStatus: 'succeeded' },
   })
 
-  console.log(prisma, 'Kar jan prisma')
-  console.log(order, 'Kar jan order')
-
   for (const item of order.items) {
     await prisma.product.update({
       where: {

@@ -232,7 +232,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                 </button>
               </div>
               {selectedPickupType === 'cdek' ? (
-                <CdekPickupDelivery parcels={parcels} onChange={setDelivery} />
+                <CdekPickupDelivery parcels={parcels} totalPrice={subtotal} onChange={setDelivery} />
               ) : null}
             </div>
 

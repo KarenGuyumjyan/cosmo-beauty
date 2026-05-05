@@ -242,7 +242,7 @@ export default async function AboutPage({ params }: Props) {
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { icon: <Instagram size={22} />, label: 'Instagram', href: 'https://instagram.com', color: 'hover:bg-pink-600' },
+                  { icon: <Instagram size={22} />, label: 'Instagram', href: 'https://www.instagram.com/morena_cosmetics__/', color: 'hover:bg-pink-600' },
                   { icon: <Facebook size={22} />, label: 'Facebook', href: 'https://facebook.com', color: 'hover:bg-blue-600' },
                   {
                     icon: (

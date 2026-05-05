@@ -14,11 +14,9 @@ import { DEFAULT_CHECKOUT_CITY } from '@/lib/cdek/default-city'
 
 type Props = {
   parcels: CdekParcel[]
+  totalPrice: number
   onChange: (value: CdekDeliverySelection | null) => void
 }
-
-const PACKAGING = 0
-const MARKUP = 0
 
 type CdekUpstreamError = {
   error?: string
@@ -52,7 +50,7 @@ async function readErrorMessage(
   return fallback
 }
 
-export default function CdekPickupDelivery({ parcels, onChange }: Props) {
+export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Props) {
   const t = useTranslations('checkout')
 
   const [query, setQuery] = useState(DEFAULT_CHECKOUT_CITY.city)
@@ -186,7 +184,7 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
         const res = await fetch('/api/delivery/cdek/quote', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cityCode: selectedCity.code, parcels }),
+          body: JSON.stringify({ cityCode: selectedCity.code, parcels, totalPrice }),
         })
         if (cancelled) return
         if (!res.ok) {
@@ -213,7 +211,7 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
     return () => {
       cancelled = true
     }
-  }, [selectedCity, parcels, t])
+  }, [selectedCity, parcels, totalPrice, t])
 
   const selectedPoint = useMemo(
     () => points.find((point) => point.code === selectedPointCode) ?? null,
@@ -225,7 +223,6 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
       onChange(null)
       return
     }
-    const finalPrice = quote.cdekPrice + PACKAGING + MARKUP
     onChange({
       city: selectedCity.city,
       cityCode: selectedCity.code,
@@ -234,7 +231,7 @@ export default function CdekPickupDelivery({ parcels, onChange }: Props) {
       pickupPointAddress: selectedPoint.address,
       tariffCode: quote.tariffCode,
       cdekPrice: quote.cdekPrice,
-      finalPrice,
+      finalPrice: quote.cdekPrice,
     })
   }, [selectedCity, selectedPoint, quote, onChange])
 

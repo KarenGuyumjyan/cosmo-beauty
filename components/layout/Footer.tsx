@@ -25,7 +25,7 @@ export default function Footer() {
             <p className="text-sm leading-relaxed text-stone-400">{t('description')}</p>
             <div className="flex items-center gap-3 mt-5">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/morena_cosmetics__/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-stone-800 flex items-center justify-center text-stone-400 hover:bg-rose-600 hover:text-white transition-colors"
