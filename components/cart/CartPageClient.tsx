@@ -1,7 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { ShoppingBag, ArrowRight } from 'lucide-react';
+import { ShoppingBag, ArrowRight, AlertCircle } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { useCart } from '@/context/CartContext';
 import CartItem from '@/components/cart/CartItem';
@@ -15,7 +16,14 @@ const CURRENCY = '₽';
 
 export default function CartPageClient({ locale }: CartPageClientProps) {
   const t = useTranslations('cart');
-  const { items, subtotal } = useCart();
+  const { items, subtotal, refreshCart } = useCart();
+
+  // Re-validate stock from DB every time the cart page is opened.
+  useEffect(() => {
+    void refreshCart();
+  }, [refreshCart]);
+
+  const hasOutOfStock = items.some((item) => item.product.stockQuantity === 0);
 
   const savingsTotal = items.reduce(
     (sum, item) =>
@@ -102,12 +110,28 @@ export default function CartPageClient({ locale }: CartPageClientProps) {
               </div>
             </div>
 
-            <Link
-              href="/checkout"
-              className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2"
-            >
-              {t('checkout')} <ArrowRight size={18} />
-            </Link>
+            {hasOutOfStock && (
+              <div className="flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4 text-sm text-red-700">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{t('outOfStockBanner')}</span>
+              </div>
+            )}
+
+            {hasOutOfStock ? (
+              <button
+                disabled
+                className="w-full bg-stone-200 text-stone-400 font-bold py-4 rounded-2xl text-base cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {t('checkout')} <ArrowRight size={18} />
+              </button>
+            ) : (
+              <Link
+                href="/checkout"
+                className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2"
+              >
+                {t('checkout')} <ArrowRight size={18} />
+              </Link>
+            )}
 
             <p className="text-center text-xs text-stone-400 mt-4">
               🔒 Secure checkout · Encrypted payment

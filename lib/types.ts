@@ -53,6 +53,7 @@ export interface CartState {
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  refreshCart: () => Promise<void>;
   totalItems: number;
   subtotal: number;
 }

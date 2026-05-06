@@ -5,6 +5,24 @@ import { createCdekOrder } from '@/lib/cdek'
 import { prisma } from '@/lib/prisma'
 import { createPayment } from '@/lib/yookassa'
 
+type StockRow = { id: string; stockQuantity: number; nameEn: string }
+
+/** Returns a user-facing error string if any item fails the stock check, otherwise null. */
+function stockError(
+  items: { productId: string; quantity: number }[],
+  map: Map<string, StockRow>,
+): string | null {
+  for (const item of items) {
+    const p = map.get(item.productId)
+    if (!p) return 'One or more products were not found. Please refresh your cart.'
+    if (p.stockQuantity <= 0)
+      return `"${p.nameEn}" is out of stock. Please remove it from your cart.`
+    if (item.quantity > p.stockQuantity)
+      return `"${p.nameEn}": only ${p.stockQuantity} left in stock (you requested ${item.quantity}). Please update your cart.`
+  }
+  return null
+}
+
 interface CheckoutInput {
   customerName: string
   customerPhone: string
@@ -49,16 +67,8 @@ export async function createOrder(
 
   const productMap = new Map(products.map((p) => [p.id, p]))
 
-  for (const item of items) {
-    const p = productMap.get(item.productId)
-    if (!p) return { error: `Product not found` }
-    if (p.stockQuantity <= 0) return { error: `${p.nameEn} is out of stock` }
-    if (item.quantity > p.stockQuantity) {
-      return {
-        error: `${p.nameEn}: only ${p.stockQuantity} in stock (requested ${item.quantity})`,
-      }
-    }
-  }
+  const earlyStockErr = stockError(items, productMap)
+  if (earlyStockErr) return { error: earlyStockErr }
 
   const orderItems = items.map((item) => {
     const p = productMap.get(item.productId)!
@@ -100,6 +110,22 @@ export async function createOrder(
   const returnUrl = `${baseUrl}/${locale}/order/${order.id}`
 
   try {
+    // Re-fetch stock right before payment to close the race window between
+    // initial validation and actual payment creation.
+    const freshRows = await prisma.product.findMany({
+      where: { id: { in: items.map((i) => i.productId) } },
+      select: { id: true, stockQuantity: true, nameEn: true },
+    })
+    const freshMap = new Map(freshRows.map((p) => [p.id, p]))
+    const lateStockErr = stockError(items, freshMap)
+    if (lateStockErr) {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { status: 'CANCELLED' },
+      })
+      return { error: lateStockErr }
+    }
+
     const payment = await createPayment({
       amountRub: total,
       orderId: order.id,

@@ -2,6 +2,7 @@
 
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -74,6 +75,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   itemsRef.current = items;
 
   const canPersist = useRef(false);
+  const syncNonce = useRef(0);
 
   const idsKey = useMemo(
     () => [...new Set(items.map((i) => i.product.id))].sort().join(','),
@@ -90,31 +92,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('cosmo-cart', JSON.stringify(items));
   }, [items]);
 
-  // When cart line product ids change, merge lines with PostgreSQL (prices, stock, fields).
+  // Fetch fresh product data from DB and merge into cart (updates prices, stock, fields).
+  const refreshCart = useCallback(async () => {
+    const ids = [...new Set(itemsRef.current.map((i) => i.product.id))].filter(Boolean);
+    if (!ids.length) return;
+    const nonce = ++syncNonce.current;
+    try {
+      const res = await fetch('/api/cart-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok || nonce !== syncNonce.current) return;
+      const catalog = (await res.json()) as Product[];
+      if (nonce !== syncNonce.current) return;
+      const merged = mergeCartWithCatalog(itemsRef.current, catalog);
+      dispatch({ type: 'HYDRATE', items: merged });
+    } catch {
+      /* offline or DB unavailable — keep local cart */
+    }
+  }, []);
+
+  // Re-sync whenever the set of product IDs in the cart changes.
   useEffect(() => {
     if (!idsKey) return;
-    const ids = idsKey.split(',').filter(Boolean);
-    let cancelled = false;
-    void (async () => {
-      try {
-        const res = await fetch('/api/cart-products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ids }),
-        });
-        if (!res.ok || cancelled) return;
-        const catalog = (await res.json()) as Product[];
-        if (cancelled) return;
-        const merged = mergeCartWithCatalog(itemsRef.current, catalog);
-        dispatch({ type: 'HYDRATE', items: merged });
-      } catch {
-        /* offline or DB unavailable — keep local cart */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [idsKey]);
+    void refreshCart();
+  }, [idsKey, refreshCart]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce(
@@ -130,6 +133,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     updateQuantity: (productId: string, quantity: number) =>
       dispatch({ type: 'UPDATE_QUANTITY', productId, quantity }),
     clearCart: () => dispatch({ type: 'CLEAR_CART' }),
+    refreshCart,
     totalItems,
     subtotal,
   };

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { ShoppingBag, ArrowRight, Loader2, PackageCheck } from 'lucide-react'
+import { ShoppingBag, ArrowRight, Loader2, PackageCheck, AlertCircle } from 'lucide-react'
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { useCart } from '@/context/CartContext'
@@ -21,7 +21,7 @@ const CURRENCY = '₽'
 
 export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const t = useTranslations('checkout')
-  const { items, subtotal, clearCart } = useCart()
+  const { items, subtotal, clearCart, refreshCart } = useCart()
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -35,6 +35,13 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
 
   const shippingCost = delivery?.finalPrice ?? 0
   const total = subtotal + shippingCost
+
+  const hasOutOfStock = items.some((item) => item.product.stockQuantity === 0)
+
+  // Re-validate stock from DB when the checkout page loads.
+  useEffect(() => {
+    void refreshCart()
+  }, [refreshCart])
 
   // Stable reference: only recompute when cart contents actually change.
   // Without this, every parent re-render produced a fresh array reference,
@@ -54,6 +61,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
     e.preventDefault()
     setError('')
 
+    if (hasOutOfStock) return setError(t('errors.outOfStockBanner'))
     if (!name.trim()) return setError(t('errors.nameRequired'))
     if (!phone.trim()) return setError(t('errors.phoneRequired'))
     if (!email.trim()) return setError(t('errors.emailRequired'))
@@ -313,6 +321,13 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                 </div>
               </div>
 
+              {hasOutOfStock && (
+                <div className='flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4 text-sm text-red-700'>
+                  <AlertCircle size={16} className='shrink-0 mt-0.5' />
+                  <span>{t('errors.outOfStockBanner')}</span>
+                </div>
+              )}
+
               {error && (
                 <div className='bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-4'>
                   {error}
@@ -321,7 +336,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
 
               <button
                 type='submit'
-                disabled={submitting || !delivery || shippingCost <= 0}
+                disabled={submitting || !delivery || shippingCost <= 0 || hasOutOfStock}
                 className='w-full bg-rose-600 hover:bg-rose-700 active:scale-95 disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed disabled:hover:bg-rose-600 disabled:active:scale-100 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2'
               >
                 {submitting ? (
