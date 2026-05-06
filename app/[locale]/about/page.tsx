@@ -142,7 +142,7 @@ export default async function AboutPage({ params }: Props) {
       </section>
 
       {/* Blog */}
-      <section className="py-20" style={{ background: '#fdf8f0' }}>
+      {/*<section className="py-20" style={{ background: '#fdf8f0' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-rose-600 text-xs tracking-widest uppercase font-semibold mb-3">{tBlog('subtitle')}</p>
@@ -160,7 +160,6 @@ export default async function AboutPage({ params }: Props) {
                 className="bg-white rounded-2xl overflow-hidden border border-stone-100 hover:shadow-xl hover:shadow-rose-100/50 transition-all group"
               >
                 <div className="relative h-52 overflow-hidden bg-stone-50">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={post.image}
                     alt={post.title}
@@ -184,7 +183,7 @@ export default async function AboutPage({ params }: Props) {
             ))}
           </div>
         </div>
-      </section>
+      </section>*/}
 
       {/* Contact & Social */}
       <section className="py-20 bg-stone-900 text-white">
