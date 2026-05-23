@@ -25,6 +25,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/icon.png',
+  },
   metadataBase: new URL(BASE_URL),
   title: {
     default: 'Morena Cosmetics — Интернет-магазин косметики',
