@@ -25,7 +25,7 @@ async function fetchToken(): Promise<string> {
       !clientSecret && 'CDEK_CLIENT_SECRET',
     ].filter(Boolean);
     throw new Error(
-      `CDEK OAuth credentials missing (${missing.join(', ')}). Set them in .env — same values as in the CDEK integration account (Интеграция). Also set CDEK_BASE_URL (e.g. https://api.edu.cdek.ru for the test API).`,
+      `CDEK OAuth credentials missing (${missing.join(', ')}). Set them in .env - same values as in the CDEK integration account (Интеграция). Also set CDEK_BASE_URL (e.g. https://api.edu.cdek.ru for the test API).`,
     );
   }
 

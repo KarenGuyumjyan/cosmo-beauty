@@ -42,7 +42,7 @@ export default async function ThankYouPage({ params }: Props) {
       const match = validatePaymentMatchesOrder(payment, order);
       if (!match.ok) {
         console.warn(
-          `[yookassa:return] Order ${order.id}: payment verification failed — ${match.reason}`,
+          `[yookassa:return] Order ${order.id}: payment verification failed - ${match.reason}`,
         );
       } else if (payment.status === 'succeeded') {
         const outcome = await finalizeOrderPaidViaYooKassa(order as OrderWithItemsAndProduct);

@@ -1,19 +1,19 @@
 {
   "seo": {
     "siteName": "Morena Cosmetics",
-    "defaultTitle": "Morena Cosmetics — Premium Makeup & Beauty",
-    "defaultDescription": "Morena Cosmetics — premium makeup and beauty products. Lip gloss, highlighter, blush, concealer, lip liner and more, shipped across Russia.",
+    "defaultTitle": "Morena Cosmetics - Premium Makeup & Beauty",
+    "defaultDescription": "Morena Cosmetics - premium makeup and beauty products. Lip gloss, highlighter, blush, concealer, lip liner and more, shipped across Russia.",
     "home": {
       "title": "Premium Makeup & Cosmetics",
-      "description": "Discover Morena Cosmetics — premium lip gloss, highlighters, blush, lip liners and concealers. Crafted with love, shipped fast across Russia."
+      "description": "Discover Morena Cosmetics - premium lip gloss, highlighters, blush, lip liners and concealers. Crafted with love, shipped fast across Russia."
     },
     "catalog": {
-      "title": "Catalog — Makeup & Beauty Products",
+      "title": "Catalog - Makeup & Beauty Products",
       "description": "Browse the full Morena Cosmetics catalog: lip gloss, highlighters, blush, lip liners, concealers and more. Premium quality, fast shipping."
     },
     "about": {
       "title": "About Morena Cosmetics",
-      "description": "Learn about Morena Cosmetics — our story, values and commitment to ethically sourced, premium beauty for every skin tone."
+      "description": "Learn about Morena Cosmetics - our story, values and commitment to ethically sourced, premium beauty for every skin tone."
     },
     "cart": {
       "title": "Your Cart",
@@ -29,7 +29,7 @@
     },
     "privacy": {
       "title": "Privacy Policy",
-      "description": "Morena Cosmetics privacy policy — how we collect, use and protect your personal data."
+      "description": "Morena Cosmetics privacy policy - how we collect, use and protect your personal data."
     },
     "terms": {
       "title": "Terms of Service",
@@ -262,7 +262,7 @@
       "cityPlaceholder": "Start typing a city, e.g. Moscow",
       "citySearchPlaceholder": "Search city…",
       "resolvingCity": "Searching CDEK cities…",
-      "multiCityTitle": "Several cities in CDEK — choose one:",
+      "multiCityTitle": "Several cities in CDEK - choose one:",
       "pointsTitle": "Pickup points",
       "searchPlaceholder": "Search by address or code",
       "loadingPoints": "Loading pickup points…",

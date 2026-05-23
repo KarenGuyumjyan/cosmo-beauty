@@ -31,7 +31,7 @@ export default async function AdminContactsPage() {
                   <tr key={c.id} className="hover:bg-stone-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-stone-800">{c.name}</td>
                     <td className="px-6 py-4 text-stone-500">{c.phone}</td>
-                    <td className="px-6 py-4 text-stone-500 max-w-xs truncate">{c.message ?? '—'}</td>
+                    <td className="px-6 py-4 text-stone-500 max-w-xs truncate">{c.message ?? '-'}</td>
                     <td className="px-6 py-4 text-stone-400">
                       {new Date(c.createdAt).toLocaleString()}
                     </td>

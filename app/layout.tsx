@@ -30,11 +30,11 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'Morena Cosmetics — Интернет-магазин косметики',
+    default: 'Morena Cosmetics - Интернет-магазин косметики',
     template: '%s | Morena Cosmetics',
   },
   description:
-    'Morena Cosmetics — интернет-магазин премиальной косметики. Блеск для губ, хайлайтер, румяна, консилер и многое другое с доставкой по России.',
+    'Morena Cosmetics - интернет-магазин премиальной косметики. Блеск для губ, хайлайтер, румяна, консилер и многое другое с доставкой по России.',
   applicationName: 'Morena Cosmetics',
   keywords: [
     'Morena Cosmetics',
@@ -99,7 +99,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     name: 'Morena Cosmetics',
     url: BASE_URL,
     description:
-      'Morena Cosmetics — premium makeup brand offering lip gloss, highlighters, blush, concealers and more.',
+      'Morena Cosmetics - premium makeup brand offering lip gloss, highlighters, blush, concealers and more.',
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+37411234567',

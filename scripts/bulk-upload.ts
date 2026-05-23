@@ -55,7 +55,7 @@ async function main() {
       results.push(blob.pathname);
       console.log(`✅ ${file} → ${blob.pathname}`);
     } catch (err) {
-      console.error(`❌ ${file} — failed:`, err);
+      console.error(`❌ ${file} - failed:`, err);
     }
   }
 

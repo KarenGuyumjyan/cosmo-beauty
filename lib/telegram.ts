@@ -22,10 +22,10 @@ export async function sendOrderNotification(order: OrderNotification) {
 
   const shippingLabel = [order.shippingMethod.trim(), order.city, order.address]
     .filter(Boolean)
-    .join(' · ') || '—';
+    .join(' · ') || '-';
 
   const itemLines = order.items
-    .map((i) => `  • ${i.name} x${i.quantity} — ${(i.price * i.quantity).toLocaleString('ru-RU')} ₽`)
+    .map((i) => `  • ${i.name} x${i.quantity} - ${(i.price * i.quantity).toLocaleString('ru-RU')} ₽`)
     .join('\n');
 
   const text = [

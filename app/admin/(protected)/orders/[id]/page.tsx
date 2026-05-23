@@ -80,14 +80,14 @@ export default async function OrderDetailPage({ params }: Props) {
           <div>
             <p className='text-stone-400 text-xs mb-0.5'>Способ</p>
             <p className='font-medium text-stone-800'>
-              {order.shippingMethod.trim() || '—'}
+              {order.shippingMethod.trim() || '-'}
             </p>
           </div>
           {order.pickupPointName && (
             <div className='col-span-2'>
               <p className='text-stone-400 text-xs mb-0.5'>Пункт выдачи</p>
               <p className='font-medium text-stone-800'>
-                {order.pickupPointName} — {order.pickupPointAddress ?? '—'}
+                {order.pickupPointName} - {order.pickupPointAddress ?? '-'}
               </p>
             </div>
           )}

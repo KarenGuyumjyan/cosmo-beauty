@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     product.shortDescription[l] ||
     product.description[l] ||
-    `${product.name[l]} — Morena Cosmetics`;
+    `${product.name[l]} - Morena Cosmetics`;
   const image = product.images[0];
 
   return buildPageMetadata({
