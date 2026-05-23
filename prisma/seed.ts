@@ -1,6 +1,6 @@
 import { PrismaClient, Prisma, ProductCategory } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { products } from '../lib/data';
+import { products } from './seed-data';
 
 const prisma = new PrismaClient();
 
@@ -13,7 +13,7 @@ async function main() {
     await tx.contactApplication.deleteMany();
     await tx.product.deleteMany();
 
-        for (const p of products) {
+    for (const p of products) {
       await tx.product.create({
         data: {
           id: p.id,

@@ -1,62 +1,25 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { Instagram, Facebook, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.ru';
+import { Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import { BASE_URL, buildPageMetadata } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string }> };
 
-const ABOUT_DESCRIPTIONS: Record<string, string> = {
-  ru: 'Узнайте о Morena Cosmetics — бренде премиальной косметики. Наша миссия: доступная роскошь и уверенность в красоте для каждого.',
-  en: 'Learn about Morena Cosmetics — a premium beauty brand. Our mission: accessible luxury and confidence through ethically-sourced makeup.',
-  hy: 'Ծանոթացեք Morena Cosmetics-ին — պրեմիում կոսմետիկայի ապրանքանիշ, որի առաքելությունն է մատչելի շքեղությունն ու վստահությունն ամենքի համար։',
-};
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'about' });
-  const title = t('title');
-  const description = ABOUT_DESCRIPTIONS[locale] ?? ABOUT_DESCRIPTIONS.en;
-  return {
-    title,
-    description,
-    alternates: { canonical: `${BASE_URL}/${locale}/about` },
-    openGraph: { title, description, url: `${BASE_URL}/${locale}/about` },
-    twitter: { card: 'summary_large_image', title, description },
-  };
+  const t = await getTranslations({ locale, namespace: 'seo.about' });
+  return buildPageMetadata({
+    locale,
+    path: '/about',
+    title: t('title'),
+    description: t('description'),
+  });
 }
-
-const blogPosts = [
-  {
-    id: 1,
-    title: 'The Ultimate Guide to Building a Skincare Routine',
-    date: 'March 5, 2026',
-    category: 'Skincare',
-    image: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&q=80',
-    excerpt: 'Whether you\'re a skincare novice or a seasoned enthusiast, building the right routine can transform your skin.',
-  },
-  {
-    id: 2,
-    title: 'Spring Makeup Trends You Need to Try',
-    date: 'February 20, 2026',
-    category: 'Makeup',
-    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80',
-    excerpt: 'From dewy skin to bold lips, here\'s what\'s trending this spring season.',
-  },
-  {
-    id: 3,
-    title: 'How to Choose the Right Fragrance for Your Personality',
-    date: 'February 10, 2026',
-    category: 'Fragrance',
-    image: 'https://images.unsplash.com/photo-1541643600914-78b084683702?w=600&q=80',
-    excerpt: 'Scent is deeply personal. Here\'s how to find the fragrance that truly speaks to you.',
-  },
-];
 
 export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'about' });
-  const tBlog = await getTranslations({ locale, namespace: 'about.blog' });
+  const tSeo = await getTranslations({ locale, namespace: 'seo.about' });
 
   const localBusinessJsonLd = {
     '@context': 'https://schema.org',
@@ -66,7 +29,7 @@ export default async function AboutPage({ params }: Props) {
     url: BASE_URL,
     telephone: '+37411234567',
     email: 'morena_studio@mail.ru',
-    description: ABOUT_DESCRIPTIONS[locale] ?? ABOUT_DESCRIPTIONS.en,
+    description: tSeo('description'),
     address: {
       '@type': 'PostalAddress',
       streetAddress: '15 Baghramyan Ave',
@@ -140,50 +103,6 @@ export default async function AboutPage({ params }: Props) {
           </div>
         </div>
       </section>
-
-      {/* Blog */}
-      {/*<section className="py-20" style={{ background: '#fdf8f0' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <p className="text-rose-600 text-xs tracking-widest uppercase font-semibold mb-3">{tBlog('subtitle')}</p>
-            <h2
-              className="text-3xl sm:text-4xl font-bold text-stone-900"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              {tBlog('title')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => (
-              <article
-                key={post.id}
-                className="bg-white rounded-2xl overflow-hidden border border-stone-100 hover:shadow-xl hover:shadow-rose-100/50 transition-all group"
-              >
-                <div className="relative h-52 overflow-hidden bg-stone-50">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <span className="absolute top-3 left-3 bg-white text-rose-600 text-xs font-bold px-3 py-1 rounded-full">
-                    {post.category}
-                  </span>
-                </div>
-                <div className="p-5">
-                  <p className="text-xs text-stone-400 mb-2">{post.date}</p>
-                  <h3 className="font-bold text-stone-800 mb-2 leading-snug group-hover:text-rose-700 transition-colors">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-stone-500 leading-relaxed line-clamp-2 mb-4">{post.excerpt}</p>
-                  <button className="text-sm font-semibold text-rose-600 hover:text-rose-800 flex items-center gap-1 transition-colors">
-                    {tBlog('readMore')} <ExternalLink size={13} />
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>*/}
 
       {/* Contact & Social */}
       <section className="py-20 bg-stone-900 text-white">

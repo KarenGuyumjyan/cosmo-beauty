@@ -72,10 +72,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Always start empty so SSR + first client paint match; hydrate from localStorage in useLayoutEffect.
   const [items, dispatch] = useReducer(cartReducer, [] as CartItem[]);
   const itemsRef = useRef(items);
-  itemsRef.current = items;
 
   const canPersist = useRef(false);
   const syncNonce = useRef(0);
+
+  // Keep the ref in sync with the latest items so async callbacks (refreshCart)
+  // can read the current cart without re-creating themselves on every state
+  // update. Updating refs during render breaks Concurrent React; do it in an
+  // effect after commit.
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   const idsKey = useMemo(
     () => [...new Set(items.map((i) => i.product.id))].sort().join(','),
@@ -83,7 +90,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 
   useLayoutEffect(() => {
-    dispatch({ type: 'HYDRATE', items: loadCartFromStorage() });
+    const persisted = loadCartFromStorage();
+    if (persisted.length > 0) {
+      dispatch({ type: 'HYDRATE', items: persisted });
+    }
     canPersist.current = true;
   }, []);
 

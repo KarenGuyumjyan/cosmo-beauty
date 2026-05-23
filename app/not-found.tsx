@@ -1,7 +1,12 @@
+import type { Metadata } from 'next'
 import { getLocale, getTranslations, getMessages } from 'next-intl/server'
 import { NextIntlClientProvider } from 'next-intl'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function RootNotFound() {
   let locale = 'ru'

@@ -39,22 +39,26 @@ export default function CdekPickupMap({
   const placemarksRef = useRef<Map<string, YPlacemark>>(new Map());
   const onSelectRef = useRef(onSelect);
 
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Compute the missing-key error during render so React doesn't have to
+  // schedule a cascading setState from inside an effect.
+  const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
+  const [apiError, setApiError] = useState<string | null>(
+    apiKey ? null : MAP_API_KEY_MISSING,
+  );
+  const [loading, setLoading] = useState<boolean>(Boolean(apiKey));
 
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
 
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
-    if (!apiKey) {
-      setApiError(MAP_API_KEY_MISSING);
-      setLoading(false);
-      return;
-    }
+    if (!apiKey) return;
 
     let disposed = false;
+    // Capture the Map instance once at effect creation time so the cleanup
+    // function clears the exact same collection that was populated by this
+    // effect's render scope, not a future render's swapped-in instance.
+    const placemarks = placemarksRef.current;
 
     loadYandexMaps(apiKey)
       .then((api) => {
@@ -67,7 +71,7 @@ export default function CdekPickupMap({
             zoom: DEFAULT_ZOOM,
             controls: ['zoomControl'],
           },
-          { suppressMapOpenBlock: true }
+          { suppressMapOpenBlock: true },
         );
         setLoading(false);
       })
@@ -84,9 +88,9 @@ export default function CdekPickupMap({
         mapRef.current = null;
       }
       clustererRef.current = null;
-      placemarksRef.current.clear();
+      placemarks.clear();
     };
-  }, []);
+  }, [apiKey]);
 
   useEffect(() => {
     const api = apiRef.current;

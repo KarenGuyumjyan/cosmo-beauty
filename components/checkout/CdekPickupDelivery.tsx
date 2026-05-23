@@ -320,22 +320,31 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
               </div>
               <ul className='max-h-52 overflow-y-auto py-1' role='listbox'>
                 {filteredCities.length > 0 ? (
-                  filteredCities.map((city) => (
-                    <li key={`${city.code}-${city.region ?? ''}`} role='option'>
-                      <button
-                        type='button'
-                        onClick={() => handleCitySelect(city)}
-                        className={`w-full px-4 py-2.5 text-left text-xs transition-colors hover:bg-rose-50 ${
-                          selectedCity?.code === city.code
-                            ? 'bg-rose-50 text-rose-700'
-                            : 'text-stone-700'
-                        }`}
+                  filteredCities.map((city) => {
+                    const isSelected = selectedCity?.code === city.code
+                    return (
+                      <li
+                        key={`${city.code}-${city.region ?? ''}`}
+                        role='option'
+                        aria-selected={isSelected}
                       >
-                        <span className='font-semibold text-sm'>{city.city}</span>
-                        {city.region ? `, ${city.region}` : ''}
-                      </button>
-                    </li>
-                  ))
+                        <button
+                          type='button'
+                          onClick={() => handleCitySelect(city)}
+                          className={`w-full px-4 py-2.5 text-left text-xs transition-colors hover:bg-rose-50 ${
+                            isSelected
+                              ? 'bg-rose-50 text-rose-700'
+                              : 'text-stone-700'
+                          }`}
+                        >
+                          <span className='font-semibold text-sm'>
+                            {city.city}
+                          </span>
+                          {city.region ? `, ${city.region}` : ''}
+                        </button>
+                      </li>
+                    )
+                  })
                 ) : (
                   <li className='px-4 py-4 text-center text-sm text-stone-400'>
                     {t('cdek.errors.cityNotFound')}

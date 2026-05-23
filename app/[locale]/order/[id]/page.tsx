@@ -9,13 +9,20 @@ import { fetchPayment, validatePaymentMatchesOrder } from '@/lib/yookassa';
 import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations';
 import type { Metadata } from 'next';
 import ThankYouClient from './ThankYouClient';
+import { buildPageMetadata } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'thankYou' });
-  return { title: t('title') };
+  const { locale, id } = await params;
+  const t = await getTranslations({ locale, namespace: 'seo.order' });
+  return buildPageMetadata({
+    locale,
+    path: `/order/${id}`,
+    title: t('title'),
+    description: t('description'),
+    noIndex: true,
+  });
 }
 
 export default async function ThankYouPage({ params }: Props) {

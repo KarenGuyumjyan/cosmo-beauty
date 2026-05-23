@@ -1,4 +1,57 @@
 {
+  "seo": {
+    "siteName": "Morena Cosmetics",
+    "defaultTitle": "Morena Cosmetics — Premium Makeup & Beauty",
+    "defaultDescription": "Morena Cosmetics — premium makeup and beauty products. Lip gloss, highlighter, blush, concealer, lip liner and more, shipped across Russia.",
+    "home": {
+      "title": "Premium Makeup & Cosmetics",
+      "description": "Discover Morena Cosmetics — premium lip gloss, highlighters, blush, lip liners and concealers. Crafted with love, shipped fast across Russia."
+    },
+    "catalog": {
+      "title": "Catalog — Makeup & Beauty Products",
+      "description": "Browse the full Morena Cosmetics catalog: lip gloss, highlighters, blush, lip liners, concealers and more. Premium quality, fast shipping."
+    },
+    "about": {
+      "title": "About Morena Cosmetics",
+      "description": "Learn about Morena Cosmetics — our story, values and commitment to ethically sourced, premium beauty for every skin tone."
+    },
+    "cart": {
+      "title": "Your Cart",
+      "description": "Review the products in your Morena Cosmetics shopping cart."
+    },
+    "checkout": {
+      "title": "Checkout",
+      "description": "Complete your Morena Cosmetics order with secure payment via YooKassa."
+    },
+    "order": {
+      "title": "Order Confirmation",
+      "description": "Thank you for shopping at Morena Cosmetics."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "Morena Cosmetics privacy policy — how we collect, use and protect your personal data."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "description": "Morena Cosmetics terms of service."
+    },
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "The page you are looking for has moved or no longer exists."
+    },
+    "keywords": [
+      "Morena Cosmetics",
+      "cosmetics",
+      "makeup",
+      "lip gloss",
+      "highlighter",
+      "blush",
+      "concealer",
+      "lip liner",
+      "premium beauty",
+      "online store"
+    ]
+  },
   "nav": {
     "home": "Home",
     "catalog": "Catalog",
@@ -22,6 +75,12 @@
       "title": "Bestsellers",
       "subtitle": "Our most-loved products"
     },
+    "promo": {
+      "eyebrow": "Limited Offer",
+      "title": "Up to 30% Off",
+      "description": "Discover our seasonal sale on premium skincare and makeup collections.",
+      "cta": "Shop the Sale"
+    },
     "values": {
       "quality": {
         "title": "High Quality",
@@ -44,6 +103,7 @@
   "catalog": {
     "title": "Product Catalog",
     "subtitle": "Explore our full collection",
+    "collectionEyebrow": "Collection",
     "filters": {
       "title": "Filters",
       "category": "Category",
@@ -86,12 +146,14 @@
     "empty": "Your cart is empty",
     "emptySubtitle": "Start shopping to add products to your cart",
     "continueShopping": "Continue Shopping",
+    "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "discount": "Discount",
     "shipping": "Shipping",
     "free": "Free",
     "total": "Total",
     "checkout": "Proceed to Checkout",
+    "secureCheckout": "Secure checkout · Encrypted payment",
     "remove": "Remove",
     "quantity": "Qty",
     "size": "Size",

@@ -1,4 +1,3 @@
-import { products } from './../newData'
 import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { buildParcelsFromOrderLines } from '@/lib/cdek/build-parcels'
@@ -13,25 +12,28 @@ import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations'
 export async function finalizeOrderPaidViaYooKassa(
   order: OrderWithItemsAndProduct,
 ): Promise<'paid' | 'already_paid' | 'not_pending'> {
-  const updated = await prisma.order.updateMany({
-    where: { id: order.id, status: 'PENDING' },
-    data: { status: 'PAID', yookassaStatus: 'succeeded' },
+  // Atomically flip status from PENDING → PAID *and* decrement stock in one
+  // transaction so duplicate webhook deliveries (webhook + thank-you page race)
+  // cannot double-decrement inventory.
+  const transition = await prisma.$transaction(async (tx) => {
+    const updated = await tx.order.updateMany({
+      where: { id: order.id, status: 'PENDING' },
+      data: { status: 'PAID', yookassaStatus: 'succeeded' },
+    })
+
+    if (updated.count === 0) return { transitioned: false as const }
+
+    for (const item of order.items) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: { stockQuantity: { decrement: item.quantity } },
+      })
+    }
+
+    return { transitioned: true as const }
   })
 
-  for (const item of order.items) {
-    await prisma.product.update({
-      where: {
-        id: item.productId,
-      },
-      data: {
-        stockQuantity: {
-          decrement: item.quantity,
-        },
-      },
-    })
-  }
-
-  if (updated.count === 0) {
+  if (!transition.transitioned) {
     const current = await prisma.order.findUnique({
       where: { id: order.id },
       select: { status: true },

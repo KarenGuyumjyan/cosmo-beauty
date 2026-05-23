@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useSyncExternalStore } from 'react'
 import { useTranslations } from 'next-intl'
 import { ShoppingBag, ArrowRight, Loader2, PackageCheck, AlertCircle } from 'lucide-react'
 import Image from 'next/image'
@@ -19,6 +19,10 @@ import {
 
 const CURRENCY = '₽'
 
+const subscribeNoop = () => () => {}
+const getClientHydratedSnapshot = () => true
+const getServerHydratedSnapshot = () => false
+
 export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const t = useTranslations('checkout')
   const { items, subtotal, clearCart, refreshCart } = useCart()
@@ -32,6 +36,16 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const [selectedPickupType, setSelectedPickupType] = useState<
     'cdek' | 'yandex'
   >('cdek')
+  // The cart hydrates from localStorage after mount, so on first render
+  // `items` is always []. Once we've mounted we know an empty cart is real
+  // and can show the empty-cart UI instead of an indefinite spinner.
+  // `useSyncExternalStore` gives us a hydration-safe boolean without invoking
+  // setState from inside an effect.
+  const hydrated = useSyncExternalStore(
+    subscribeNoop,
+    getClientHydratedSnapshot,
+    getServerHydratedSnapshot,
+  )
 
   const shippingCost = delivery?.finalPrice ?? 0
   const total = subtotal + shippingCost
@@ -104,15 +118,14 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
     }
   }
 
-  if (!items.length) {
-    return (
-      <div className='pt-32 pb-24 min-h-dvh flex items-center justify-center'>
-        <Loader2 size={32} className='animate-spin text-rose-400' />
-      </div>
-    )
-  }
-
   if (items.length === 0) {
+    if (!hydrated) {
+      return (
+        <div className='pt-32 pb-24 min-h-dvh flex items-center justify-center'>
+          <Loader2 size={32} className='animate-spin text-rose-400' />
+        </div>
+      )
+    }
     return (
       <div className='pt-32 pb-24 min-h-dvh flex items-center justify-center'>
         <div className='text-center max-w-sm mx-auto px-4'>

@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.ru';
+import { BASE_URL } from '@/lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,9 +7,25 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/api/'],
+        disallow: [
+          '/admin',
+          '/admin/',
+          '/api/',
+          '/cart',
+          '/checkout',
+          '/order/',
+          '/*/cart',
+          '/*/checkout',
+          '/*/order/',
+          // Disallow filtered/sorted catalog query strings — keeps the
+          // canonical `/catalog` clean in the index.
+          '/*?cat=*',
+          '/*?sort=*',
+          '/*?q=*',
+        ],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
+    host: BASE_URL,
   };
 }

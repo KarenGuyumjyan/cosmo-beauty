@@ -88,7 +88,7 @@ export default function CartPageClient({ locale }: CartPageClientProps) {
 
           {/* Order summary */}
           <div className="bg-white rounded-2xl border border-stone-100 p-6 sticky top-24">
-            <h2 className="font-bold text-stone-900 text-lg mb-5">Order Summary</h2>
+            <h2 className="font-bold text-stone-900 text-lg mb-5">{t('orderSummary')}</h2>
 
             <div className="space-y-3 text-sm mb-5">
               <div className="flex justify-between text-stone-600">
@@ -134,7 +134,7 @@ export default function CartPageClient({ locale }: CartPageClientProps) {
             )}
 
             <p className="text-center text-xs text-stone-400 mt-4">
-              🔒 Secure checkout · Encrypted payment
+              🔒 {t('secureCheckout')}
             </p>
           </div>
         </div>

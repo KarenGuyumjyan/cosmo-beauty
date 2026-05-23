@@ -24,10 +24,15 @@ const NAV = [
 export default function AdminNav({ email }: { email?: string | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  // Track the pathname seen on the previous render so we can close the mobile
+  // drawer on navigation without an effect (avoiding the cascading-render
+  // pattern the React lint rule warns against).
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    if (open) setOpen(false);
+  }
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Inter } from 'next/font/google';
 import { getLocale } from 'next-intl/server';
 import { CartProvider } from '@/context/CartContext';
+import { BASE_URL, DEFAULT_OG_IMAGE, htmlLang, languageAlternates } from '@/lib/seo';
 import './globals.css';
 
 const inter = Inter({
@@ -23,8 +24,6 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.ru';
-
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
@@ -33,6 +32,7 @@ export const metadata: Metadata = {
   },
   description:
     'Morena Cosmetics — интернет-магазин премиальной косметики. Блеск для губ, хайлайтер, румяна, консилер и многое другое с доставкой по России.',
+  applicationName: 'Morena Cosmetics',
   keywords: [
     'Morena Cosmetics',
     'косметика',
@@ -48,14 +48,20 @@ export const metadata: Metadata = {
     'blush',
     'concealer',
   ],
+  alternates: {
+    canonical: `${BASE_URL}/ru`,
+    languages: languageAlternates('/'),
+  },
   openGraph: {
     type: 'website',
     siteName: 'Morena Cosmetics',
     locale: 'ru_RU',
     alternateLocale: ['en_US', 'hy_AM'],
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
+    images: [DEFAULT_OG_IMAGE.url],
   },
   robots: {
     index: true,
@@ -68,6 +74,11 @@ export const metadata: Metadata = {
       'max-video-preview': -1,
     },
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    yandex: process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION,
+  },
+  category: 'shopping',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -84,10 +95,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '@id': `${BASE_URL}/#organization`,
     name: 'Morena Cosmetics',
     url: BASE_URL,
-    logo: {
-      '@type': 'ImageObject',
-      url: `${BASE_URL}/logo.png`,
-    },
     description:
       'Morena Cosmetics — premium makeup brand offering lip gloss, highlighters, blush, concealers and more.',
     contactPoint: {
@@ -105,7 +112,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   };
 
   return (
-    <html lang={locale} className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+    <html lang={htmlLang(locale)} className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

@@ -1,7 +1,6 @@
 'use server'
 
 import type { CdekDeliverySelection } from '@/lib/cdek/types'
-import { createCdekOrder } from '@/lib/cdek'
 import { prisma } from '@/lib/prisma'
 import { createPayment } from '@/lib/yookassa'
 
@@ -144,50 +143,10 @@ export async function createOrder(
       data: { yookassaId: payment.id, yookassaStatus: payment.status },
     })
 
-    // Register order with CDEK
-    try {
-      const cdekResponse = await createCdekOrder({
-        tariff_code: delivery.tariffCode,
-        delivery_point: delivery.pickupPointCode,
-        recipient: {
-          name: customerName.trim(),
-          phones: [{ number: customerPhone.trim() }],
-          email: customerEmail?.trim(),
-        },
-        from_location: {
-          address: process.env.CDEK_SENDER_ADDRESS ?? 'Москва',
-          code: Number(process.env.CDEK_SENDER_CITY_CODE) || 44,
-        },
-        services: [{ code: 'INSURANCE', parameter: 0 }],
-        packages: [
-          {
-            number: order.id.slice(0, 8),
-            weight: orderItems.reduce((sum, i) => sum + i.quantity * 100, 0), // grams
-            items: orderItems.map((item) => {
-              const p = productMap.get(item.productId)!
-              return {
-                name: p.nameEn,
-                ware_key: item.productId.slice(0, 20),
-                weight: 100,
-                amount: item.quantity,
-                cost: item.price,
-                payment: { value: 0 },
-              }
-            }),
-          },
-        ],
-      })
-
-      const cdekUuid = cdekResponse.entity?.uuid
-      if (cdekUuid) {
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { cdekUuid },
-        })
-      }
-    } catch (cdekErr) {
-      console.error('CDEK order registration failed (non-blocking)', cdekErr)
-    }
+    // NB: CDEK order is intentionally NOT created here.
+    // It is created in `finalizeOrderPaidViaYooKassa` after the payment
+    // succeeds — registering CDEK orders for abandoned/unpaid carts pollutes
+    // CDEK's system and incurs needless reservations.
 
     const confirmUrl = payment.confirmation?.confirmation_url
     if (!confirmUrl) {

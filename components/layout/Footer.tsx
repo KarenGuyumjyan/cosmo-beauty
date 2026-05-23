@@ -103,10 +103,10 @@ export default function Footer() {
         <div className="border-t border-stone-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500">
           <span>© {new Date().getFullYear()} Morena Cosmetics. {t('rights')}</span>
           <div className="flex gap-4">
-            <Link href="/about" className="hover:text-rose-400 transition-colors">
+            <Link href="/documents/privacy-policy" className="hover:text-rose-400 transition-colors">
               {t('privacy')}
             </Link>
-            <Link href="/about" className="hover:text-rose-400 transition-colors">
+            <Link href="/documents/terms-of-service" className="hover:text-rose-400 transition-colors">
               {t('terms')}
             </Link>
           </div>

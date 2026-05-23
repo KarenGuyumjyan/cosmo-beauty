@@ -3,8 +3,7 @@ import { notFound } from 'next/navigation';
 import { getProductById } from '@/lib/db-products';
 import { Locale } from '@/lib/types';
 import ProductDetail from '@/components/product/ProductDetail';
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://morena-cosmetics.ru';
+import { BASE_URL, buildPageMetadata } from '@/lib/seo';
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -13,37 +12,29 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params;
   const product = await getProductById(id);
-  if (!product) return { title: 'Product Not Found' };
+  if (!product) {
+    return {
+      title: 'Product Not Found',
+      robots: { index: false, follow: false },
+    };
+  }
   const l = locale as Locale;
   const title = product.name[l];
-  const description = product.shortDescription[l];
+  const description =
+    product.shortDescription[l] ||
+    product.description[l] ||
+    `${product.name[l]} — Morena Cosmetics`;
   const image = product.images[0];
-  return {
+
+  return buildPageMetadata({
+    locale,
+    path: `/product/${id}`,
     title,
     description,
-    alternates: {
-      canonical: `${BASE_URL}/${locale}/product/${id}`,
-      languages: {
-        ru: `${BASE_URL}/ru/product/${id}`,
-        en: `${BASE_URL}/en/product/${id}`,
-        hy: `${BASE_URL}/hy/product/${id}`,
-        'x-default': `${BASE_URL}/ru/product/${id}`,
-      },
-    },
-    openGraph: {
-      title,
-      description,
-      url: `${BASE_URL}/${locale}/product/${id}`,
-      type: 'website',
-      images: image ? [{ url: image, width: 800, height: 800, alt: title }] : [],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: image ? [image] : [],
-    },
-  };
+    images: image
+      ? [{ url: image, width: 800, height: 800, alt: title }]
+      : undefined,
+  });
 }
 
 const NAV: Record<string, { home: string; catalog: string }> = {
