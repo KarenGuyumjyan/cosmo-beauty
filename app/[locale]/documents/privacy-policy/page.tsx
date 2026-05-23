@@ -61,7 +61,7 @@ const PrivacyPolicyPage = () => {
             </span>
             {title}
           </h2>
-          <div className='max-w-[800px] whitespace-pre-line text-stone-700 leading-relaxed'>
+          <div className='max-w-[800] whitespace-pre-line text-stone-700 leading-relaxed'>
             {normalizeDescription(description)}
           </div>
         </section>
