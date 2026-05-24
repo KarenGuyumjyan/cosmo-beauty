@@ -38,7 +38,7 @@ function metadataOrderId(metadata: Record<string, unknown> | undefined): string 
 
 /**
  * Confirms the payment object from YooKassa belongs to this order (metadata + amount).
- * Always use after loading the payment via the API — never trust webhook JSON alone.
+ * Always use after loading the payment via the API - never trust webhook JSON alone.
  */
 export function validatePaymentMatchesOrder(
   payment: YooKassaPayment,

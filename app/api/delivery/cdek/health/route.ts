@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
  * Diagnostic endpoint to verify CDEK env wiring in any environment (including Vercel).
  * Hit it from the browser or `curl https://<your-domain>/api/delivery/cdek/health`.
  *
- * Never returns secret values — only booleans + a host hint.
+ * Never returns secret values - only booleans + a host hint.
  */
 export async function GET() {
   const baseUrl = process.env.CDEK_BASE_URL;

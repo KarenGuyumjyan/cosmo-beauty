@@ -6,7 +6,7 @@ export interface LocalizedString {
 
 export type Locale = 'en' | 'hy' | 'ru';
 
-// Underscore format — must match Prisma enum ProductCategory values
+// Underscore format - must match Prisma enum ProductCategory values
 export type Category =
   | 'cosmetic_sponges'
   | 'lip_liner'

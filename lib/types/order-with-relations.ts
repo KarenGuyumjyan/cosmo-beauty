@@ -1,7 +1,7 @@
 import type { OrderStatus, Product } from '@prisma/client';
 
 /**
- * Order row with line items and product rows — matches prisma.order.findFirst/findUnique
+ * Order row with line items and product rows - matches prisma.order.findFirst/findUnique
  * with `include: { items: { include: { product: true } } }`.
  *
  * Kept explicit (not only Prisma inference) so editors stay correct if @prisma/client

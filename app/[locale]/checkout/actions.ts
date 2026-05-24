@@ -145,7 +145,7 @@ export async function createOrder(
 
     // NB: CDEK order is intentionally NOT created here.
     // It is created in `finalizeOrderPaidViaYooKassa` after the payment
-    // succeeds — registering CDEK orders for abandoned/unpaid carts pollutes
+    // succeeds - registering CDEK orders for abandoned/unpaid carts pollutes
     // CDEK's system and incurs needless reservations.
 
     const confirmUrl = payment.confirmation?.confirmation_url

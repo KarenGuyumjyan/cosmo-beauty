@@ -58,7 +58,7 @@ export const getProductById = cache(
   { revalidate: REVALIDATE, tags: ['products'] }
 );
 
-/** Uncached — cart sync API and any dynamic id list (not unstable_cache). */
+/** Uncached - cart sync API and any dynamic id list (not unstable_cache). */
 export async function fetchProductsByIdsForCart(ids: string[]): Promise<Product[]> {
   const unique = [...new Set(ids)].filter(Boolean);
   if (unique.length === 0) return [];

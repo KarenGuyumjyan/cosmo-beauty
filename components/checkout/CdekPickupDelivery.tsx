@@ -205,7 +205,7 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
   }, [selectedCity, t])
 
   // Recalculate the quote when city or cart parcels change.
-  // Importantly, this does NOT reset `selectedPointCode` — the pickup point
+  // Importantly, this does NOT reset `selectedPointCode` - the pickup point
   // stays selected while we re-quote.
   useEffect(() => {
     if (!selectedCity) return

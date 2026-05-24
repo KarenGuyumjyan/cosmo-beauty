@@ -17,7 +17,7 @@ export default function robots(): MetadataRoute.Robots {
           '/*/cart',
           '/*/checkout',
           '/*/order/',
-          // Disallow filtered/sorted catalog query strings — keeps the
+          // Disallow filtered/sorted catalog query strings - keeps the
           // canonical `/catalog` clean in the index.
           '/*?cat=*',
           '/*?sort=*',

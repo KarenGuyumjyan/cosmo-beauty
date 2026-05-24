@@ -70,7 +70,7 @@ type OgImage = { url: string; width?: number; height?: number; alt?: string }
 
 interface BuildPageMetadataInput {
   locale: string
-  /** Path WITHOUT locale prefix — '' for home, '/catalog', '/product/abc'. */
+  /** Path WITHOUT locale prefix - '' for home, '/catalog', '/product/abc'. */
   path: string
   title: string
   description: string
@@ -79,7 +79,7 @@ interface BuildPageMetadataInput {
   applyTitleTemplate?: boolean
   images?: OgImage[]
   ogType?: 'website' | 'article'
-  /** Set to true on cart/checkout/order/admin — keeps them out of the index. */
+  /** Set to true on cart/checkout/order/admin - keeps them out of the index. */
   noIndex?: boolean
 }
 

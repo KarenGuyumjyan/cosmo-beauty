@@ -238,7 +238,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
         </div>
       </div>
 
-      {/* Images (drag-and-drop reorder — first image = main) */}
+      {/* Images (drag-and-drop reorder - first image = main) */}
       <div className="bg-white rounded-2xl border border-stone-100 p-6">
         <h2 className="font-semibold text-stone-900 mb-1">Изображения</h2>
         <p className="text-stone-400 text-xs mb-4">

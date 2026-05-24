@@ -12,7 +12,7 @@ const buildAlternates = (path: string) =>
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // One canonical entry per (locale × path) with hreflang alternates.
-  // Cart / checkout / order / terms are intentionally excluded — they're
+  // Cart / checkout / order / terms are intentionally excluded - they're
   // user-specific transactional routes that should not be indexed.
   const staticPages = [
     { path: '', changeFrequency: 'daily' as const, priority: 1.0 },

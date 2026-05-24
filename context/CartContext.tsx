@@ -119,7 +119,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const merged = mergeCartWithCatalog(itemsRef.current, catalog);
       dispatch({ type: 'HYDRATE', items: merged });
     } catch {
-      /* offline or DB unavailable — keep local cart */
+      /* offline or DB unavailable - keep local cart */
     }
   }, []);
 

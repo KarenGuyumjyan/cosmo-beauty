@@ -76,7 +76,7 @@ export default function VideoHero() {
       {/* Fallback gradient (always visible behind video) */}
       <div className="absolute inset-0 z-0 bg-linear-to-br from-rose-950 via-stone-900 to-rose-900" />
 
-      {/* Background video — above gradient, below text overlay */}
+      {/* Background video - above gradient, below text overlay */}
       <video
         ref={videoRef}
         src={VIDEO_SRC}
@@ -138,7 +138,7 @@ export default function VideoHero() {
         </div>
       </div>
 
-      {/* Play / pause — only when video loaded */}
+      {/* Play / pause - only when video loaded */}
       {!failed && (
         <button
           type="button"
