@@ -184,15 +184,11 @@
       "phoneLabel": "Телефон",
       "addressLabel": "Адрес",
       "email": "morena_studio@mail.ru",
-      "phone": "+374 11 234 567",
+      "phone": "+7 (999) 780-41-60",
       "address": "г. Москва"
     },
     "social": {
-      "title": "Подписывайтесь",
-      "instagram": "Instagram",
-      "facebook": "Facebook",
-      "tiktok": "TikTok",
-      "youtube": "YouTube"
+      "title": "Подписывайтесь"
     },
     "blog": {
       "title": "Блог о красоте",

@@ -108,9 +108,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       availableLanguage: ['Russian', 'English', 'Armenian'],
     },
     sameAs: [
-      'https://instagram.com',
-      'https://facebook.com',
-      'https://tiktok.com',
+      'https://www.instagram.com/morena_cosmetics__',
+      'https://www.wildberries.ru/seller/4293534',
+      'https://ozon.ru/s/morena-cosmetics'
     ],
   };
 
