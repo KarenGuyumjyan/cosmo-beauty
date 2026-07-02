@@ -28,23 +28,23 @@ export async function sendOrderNotification(order: OrderNotification) {
     .join('\n');
 
   const text = [
-    `✨ Новый заказ
-
-    Номер заказа - #${order.orderId}`,
-    `Имя ${order.customerName}`,
-    `📞 Номер телефона ${order.customerPhone}`,
-    order.customerEmail ? `📧 ${order.customerEmail}` : null,
-    '',
-    `📦 Тип доставки: ${order.shippingMethod.trim()}`,
+    '✨ Новый заказ',
+    ' ',
+    `Номер заказа — #${order.orderId}`,
+    `Имя — ${order.customerName}`,
+    `📞 Номер телефона — ${order.customerPhone}`,
+    order.customerEmail ? `✉️ Эл. почта — ${order.customerEmail}` : null,
+    `📦 Тип доставки: ${order.shippingMethod.trim() === 'CDEK_PICKUP' ? 'ПВЗ CDEК' : order.shippingMethod.trim()}`,
     order.address ? `📍 Адрес: ${order.address}` : null,
-    '',
+    ' ',
     '🛒 Товары:',
     itemLines,
-    '',
+    ' ',
     order.shippingCost > 0
       ? `🚚 Доставка: ${order.shippingCost.toLocaleString('ru-RU')} ₽`
       : null,
     `💰 Итого: ${order.total.toLocaleString('ru-RU')} ₽`,
+    '————————————',
   ]
     .filter(Boolean)
     .join('\n');

@@ -223,7 +223,7 @@
     "namePlaceholder": "Иван Иванов",
     "phone": "Телефон",
     "email": "Электронная почта",
-    "emailPlaceholder": "ivan@example.com",
+    "emailPlaceholder": "Эл. почта",
     "orderSummary": "Ваш заказ",
     "subtotal": "Подытог",
     "total": "Итого",

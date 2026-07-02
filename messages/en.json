@@ -231,7 +231,7 @@
     "namePlaceholder": "John Doe",
     "phone": "Phone",
     "email": "Email",
-    "emailPlaceholder": "john@example.com",
+    "emailPlaceholder": "Email address",
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "total": "Total",
