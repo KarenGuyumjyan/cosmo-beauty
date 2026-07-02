@@ -20,29 +20,31 @@ export async function sendOrderNotification(order: OrderNotification) {
     return;
   }
 
-  const shippingLabel = [order.shippingMethod.trim(), order.city, order.address]
-    .filter(Boolean)
-    .join(' · ') || '-';
-
   const itemLines = order.items
-    .map((i) => `  • ${i.name} x${i.quantity} - ${(i.price * i.quantity).toLocaleString('ru-RU')} ₽`)
+    .map(
+      (i) =>
+        `  • ${i.name} — ${i.quantity} × ${i.price.toLocaleString('ru-RU')} ₽ = ${(i.price * i.quantity).toLocaleString('ru-RU')} ₽`,
+    )
     .join('\n');
 
   const text = [
-    `🛍 New order #${order.orderId.slice(0, 8)}`,
-    '',
-    `👤 ${order.customerName}`,
-    `📞 ${order.customerPhone}`,
+    `✨ Новый заказ
+
+    Номер заказа - #${order.orderId}`,
+    `Имя ${order.customerName}`,
+    `📞 Номер телефона ${order.customerPhone}`,
     order.customerEmail ? `📧 ${order.customerEmail}` : null,
     '',
-    `📦 ${shippingLabel}`,
+    `📦 Тип доставки: ${order.shippingMethod.trim()}`,
+    order.address ? `📍 Адрес: ${order.address}` : null,
     '',
+    '🛒 Товары:',
     itemLines,
     '',
     order.shippingCost > 0
-      ? `🚚 Delivery: ${order.shippingCost.toLocaleString('ru-RU')} ₽`
+      ? `🚚 Доставка: ${order.shippingCost.toLocaleString('ru-RU')} ₽`
       : null,
-    `💰 Total: ${order.total.toLocaleString('ru-RU')} ₽`,
+    `💰 Итого: ${order.total.toLocaleString('ru-RU')} ₽`,
   ]
     .filter(Boolean)
     .join('\n');
@@ -51,7 +53,7 @@ export async function sendOrderNotification(order: OrderNotification) {
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML' }),
+      body: JSON.stringify({ chat_id: CHAT_ID, text }),
     });
   } catch (e) {
     console.error('Telegram notification failed', e);
