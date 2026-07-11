@@ -44,7 +44,7 @@ export async function sendOrderNotification(order: OrderNotification) {
       ? `🚚 Доставка: ${order.shippingCost.toLocaleString('ru-RU')} ₽`
       : null,
     `💰 Итого: ${order.total.toLocaleString('ru-RU')} ₽`,
-    '————————————',
+    '——————————————————',
   ]
     .filter(Boolean)
     .join('\n');

@@ -2,7 +2,9 @@ import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { buildParcelsFromOrderLines } from '@/lib/cdek/build-parcels'
 import { createCdekOrder } from '@/lib/cdek/service'
+import { sendOrderEmail } from '@/lib/email/send-order-email'
 import { sendOrderNotification } from '@/lib/telegram'
+import { BASE_URL } from '@/lib/seo'
 import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations'
 
 /**
@@ -101,6 +103,20 @@ export async function finalizeOrderPaidViaYooKassa(
       `[yookassa] Telegram notification failed after payment for order ${order.id}`,
       notifyError,
     )
+  }
+
+  if (order.customerEmail) {
+    try {
+      await sendOrderEmail({
+        email: order.customerEmail,
+        trackingLink: `${BASE_URL}/ru/order/${order.id}`,
+      })
+    } catch (emailError) {
+      console.error(
+        `[yookassa] Customer email notification failed after payment for order ${order.id}`,
+        emailError,
+      )
+    }
   }
 
   return 'paid'

@@ -28,7 +28,7 @@ export default async function AboutPage({ params }: Props) {
     name: 'Morena Cosmetics',
     url: BASE_URL,
     telephone: '+37411234567',
-    email: 'morena_studio@mail.ru',
+    email: 'morena_cosmetics@mail.ru',
     description: tSeo('description'),
     address: {
       '@type': 'PostalAddress',
@@ -148,7 +148,7 @@ export default async function AboutPage({ params }: Props) {
                 </h2>
                 <div className='space-y-5'>
                   <a
-                    href='mailto:morena_studio@mail.ru'
+                    href='mailto:morena_cosmetics@mail.ru'
                     className='flex items-center gap-4 group'
                   >
                     <div className='w-12 h-12 rounded-xl bg-rose-600/20 flex items-center justify-center text-rose-400 group-hover:bg-rose-600 group-hover:text-white transition-colors shrink-0'>
