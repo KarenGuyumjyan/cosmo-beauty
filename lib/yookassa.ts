@@ -112,14 +112,16 @@ export async function createPayment({
     // 401 on the standard shopId:secret order. Surface this original error
     // (not the reversed retry's) plus a sanity check on the credentials
     // shape, so a malformed/missing env var is obvious.
+    const shopIdPrefix = SHOP_ID ? SHOP_ID.slice(0, 6) : '(empty)';
     const shopIdLen = SHOP_ID?.length ?? 0;
-    const secretPrefix = SECRET ? SECRET.slice(0, 5) : '(empty)';
+    const secretPrefix = SECRET ? SECRET.slice(0, 6) : '(empty)';
     const secretLen = SECRET?.length ?? 0;
     res = await post(`${orderId}:auth-retry`, true);
     if (!res.ok) {
       const retryBody = await res.text();
       throw new Error(
-        `YooKassa 401 (shopId len=${shopIdLen}, secret prefix="${secretPrefix}" len=${secretLen}). ` +
+        `YooKassa 401 (shopId prefix="${shopIdPrefix}" len=${shopIdLen}, ` +
+          `secret prefix="${secretPrefix}" len=${secretLen}). ` +
           `Standard order: ${firstBody} | Reversed retry ${res.status}: ${retryBody}`,
       );
     }
