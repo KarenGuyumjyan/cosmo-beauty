@@ -122,6 +122,17 @@ export async function createPayment({
 
   if (!res.ok) {
     const errBody = await res.text();
+    if (res.status === 401) {
+      // TEMP DEBUG: assert credential SHAPE without leaking any key material.
+      const secretLooksLikeKey =
+        SECRET?.startsWith('live_') || SECRET?.startsWith('test_') || false;
+      const shopIdLooksNumeric = /^\d+$/.test(SHOP_ID ?? '');
+      throw new Error(
+        `YooKassa ${res.status}: ${errBody} ` +
+          `[SECRET_KEY looks like a key: ${secretLooksLikeKey}; ` +
+          `SHOP_ID looks numeric: ${shopIdLooksNumeric}]`,
+      );
+    }
     throw new Error(`YooKassa ${res.status}: ${errBody}`);
   }
 
