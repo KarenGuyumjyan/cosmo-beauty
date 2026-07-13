@@ -2,7 +2,7 @@
 
 import type { CdekDeliverySelection } from '@/lib/cdek/types'
 import { prisma } from '@/lib/prisma'
-import { createPayment } from '@/lib/yookassa'
+import { createPayment, type ReceiptItemInput } from '@/lib/yookassa'
 import { BASE_URL } from '@/lib/seo'
 
 type StockRow = { id: string; stockQuantity: number; nameEn: string }
@@ -62,6 +62,7 @@ export async function createOrder(
       discountedPrice: true,
       stockQuantity: true,
       nameEn: true,
+      nameRu: true,
     },
   })
 
@@ -125,11 +126,31 @@ export async function createOrder(
       return { error: lateStockErr }
     }
 
+    // 54-ФЗ receipt: one line per product plus a shipping line. vatCode 1 = Без НДС.
+    const receiptItems: ReceiptItemInput[] = orderItems.map((item) => ({
+      description: productMap.get(item.productId)!.nameRu,
+      amountRub: item.price,
+      quantity: item.quantity,
+      vatCode: 1,
+    }))
+    receiptItems.push({
+      description: 'Доставка CDEK',
+      amountRub: shippingCost,
+      quantity: 1,
+      vatCode: 1,
+      isShipping: true,
+    })
+
     const payment = await createPayment({
       amountRub: total,
       orderId: order.id,
       returnUrl,
       description: `Morena Cosmetics order #${order.id.slice(0, 8)}`,
+      receipt: {
+        email: customerEmail.trim(),
+        phone: customerPhone.trim(),
+        items: receiptItems,
+      },
     })
 
     if (!payment) {

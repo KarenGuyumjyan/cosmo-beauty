@@ -6,11 +6,26 @@ const API = 'https://api.yookassa.ru/v3';
 
 /**
  * YooKassa HTTP Basic: username = shopId, password = secretKey → `shopId:secretKey` before base64.
- * Some setups historically used reversed env placement; we retry on 401 with the other order.
+ * Put the numeric shopId in YOOKASSA_SHOP_ID and the `live_`/`test_` key in
+ * YOOKASSA_SECRET_KEY - the two are NOT interchangeable.
  */
-function basicAuthorizationHeader(reversed: boolean): string {
-  const pair = reversed ? `${SECRET}:${SHOP_ID}` : `${SHOP_ID}:${SECRET}`;
-  return `Basic ${Buffer.from(pair).toString('base64')}`;
+function basicAuthorizationHeader(): string {
+  return `Basic ${Buffer.from(`${SHOP_ID}:${SECRET}`).toString('base64')}`;
+}
+
+/** One line item on the fiscal receipt (54-ФЗ). `amountRub` is the price per single unit. */
+export interface ReceiptItemInput {
+  description: string
+  amountRub: number
+  quantity: number
+  vatCode: number
+  isShipping?: boolean
+}
+
+export interface ReceiptInput {
+  email?: string
+  phone?: string
+  items: ReceiptItemInput[]
 }
 
 export interface CreatePaymentParams {
@@ -18,6 +33,7 @@ export interface CreatePaymentParams {
   orderId: string
   returnUrl: string
   description?: string
+  receipt?: ReceiptInput
 }
 
 export interface YooKassaPayment {
@@ -83,6 +99,7 @@ export async function createPayment({
   orderId,
   returnUrl,
   description,
+  receipt,
 }: CreatePaymentParams): Promise<YooKassaPayment> {
   const body = JSON.stringify({
     amount: { value: amountRub.toFixed(2), currency: 'RUB' },
@@ -90,56 +107,54 @@ export async function createPayment({
     capture: true,
     description: description ?? `Order ${orderId}`,
     metadata: { order_id: orderId },
+    ...(receipt ? { receipt: buildReceipt(receipt) } : {}),
   });
 
-  const post = (idempotenceKey: string, reversed: boolean) =>
-    fetch(`${API}/payments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Idempotence-Key': idempotenceKey,
-        Authorization: basicAuthorizationHeader(reversed),
-      },
-      body,
-    });
+  const res = await fetch(`${API}/payments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Idempotence-Key': orderId,
+      Authorization: basicAuthorizationHeader(),
+    },
+    body,
+  });
 
-  let res = await post(orderId, false);
   if (!res.ok) {
-    const firstBody = await res.text();
-    if (res.status !== 401) {
-      throw new Error(`YooKassa ${res.status}: ${firstBody}`);
-    }
-    // 401 on the standard shopId:secret order. Surface this original error
-    // (not the reversed retry's) plus a sanity check on the credentials
-    // shape, so a malformed/missing env var is obvious.
-    const shopIdPrefix = SHOP_ID ? SHOP_ID.slice(0, 6) : '(empty)';
-    const shopIdLen = SHOP_ID?.length ?? 0;
-    const secretPrefix = SECRET ? SECRET.slice(0, 6) : '(empty)';
-    const secretLen = SECRET?.length ?? 0;
-    res = await post(`${orderId}:auth-retry`, true);
-    if (!res.ok) {
-      const retryBody = await res.text();
-      throw new Error(
-        `YooKassa 401 (shopId prefix="${shopIdPrefix}" len=${shopIdLen}, ` +
-          `secret prefix="${secretPrefix}" len=${secretLen}). ` +
-          `Standard order: ${firstBody} | Reversed retry ${res.status}: ${retryBody}`,
-      );
-    }
+    const errBody = await res.text();
+    throw new Error(`YooKassa ${res.status}: ${errBody}`);
   }
 
   return res.json();
 }
 
-export async function fetchPayment(paymentId: string): Promise<YooKassaPayment> {
-  const get = (reversed: boolean) =>
-    fetch(`${API}/payments/${paymentId}`, {
-      headers: { Authorization: basicAuthorizationHeader(reversed) },
-    });
+/**
+ * Builds a 54-ФЗ receipt. YooKassa requires the sum of item (amount × quantity)
+ * to equal the payment amount, so shipping must be its own line item.
+ */
+function buildReceipt(receipt: ReceiptInput) {
+  const phone = receipt.phone?.replace(/\D/g, '');
+  const customer: Record<string, string> = {};
+  if (receipt.email) customer.email = receipt.email;
+  if (phone) customer.phone = phone;
 
-  let res = await get(false);
-  if (res.status === 401) {
-    res = await get(true);
-  }
+  return {
+    customer,
+    items: receipt.items.map((item) => ({
+      description: item.description.slice(0, 128),
+      quantity: item.quantity.toFixed(2),
+      amount: { value: item.amountRub.toFixed(2), currency: 'RUB' },
+      vat_code: item.vatCode,
+      payment_mode: 'full_payment',
+      payment_subject: item.isShipping ? 'service' : 'commodity',
+    })),
+  };
+}
+
+export async function fetchPayment(paymentId: string): Promise<YooKassaPayment> {
+  const res = await fetch(`${API}/payments/${paymentId}`, {
+    headers: { Authorization: basicAuthorizationHeader() },
+  });
   if (!res.ok) throw new Error(`YooKassa fetch ${res.status}`);
   return res.json();
 }
