@@ -1,16 +1,57 @@
 import { Buffer } from 'node:buffer';
 
-const SHOP_ID = process.env.YOOKASSA_SHOP_ID!;
-const SECRET = process.env.YOOKASSA_SECRET_KEY!;
 const API = 'https://api.yookassa.ru/v3';
 
+/** 54-FZ receipt defaults; override via env if your tax regime differs. */
+const TAX_SYSTEM_CODE = Number(process.env.YOOKASSA_TAX_SYSTEM_CODE ?? '1');
+const VAT_CODE = Number(process.env.YOOKASSA_VAT_CODE ?? '1');
+
+export interface YooKassaReceiptItem {
+  description: string;
+  quantity: number;
+  /** Line total in whole rubles (price × quantity). */
+  amountRub: number;
+  /** Defaults to `commodity`; use `service` for delivery. */
+  paymentSubject?: 'commodity' | 'service';
+}
+
+function normalizeSecretKey(raw: string): string {
+  if (raw.startsWith('live_') || raw.startsWith('test_')) return raw;
+  // Merchant profile secrets are issued with a live_/test_ prefix; tolerate env without it.
+  return `live_${raw}`;
+}
+
 /**
- * YooKassa HTTP Basic: username = shopId, password = secretKey → `shopId:secretKey` before base64.
- * Some setups historically used reversed env placement; we retry on 401 with the other order.
+ * Resolve shop id + secret even when env vars were saved in the wrong slots.
+ * Shop id is numeric; secret is a long token (often live_… / test_…).
  */
-function basicAuthorizationHeader(reversed: boolean): string {
-  const pair = reversed ? `${SECRET}:${SHOP_ID}` : `${SHOP_ID}:${SECRET}`;
-  return `Basic ${Buffer.from(pair).toString('base64')}`;
+function resolveCredentials(): { shopId: string; secretKey: string } {
+  const a = process.env.YOOKASSA_SHOP_ID?.trim() ?? '';
+  const b = process.env.YOOKASSA_SECRET_KEY?.trim() ?? '';
+  if (!a || !b) {
+    throw new Error('YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY must be set');
+  }
+
+  const aIsShopId = /^\d{4,10}$/.test(a);
+  const bIsShopId = /^\d{4,10}$/.test(b);
+  const aIsSecret = a.startsWith('live_') || a.startsWith('test_') || (!aIsShopId && a.length >= 20);
+  const bIsSecret = b.startsWith('live_') || b.startsWith('test_') || (!bIsShopId && b.length >= 20);
+
+  if (aIsShopId && bIsSecret) {
+    return { shopId: a, secretKey: normalizeSecretKey(b) };
+  }
+  if (bIsShopId && aIsSecret) {
+    return { shopId: b, secretKey: normalizeSecretKey(a) };
+  }
+
+  // Fallback: documented order shopId:secretKey
+  return { shopId: a, secretKey: normalizeSecretKey(b) };
+}
+
+/** YooKassa HTTP Basic: username = shopId, password = secretKey. */
+function basicAuthorizationHeader(): string {
+  const { shopId, secretKey } = resolveCredentials();
+  return `Basic ${Buffer.from(`${shopId}:${secretKey}`).toString('base64')}`;
 }
 
 export interface CreatePaymentParams {
@@ -18,6 +59,8 @@ export interface CreatePaymentParams {
   orderId: string
   returnUrl: string
   description?: string
+  customerEmail: string
+  receiptItems: YooKassaReceiptItem[]
 }
 
 export interface YooKassaPayment {
@@ -78,11 +121,31 @@ export function validatePaymentMatchesOrder(
   return { ok: true };
 }
 
+function buildReceipt(
+  customerEmail: string,
+  items: YooKassaReceiptItem[],
+) {
+  return {
+    customer: { email: customerEmail },
+    tax_system_code: TAX_SYSTEM_CODE,
+    items: items.map((item) => ({
+      description: item.description.slice(0, 128),
+      quantity: item.quantity.toFixed(2),
+      amount: { value: item.amountRub.toFixed(2), currency: 'RUB' },
+      vat_code: VAT_CODE,
+      payment_mode: 'full_payment',
+      payment_subject: item.paymentSubject ?? 'commodity',
+    })),
+  };
+}
+
 export async function createPayment({
   amountRub,
   orderId,
   returnUrl,
   description,
+  customerEmail,
+  receiptItems,
 }: CreatePaymentParams): Promise<YooKassaPayment> {
   const body = JSON.stringify({
     amount: { value: amountRub.toFixed(2), currency: 'RUB' },
@@ -90,23 +153,18 @@ export async function createPayment({
     capture: true,
     description: description ?? `Order ${orderId}`,
     metadata: { order_id: orderId },
+    receipt: buildReceipt(customerEmail, receiptItems),
   });
 
-  const post = (idempotenceKey: string, reversed: boolean) =>
-    fetch(`${API}/payments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Idempotence-Key': idempotenceKey,
-        Authorization: basicAuthorizationHeader(reversed),
-      },
-      body,
-    });
-
-  let res = await post(orderId, false);
-  if (res.status === 401) {
-    res = await post(`${orderId}:auth-retry`, true);
-  }
+  const res = await fetch(`${API}/payments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Idempotence-Key': orderId,
+      Authorization: basicAuthorizationHeader(),
+    },
+    body,
+  });
 
   if (!res.ok) {
     const errBody = await res.text();
@@ -117,15 +175,9 @@ export async function createPayment({
 }
 
 export async function fetchPayment(paymentId: string): Promise<YooKassaPayment> {
-  const get = (reversed: boolean) =>
-    fetch(`${API}/payments/${paymentId}`, {
-      headers: { Authorization: basicAuthorizationHeader(reversed) },
-    });
-
-  let res = await get(false);
-  if (res.status === 401) {
-    res = await get(true);
-  }
+  const res = await fetch(`${API}/payments/${paymentId}`, {
+    headers: { Authorization: basicAuthorizationHeader() },
+  });
   if (!res.ok) throw new Error(`YooKassa fetch ${res.status}`);
   return res.json();
 }

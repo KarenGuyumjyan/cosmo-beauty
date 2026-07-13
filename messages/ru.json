@@ -234,6 +234,9 @@
     "goToCart": "Перейти в корзину",
     "cdekPickupPoint": "ПВЗ CDEК",
     "yandexPickupPoint": "ПВЗ Yandex",
+    "pickupPoint": "С Магазина",
+    "free": "Бесплатно",
+    "freePickupNotice": "Вам нужно прийти в магазин, показать номер заказа и получить.",
     "errors": {
       "nameRequired": "Введите имя",
       "phoneRequired": "Введите телефон",

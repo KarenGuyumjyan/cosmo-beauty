@@ -2,7 +2,13 @@
 
 import { useState, useMemo, useEffect, useSyncExternalStore } from 'react'
 import { useTranslations } from 'next-intl'
-import { ShoppingBag, ArrowRight, Loader2, PackageCheck, AlertCircle } from 'lucide-react'
+import {
+  ShoppingBag,
+  ArrowRight,
+  Loader2,
+  PackageCheck,
+  AlertCircle,
+} from 'lucide-react'
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { useCart } from '@/context/CartContext'
@@ -34,32 +40,24 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [selectedPickupType, setSelectedPickupType] = useState<
-    'cdek' | 'yandex'
+    'cdek' | 'yandex' | 'pickup'
   >('cdek')
-  // The cart hydrates from localStorage after mount, so on first render
-  // `items` is always []. Once we've mounted we know an empty cart is real
-  // and can show the empty-cart UI instead of an indefinite spinner.
-  // `useSyncExternalStore` gives us a hydration-safe boolean without invoking
-  // setState from inside an effect.
   const hydrated = useSyncExternalStore(
     subscribeNoop,
     getClientHydratedSnapshot,
     getServerHydratedSnapshot,
   )
 
-  const shippingCost = delivery?.finalPrice ?? 0
+  const isFreePickup = selectedPickupType === 'pickup'
+  const shippingCost = isFreePickup ? 0 : (delivery?.finalPrice ?? 0)
   const total = subtotal + shippingCost
 
   const hasOutOfStock = items.some((item) => item.product.stockQuantity === 0)
 
-  // Re-validate stock from DB when the checkout page loads.
   useEffect(() => {
     void refreshCart()
   }, [refreshCart])
 
-  // Stable reference: only recompute when cart contents actually change.
-  // Without this, every parent re-render produced a fresh array reference,
-  // which retriggered the CDEK delivery effect and wiped the selected pickup point.
   const parcels = useMemo<CdekParcel[]>(
     () =>
       items.map((item) => ({
@@ -80,9 +78,12 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
     if (!phone.trim()) return setError(t('errors.phoneRequired'))
     if (!email.trim()) return setError(t('errors.emailRequired'))
     if (!isValidRuPhone(phone)) return setError(t('errors.phoneInvalid'))
-    if (!delivery) return setError(t('errors.deliveryRequired'))
-    if (delivery.finalPrice <= 0)
-      return setError(t('errors.deliveryPriceInvalid'))
+
+    if (selectedPickupType !== 'pickup') {
+      if (!delivery) return setError(t('errors.deliveryRequired'))
+      if (delivery.finalPrice <= 0)
+        return setError(t('errors.deliveryPriceInvalid'))
+    }
 
     setSubmitting(true)
     try {
@@ -91,6 +92,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
         customerPhone: phone,
         customerEmail: email,
         delivery,
+        deliveryMethod: selectedPickupType,
         items: items.map((i) => ({
           productId: i.product.id,
           quantity: i.quantity,
@@ -111,7 +113,8 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
       setSubmitting(false)
     }
   }
-  const togglePickupType = (type: 'cdek' | 'yandex') => {
+
+  const togglePickupType = (type: 'cdek' | 'yandex' | 'pickup') => {
     if (type !== selectedPickupType) {
       setSelectedPickupType(type)
       setDelivery(null)
@@ -251,10 +254,40 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                     {t('yandexPickupPoint')}
                   </p>
                 </button>
+
+                <button
+                  type='button'
+                  onClick={() => togglePickupType('pickup')}
+                  className={`rounded-2xl bg-stone-50 p-4 w-fit flex items-center gap-3 border transition ${
+                    selectedPickupType === 'pickup'
+                      ? 'border-rose-700'
+                      : 'border-transparent'
+                  }`}
+                >
+                  <div className='w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-stone-200 shrink-0'>
+                    <PackageCheck size={18} className='text-rose-600' />
+                  </div>
+
+                  <p className='font-semibold text-stone-800'>
+                    {t('pickupPoint')}
+                  </p>
+                </button>
               </div>
               {selectedPickupType === 'cdek' ? (
-                <CdekPickupDelivery parcels={parcels} totalPrice={subtotal} onChange={setDelivery} />
-              ) : null}
+                <CdekPickupDelivery
+                  parcels={parcels}
+                  totalPrice={subtotal}
+                  onChange={setDelivery}
+                />
+              ) : (
+                <div className='bg-white rounded-2xl border border-stone-100 p-6 flex items-center gap-3 text-sm text-stone-600'>
+                  <PackageCheck
+                    size={18}
+                    className='text-emerald-600 shrink-0'
+                  />
+                  <span>{t('freePickupNotice')}</span>
+                </div>
+              )}
             </div>
 
             <div className='bg-white rounded-2xl border border-stone-100 p-6 sticky top-24'>
@@ -300,15 +333,24 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                     {subtotal.toLocaleString()} {CURRENCY}
                   </span>
                 </div>
-                {shippingCost > 0 && (
+                {isFreePickup ? (
                   <div className='flex justify-between text-stone-600'>
-                    <span>CDEK (ПВЗ)</span>
-                    <span className='font-medium'>
-                      {shippingCost.toLocaleString()} {CURRENCY}
+                    <span>{t('pickupPoint')}</span>
+                    <span className='font-medium text-emerald-600'>
+                      {t('free')}
                     </span>
                   </div>
+                ) : (
+                  shippingCost > 0 && (
+                    <div className='flex justify-between text-stone-600'>
+                      <span>{t('cdekPickupPoint')}</span>
+                      <span className='font-medium'>
+                        {shippingCost.toLocaleString()} {CURRENCY}
+                      </span>
+                    </div>
+                  )
                 )}
-                {delivery && (
+                {delivery && selectedPickupType !== 'pickup' && (
                   <div className='text-xs text-stone-500 border-t border-dashed border-stone-100 pt-2 mt-2'>
                     <p className='font-medium text-stone-600'>
                       {delivery.pickupPointName}
@@ -349,7 +391,12 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
 
               <button
                 type='submit'
-                disabled={submitting || !delivery || shippingCost <= 0 || hasOutOfStock}
+                disabled={
+                  submitting ||
+                  hasOutOfStock ||
+                  (selectedPickupType !== 'pickup' &&
+                    (!delivery || shippingCost <= 0))
+                }
                 className='w-full bg-rose-600 hover:bg-rose-700 active:scale-95 disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed disabled:hover:bg-rose-600 disabled:active:scale-100 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2'
               >
                 {submitting ? (

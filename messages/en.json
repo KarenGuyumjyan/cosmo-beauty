@@ -242,6 +242,9 @@
     "goToCart": "Go to Cart",
     "cdekPickupPoint": "CDEK Pickup Point",
     "yandexPickupPoint": "Yandex Pickup Point",
+    "pickupPoint": "From the Store",
+    "free": "Free",
+    "freePickupNotice": "You need to come to the store, show your order number, and receive it.",
     "errors": {
       "nameRequired": "Name is required",
       "phoneRequired": "Phone is required",
