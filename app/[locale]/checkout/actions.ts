@@ -3,6 +3,7 @@
 import type { CdekDeliverySelection } from '@/lib/cdek/types'
 import { prisma } from '@/lib/prisma'
 import { createPayment } from '@/lib/yookassa'
+import { BASE_URL } from '@/lib/seo'
 
 type StockRow = { id: string; stockQuantity: number; nameEn: string }
 
@@ -105,8 +106,7 @@ export async function createOrder(
     },
   })
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
-  const returnUrl = `${baseUrl}/${locale}/order/${order.id}`
+  const returnUrl = `${BASE_URL}/${locale}/order/${order.id}`
 
   try {
     // Re-fetch stock right before payment to close the race window between
