@@ -1,41 +1,53 @@
-'use client'
+'use client';
 
-import { useState, useMemo, useEffect, useSyncExternalStore } from 'react'
-import { useTranslations } from 'next-intl'
-import { ShoppingBag, ArrowRight, Loader2, PackageCheck, AlertCircle } from 'lucide-react'
-import Image from 'next/image'
-import { Link } from '@/i18n/navigation'
-import { useCart } from '@/context/CartContext'
-import { createOrder } from '@/app/[locale]/checkout/actions'
-import type { Locale } from '@/lib/types'
-import type { CdekDeliverySelection, CdekParcel } from '@/lib/cdek/types'
-import CdekPickupDelivery from '@/components/checkout/CdekPickupDelivery'
+import { useState, useMemo, useEffect, useSyncExternalStore } from 'react';
+import { useTranslations } from 'next-intl';
+import {
+  ShoppingBag,
+  ArrowRight,
+  Loader2,
+  PackageCheck,
+  Store,
+  AlertCircle,
+} from 'lucide-react';
+import Image from 'next/image';
+import { Link } from '@/i18n/navigation';
+import { useCart } from '@/context/CartContext';
+import { createOrder } from '@/app/[locale]/checkout/actions';
+import type { Locale } from '@/lib/types';
+import type {
+  CdekDeliverySelection,
+  CdekParcel,
+  DeliverySelection,
+} from '@/lib/cdek/types';
+import { SHOP_PICKUP_ADDRESS } from '@/lib/shop';
+import CdekPickupDelivery from '@/components/checkout/CdekPickupDelivery';
 import {
   formatPhone,
   isValidRuPhone,
   RU_PHONE_DISPLAY_MAX_LENGTH,
   RU_PHONE_PREFIX,
-} from '@/lib/utils/phone'
+} from '@/lib/utils/phone';
 
-const CURRENCY = '₽'
+const CURRENCY = '₽';
 
-const subscribeNoop = () => () => {}
-const getClientHydratedSnapshot = () => true
-const getServerHydratedSnapshot = () => false
+const subscribeNoop = () => () => {};
+const getClientHydratedSnapshot = () => true;
+const getServerHydratedSnapshot = () => false;
 
 export default function CheckoutPageClient({ locale }: { locale: Locale }) {
-  const t = useTranslations('checkout')
-  const { items, subtotal, clearCart, refreshCart } = useCart()
+  const t = useTranslations('checkout');
+  const { items, subtotal, clearCart, refreshCart } = useCart();
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
-  const [delivery, setDelivery] = useState<CdekDeliverySelection | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [delivery, setDelivery] = useState<CdekDeliverySelection | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [selectedPickupType, setSelectedPickupType] = useState<
-    'cdek' | 'yandex'
-  >('cdek')
+    'cdek' | 'yandex' | 'shop'
+  >('cdek');
   // The cart hydrates from localStorage after mount, so on first render
   // `items` is always []. Once we've mounted we know an empty cart is real
   // and can show the empty-cart UI instead of an indefinite spinner.
@@ -45,17 +57,27 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
     subscribeNoop,
     getClientHydratedSnapshot,
     getServerHydratedSnapshot,
-  )
+  );
 
-  const shippingCost = delivery?.finalPrice ?? 0
-  const total = subtotal + shippingCost
+  // Shop pickup is free; CDEK uses its quoted price. Yandex isn't wired up yet.
+  const shippingCost =
+    selectedPickupType === 'cdek' ? (delivery?.finalPrice ?? 0) : 0;
+  const total = subtotal + shippingCost;
 
-  const hasOutOfStock = items.some((item) => item.product.stockQuantity === 0)
+  // Shop pickup is always ready; CDEK needs a priced pickup point selected.
+  const canPlaceOrder =
+    selectedPickupType === 'shop'
+      ? true
+      : selectedPickupType === 'cdek'
+        ? Boolean(delivery) && shippingCost > 0
+        : false;
+
+  const hasOutOfStock = items.some((item) => item.product.stockQuantity === 0);
 
   // Re-validate stock from DB when the checkout page loads.
   useEffect(() => {
-    void refreshCart()
-  }, [refreshCart])
+    void refreshCart();
+  }, [refreshCart]);
 
   // Stable reference: only recompute when cart contents actually change.
   // Without this, every parent re-render produced a fresh array reference,
@@ -69,54 +91,64 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
         height: Math.max(1, item.product.heightCm ?? 10),
       })),
     [items],
-  )
+  );
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
-    if (hasOutOfStock) return setError(t('errors.outOfStockBanner'))
-    if (!name.trim()) return setError(t('errors.nameRequired'))
-    if (!phone.trim()) return setError(t('errors.phoneRequired'))
-    if (!email.trim()) return setError(t('errors.emailRequired'))
-    if (!isValidRuPhone(phone)) return setError(t('errors.phoneInvalid'))
-    if (!delivery) return setError(t('errors.deliveryRequired'))
-    if (delivery.finalPrice <= 0)
-      return setError(t('errors.deliveryPriceInvalid'))
+    if (hasOutOfStock) return setError(t('errors.outOfStockBanner'));
+    if (!name.trim()) return setError(t('errors.nameRequired'));
+    if (!phone.trim()) return setError(t('errors.phoneRequired'));
+    if (!email.trim()) return setError(t('errors.emailRequired'));
+    if (!isValidRuPhone(phone)) return setError(t('errors.phoneInvalid'));
 
-    setSubmitting(true)
+    let deliverySelection: DeliverySelection;
+    if (selectedPickupType === 'shop') {
+      deliverySelection = { method: 'SHOP_PICKUP' };
+    } else if (selectedPickupType === 'cdek') {
+      if (!delivery) return setError(t('errors.deliveryRequired'));
+      if (delivery.finalPrice <= 0)
+        return setError(t('errors.deliveryPriceInvalid'));
+      deliverySelection = { method: 'CDEK_PICKUP', cdek: delivery };
+    } else {
+      // Yandex pickup isn't available yet.
+      return setError(t('errors.deliveryRequired'));
+    }
+
+    setSubmitting(true);
     try {
       const result = await createOrder({
         customerName: name,
         customerPhone: phone,
         customerEmail: email,
-        delivery,
+        delivery: deliverySelection,
         items: items.map((i) => ({
           productId: i.product.id,
           quantity: i.quantity,
         })),
         locale,
-      })
+      });
 
       if ('error' in result) {
-        setError(result.error)
-        setSubmitting(false)
-        return
+        setError(result.error);
+        setSubmitting(false);
+        return;
       }
 
-      clearCart()
-      window.location.href = result.paymentUrl
+      clearCart();
+      window.location.href = result.paymentUrl;
     } catch {
-      setError(t('errors.generic'))
-      setSubmitting(false)
+      setError(t('errors.generic'));
+      setSubmitting(false);
     }
   }
-  const togglePickupType = (type: 'cdek' | 'yandex') => {
+  const togglePickupType = (type: 'cdek' | 'yandex' | 'shop') => {
     if (type !== selectedPickupType) {
-      setSelectedPickupType(type)
-      setDelivery(null)
+      setSelectedPickupType(type);
+      setDelivery(null);
     }
-  }
+  };
 
   if (items.length === 0) {
     if (!hydrated) {
@@ -124,7 +156,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
         <div className='pt-32 pb-24 min-h-dvh flex items-center justify-center'>
           <Loader2 size={32} className='animate-spin text-rose-400' />
         </div>
-      )
+      );
     }
     return (
       <div className='pt-32 pb-24 min-h-dvh flex items-center justify-center'>
@@ -146,7 +178,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -187,10 +219,10 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                       value={phone}
                       onChange={(e) => setPhone(formatPhone(e.target.value))}
                       onFocus={() => {
-                        if (!phone) setPhone(RU_PHONE_PREFIX)
+                        if (!phone) setPhone(RU_PHONE_PREFIX);
                       }}
                       onBlur={() => {
-                        if (phone === RU_PHONE_PREFIX) setPhone('')
+                        if (phone === RU_PHONE_PREFIX) setPhone('');
                       }}
                       placeholder={`${RU_PHONE_PREFIX} (___) ___-__-__`}
                       type='tel'
@@ -215,7 +247,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                   </div>
                 </div>
               </div>
-              <div className='bg-white rounded-2xl border border-stone-100 p-6 flex gap-5'>
+              <div className='bg-white rounded-2xl border border-stone-100 p-6 flex flex-wrap gap-5'>
                 <button
                   type='button'
                   onClick={() => togglePickupType('cdek')}
@@ -251,9 +283,54 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                     {t('yandexPickupPoint')}
                   </p>
                 </button>
+
+                <button
+                  type='button'
+                  onClick={() => togglePickupType('shop')}
+                  className={`rounded-2xl bg-stone-50 p-4 w-fit flex items-center gap-3 border transition ${
+                    selectedPickupType === 'shop'
+                      ? 'border-rose-700'
+                      : 'border-transparent'
+                  }`}
+                >
+                  <div className='w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-stone-200 shrink-0'>
+                    <Store size={18} className='text-rose-600' />
+                  </div>
+
+                  <p className='font-semibold text-stone-800'>
+                    {t('shopPickup')}
+                  </p>
+                </button>
               </div>
               {selectedPickupType === 'cdek' ? (
-                <CdekPickupDelivery parcels={parcels} totalPrice={subtotal} onChange={setDelivery} />
+                <CdekPickupDelivery
+                  parcels={parcels}
+                  totalPrice={subtotal}
+                  onChange={setDelivery}
+                />
+              ) : null}
+              {selectedPickupType === 'shop' ? (
+                <div className='bg-white rounded-2xl border border-stone-100 p-6'>
+                  <div className='flex items-start gap-3'>
+                    <div className='w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center shrink-0'>
+                      <Store size={18} className='text-rose-600' />
+                    </div>
+                    <div>
+                      <p className='font-semibold text-stone-800'>
+                        {t('shopPickup')} ·{' '}
+                        <span className='text-rose-700'>
+                          {t('shopPickupFree')}
+                        </span>
+                      </p>
+                      <p className='text-sm text-stone-500 mt-1 leading-snug'>
+                        {t('shopPickupNote')}
+                      </p>
+                      <p className='text-sm font-medium text-stone-700 mt-2'>
+                        {SHOP_PICKUP_ADDRESS}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : null}
             </div>
 
@@ -265,7 +342,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
               <div className='space-y-3 mb-5 max-h-64 overflow-y-auto'>
                 {items.map((item) => {
                   const price =
-                    item.product.discountedPrice ?? item.product.price
+                    item.product.discountedPrice ?? item.product.price;
                   return (
                     <div key={item.product.id} className='flex gap-3'>
                       <div className='relative w-14 h-14 rounded-lg overflow-hidden bg-stone-50 shrink-0'>
@@ -289,7 +366,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                         {(price * item.quantity).toLocaleString()} {CURRENCY}
                       </p>
                     </div>
-                  )
+                  );
                 })}
               </div>
 
@@ -308,7 +385,15 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                     </span>
                   </div>
                 )}
-                {delivery && (
+                {selectedPickupType === 'shop' && (
+                  <div className='flex justify-between text-stone-600'>
+                    <span>{t('shopPickup')}</span>
+                    <span className='font-medium text-rose-700'>
+                      {t('shopPickupFree')}
+                    </span>
+                  </div>
+                )}
+                {selectedPickupType === 'cdek' && delivery && (
                   <div className='text-xs text-stone-500 border-t border-dashed border-stone-100 pt-2 mt-2'>
                     <p className='font-medium text-stone-600'>
                       {delivery.pickupPointName}
@@ -349,7 +434,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
 
               <button
                 type='submit'
-                disabled={submitting || !delivery || shippingCost <= 0 || hasOutOfStock}
+                disabled={submitting || !canPlaceOrder || hasOutOfStock}
                 className='w-full bg-rose-600 hover:bg-rose-700 active:scale-95 disabled:opacity-60 disabled:pointer-events-none disabled:cursor-not-allowed disabled:hover:bg-rose-600 disabled:active:scale-100 text-white font-bold py-4 rounded-2xl transition-all text-base shadow-lg shadow-rose-200 flex items-center justify-center gap-2'
               >
                 {submitting ? (
@@ -372,5 +457,5 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
         </form>
       </div>
     </div>
-  )
+  );
 }

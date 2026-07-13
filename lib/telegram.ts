@@ -27,6 +27,14 @@ export async function sendOrderNotification(order: OrderNotification) {
     )
     .join('\n');
 
+  const method = order.shippingMethod.trim();
+  const methodLabel =
+    method === 'CDEK_PICKUP'
+      ? 'ПВЗ CDEК'
+      : method === 'SHOP_PICKUP'
+        ? 'Самовывоз из магазина'
+        : method;
+
   const text = [
     '✨ Новый заказ',
     ' ',
@@ -34,7 +42,7 @@ export async function sendOrderNotification(order: OrderNotification) {
     `Имя — ${order.customerName}`,
     `📞 Номер телефона — ${order.customerPhone}`,
     order.customerEmail ? `✉️ Эл. почта — ${order.customerEmail}` : null,
-    `📦 Тип доставки: ${order.shippingMethod.trim() === 'CDEK_PICKUP' ? 'ПВЗ CDEК' : order.shippingMethod.trim()}`,
+    `📦 Тип доставки: ${methodLabel}`,
     order.address ? `📍 Адрес: ${order.address}` : null,
     ' ',
     '🛒 Товары:',

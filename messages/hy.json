@@ -234,6 +234,9 @@
     "goToCart": "Անցնել զամբյուղ",
     "cdekPickupPoint": "CDEK Հ.Կ.",
     "yandexPickupPoint": "Yandex Հ.Կ.",
+    "shopPickup": "Վերցնել խանութից",
+    "shopPickupFree": "Անվճար",
+    "shopPickupNote": "Վերցրեք ձեր պատվերը մեր խանութից — առանց առաքման վճարի:",
     "errors": {
       "nameRequired": "Մուտքագրեք անունը",
       "phoneRequired": "Մուտքագրեք հեռախոսահամարը",

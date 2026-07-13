@@ -1,9 +1,10 @@
 'use server'
 
-import type { CdekDeliverySelection } from '@/lib/cdek/types'
+import type { DeliverySelection } from '@/lib/cdek/types'
 import { prisma } from '@/lib/prisma'
 import { createPayment, type ReceiptItemInput } from '@/lib/yookassa'
 import { BASE_URL } from '@/lib/seo'
+import { SHOP_PICKUP_ADDRESS } from '@/lib/shop'
 
 type StockRow = { id: string; stockQuantity: number; nameEn: string }
 
@@ -27,7 +28,7 @@ interface CheckoutInput {
   customerName: string
   customerPhone: string
   customerEmail: string
-  delivery: CdekDeliverySelection
+  delivery: DeliverySelection
   items: { productId: string; quantity: number }[]
   locale: string
 }
@@ -46,11 +47,14 @@ export async function createOrder(
 
   if (!customerName.trim()) return { error: 'Name is required' }
   if (!customerPhone.trim()) return { error: 'Phone is required' }
-  if (!delivery.city || !delivery.pickupPointCode) {
-    return { error: 'CDEK pickup point is required' }
-  }
-  if (delivery.finalPrice <= 0) {
-    return { error: 'Delivery price must be greater than 0' }
+  if (delivery.method === 'CDEK_PICKUP') {
+    const c = delivery.cdek
+    if (!c.city || !c.pickupPointCode) {
+      return { error: 'CDEK pickup point is required' }
+    }
+    if (c.finalPrice <= 0) {
+      return { error: 'Delivery price must be greater than 0' }
+    }
   }
   if (!items.length) return { error: 'Cart is empty' }
 
@@ -81,24 +85,38 @@ export async function createOrder(
   })
 
   const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
-  const shippingCost = delivery.finalPrice
+  // Shop pickup is always free; CDEK carries its quoted delivery price.
+  const shippingCost =
+    delivery.method === 'CDEK_PICKUP' ? delivery.cdek.finalPrice : 0
   const total = subtotal + shippingCost
+
+  // CDEK-specific columns stay null for SHOP_PICKUP so no CDEK order is
+  // registered downstream (see finalizeOrderPaidViaYooKassa).
+  const shippingData =
+    delivery.method === 'CDEK_PICKUP'
+      ? {
+          shippingMethod: 'CDEK_PICKUP',
+          city: delivery.cdek.city,
+          cityCode: delivery.cdek.cityCode,
+          address: delivery.cdek.pickupPointAddress,
+          pickupPointCode: delivery.cdek.pickupPointCode,
+          pickupPointName: delivery.cdek.pickupPointName,
+          pickupPointAddress: delivery.cdek.pickupPointAddress,
+          tariffCode: delivery.cdek.tariffCode,
+          cdekPrice: delivery.cdek.cdekPrice,
+          finalPrice: delivery.cdek.finalPrice,
+        }
+      : {
+          shippingMethod: 'SHOP_PICKUP',
+          address: SHOP_PICKUP_ADDRESS,
+        }
 
   const order = await prisma.order.create({
     data: {
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
       customerEmail: customerEmail.trim(),
-      shippingMethod: 'CDEK_PICKUP',
-      city: delivery.city,
-      cityCode: delivery.cityCode,
-      address: delivery.pickupPointAddress,
-      pickupPointCode: delivery.pickupPointCode,
-      pickupPointName: delivery.pickupPointName,
-      pickupPointAddress: delivery.pickupPointAddress,
-      tariffCode: delivery.tariffCode,
-      cdekPrice: delivery.cdekPrice,
-      finalPrice: delivery.finalPrice,
+      ...shippingData,
       shippingCost,
       subtotal,
       total,
@@ -126,20 +144,25 @@ export async function createOrder(
       return { error: lateStockErr }
     }
 
-    // 54-ФЗ receipt: one line per product plus a shipping line. vatCode 1 = Без НДС.
+    // 54-ФЗ receipt: one line per product, plus a shipping line for paid
+    // delivery. Shop pickup is free, so it gets no shipping line (a 0₽ line
+    // would be rejected and the item sum must equal the payment amount).
+    // vatCode 1 = Без НДС.
     const receiptItems: ReceiptItemInput[] = orderItems.map((item) => ({
       description: productMap.get(item.productId)!.nameRu,
       amountRub: item.price,
       quantity: item.quantity,
       vatCode: 1,
     }))
-    receiptItems.push({
-      description: 'Доставка CDEK',
-      amountRub: shippingCost,
-      quantity: 1,
-      vatCode: 1,
-      isShipping: true,
-    })
+    if (shippingCost > 0) {
+      receiptItems.push({
+        description: 'Доставка CDEK',
+        amountRub: shippingCost,
+        quantity: 1,
+        vatCode: 1,
+        isShipping: true,
+      })
+    }
 
     const payment = await createPayment({
       amountRub: total,
@@ -181,9 +204,6 @@ export async function createOrder(
       where: { id: order.id },
       data: { status: 'CANCELLED' },
     })
-    // TEMP DEBUG: surface the real cause into the UI banner since Live logs
-    // aren't accessible. Revert to a generic message before final release.
-    const detail = e instanceof Error ? e.message : String(e)
-    return { error: `Payment failed: ${detail}` }
+    return { error: 'Payment failed. Please try again.' }
   }
 }

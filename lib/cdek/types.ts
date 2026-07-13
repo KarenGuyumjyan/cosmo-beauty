@@ -41,6 +41,15 @@ export type CdekDeliverySelection = {
   finalPrice: number;
 };
 
+/**
+ * Delivery method chosen at checkout. CDEK carries a full pickup-point
+ * selection; SHOP_PICKUP is a free in-store pickup with no shipping data.
+ * (Yandex pickup will be added later as another CDEK-like variant.)
+ */
+export type DeliverySelection =
+  | { method: 'CDEK_PICKUP'; cdek: CdekDeliverySelection }
+  | { method: 'SHOP_PICKUP' };
+
 export type CdekCreateOrderResult = {
   uuid: string | null;
   trackingNumber: string | null;
