@@ -160,6 +160,9 @@ export async function createOrder(
       where: { id: order.id },
       data: { status: 'CANCELLED' },
     })
-    return { error: 'Payment failed. Please try again.' }
+    // TEMP DEBUG: surface the real cause into the UI banner since Live logs
+    // aren't accessible. Revert to a generic message before final release.
+    const detail = e instanceof Error ? e.message : String(e)
+    return { error: `Payment failed: ${detail}` }
   }
 }
