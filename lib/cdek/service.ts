@@ -248,3 +248,59 @@ export async function createCdekOrder(
     rawResponse: raw,
   }
 }
+
+type CdekStatusRow = {
+  code?: string | null
+  name?: string | null
+  date_time?: string | null
+}
+
+type CdekOrderEntity = {
+  cdek_number?: string | null
+  statuses?: CdekStatusRow[] | null
+}
+
+export type CdekOrderStatus = {
+  code: string | null
+  name: string | null
+  dateTime: string | null
+  trackingNumber: string | null
+  rawResponse: unknown
+}
+
+/**
+ * Fetch the current CDEK order state. Pass the order UUID (returned when the
+ * order was created) or the CDEK tracking number as `cdekNumber`.
+ * The latest status is the newest entry in `entity.statuses`.
+ */
+export async function getCdekOrderStatus(
+  opts: { uuid?: string | null; cdekNumber?: string | null },
+): Promise<CdekOrderStatus> {
+  const path = opts.uuid
+    ? `/orders/${encodeURIComponent(opts.uuid)}`
+    : `/orders?cdek_number=${encodeURIComponent(opts.cdekNumber ?? '')}`
+
+  if (!opts.uuid && !opts.cdekNumber) {
+    throw new Error('getCdekOrderStatus requires a uuid or cdekNumber')
+  }
+
+  const raw = await cdekRequest<{ entity?: CdekOrderEntity }>(path)
+  const statuses = raw.entity?.statuses ?? []
+
+  // CDEK returns statuses in chronological order; pick the most recent one.
+  const latest = statuses.reduce<CdekStatusRow | null>((newest, row) => {
+    if (!row?.code) return newest
+    if (!newest) return row
+    const rowTime = row.date_time ? Date.parse(row.date_time) : 0
+    const newestTime = newest.date_time ? Date.parse(newest.date_time) : 0
+    return rowTime >= newestTime ? row : newest
+  }, null)
+
+  return {
+    code: latest?.code ?? null,
+    name: latest?.name ?? null,
+    dateTime: latest?.date_time ?? null,
+    trackingNumber: raw.entity?.cdek_number ?? null,
+    rawResponse: raw,
+  }
+}

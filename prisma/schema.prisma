@@ -97,6 +97,7 @@ model Order {
   cdekUuid       String?
   cdekTrackingNumber String?
   cdekRawResponse Json?
+  cdekStatus     String?
   createdAt      DateTime       @default(now())
   items          OrderItem[]
 }
