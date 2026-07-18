@@ -39,7 +39,7 @@ export async function sendOrderNotification(order: OrderNotification) {
   const text = [
     '✨ Новый заказ',
     ' ',
-    `Номер заказа — #${order.orderId}`,
+    `Номер заказа — https://www.morena-cosmetics.ru/ru/order/${order.orderId}`,
     `Имя — ${order.customerName}`,
     `📞 Номер телефона — ${order.customerPhone}`,
     order.customerEmail ? `✉️ Эл. почта — ${order.customerEmail}` : null,

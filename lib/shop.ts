@@ -4,4 +4,4 @@
  *
  * TODO: replace the placeholder address with the real one before go-live.
  */
-export const SHOP_PICKUP_ADDRESS = 'г. Москва, ул. Пример, д. 1 (ЗАМЕНИТЕ на реальный адрес)'
+export const SHOP_PICKUP_ADDRESS = 'Московская обл, Дрожжино, ул. Южная 12 к3'

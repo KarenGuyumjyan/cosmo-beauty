@@ -62,7 +62,7 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
   const [loadingCities, setLoadingCities] = useState(false)
 
   const [loadingQuote, setLoadingQuote] = useState(false)
-  const [loadingPoints, setLoadingPoints] = useState(false)
+  const [loadingPoints, setLoadingPoints] = useState(true)
   const [quote, setQuote] = useState<{
     tariffCode: number
     cdekPrice: number
@@ -167,17 +167,17 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
   // Reset & load pickup points ONLY when the chosen city changes.
   // Parcels changes (cart edits) must not wipe the user's pickup-point selection.
   useEffect(() => {
-    setError(null)
-    setQuote(null)
-    setPoints([])
-    setSelectedPointCode('')
     if (!selectedCity) return
 
     let cancelled = false
-    setLoadingPoints(true)
-
+    
     void (async () => {
       try {
+        setError(null)
+        setQuote(null)
+        setPoints([])
+        setSelectedPointCode('')
+        setLoadingPoints(true)
         const res = await fetch('/api/delivery/cdek/pickup-points', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -210,10 +210,10 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
   useEffect(() => {
     if (!selectedCity) return
     let cancelled = false
-    setLoadingQuote(true)
-
+    
     void (async () => {
       try {
+        setLoadingQuote(true)
         const res = await fetch('/api/delivery/cdek/quote', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
