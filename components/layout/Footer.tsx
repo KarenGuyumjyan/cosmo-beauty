@@ -145,7 +145,14 @@ export default function Footer() {
               </li>
               <li className='flex items-start gap-2.5 text-sm text-stone-400'>
                 <MapPin size={15} className='mt-0.5 shrink-0 text-rose-400' />
-                <span>Moscow</span>
+                <a
+                  href='https://yandex.com/maps/-/CTRpE6L7'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='hover:text-rose-400 transition-colors'
+                >
+                  <span>Moscow</span>
+                </a>
               </li>
             </ul>
           </div>

@@ -179,17 +179,24 @@ export default async function AboutPage({ params }: Props) {
                       </p>
                     </div>
                   </a>
-                  <div className='flex items-center gap-4'>
-                    <div className='w-12 h-12 rounded-xl bg-rose-600/20 flex items-center justify-center text-rose-400 shrink-0'>
+                  <a
+                    href='https://yandex.com/maps/-/CTRpE6L7'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='flex items-center gap-4 group'
+                  >
+                    <div className='w-12 h-12 rounded-xl bg-rose-600/20 flex items-center justify-center text-rose-400 group-hover:bg-rose-600 group-hover:text-white transition-colors shrink-0'>
                       <MapPin size={20} />
                     </div>
                     <div>
                       <p className='text-xs text-stone-500 uppercase tracking-wider mb-0.5'>
                         {t('contact.addressLabel')}
                       </p>
-                      <p className='text-stone-300'>{t('contact.address')}</p>
+                      <p className='text-stone-300 group-hover:text-rose-300 transition-colors'>
+                        {t('contact.address')}
+                      </p>
                     </div>
-                  </div>
+                  </a>
                 </div>
               </div>
 
@@ -254,9 +261,7 @@ export default async function AboutPage({ params }: Props) {
                       color: 'hover:bg-purple-600',
                     },
                     {
-                      icon: (
-                        <>Ozon</>
-                      ),
+                      icon: <>Ozon</>,
                       label: 'Ozon',
                       href: 'https://ozon.ru/s/morena-cosmetics',
                       color: 'hover:bg-blue-600',

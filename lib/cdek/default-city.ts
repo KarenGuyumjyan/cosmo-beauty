@@ -7,5 +7,5 @@ import type { CdekCity } from './types';
 export const DEFAULT_CHECKOUT_CITY: CdekCity = {
   code: 44,
   city: 'Москва',
-  region: 'г. Москва',
+  region: 'Московская обл, Дрожжино, ул. Южная 12 к3',
 };
