@@ -244,6 +244,9 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                       required
                       className='w-full px-4 py-3 border border-stone-200 rounded-xl text-sm focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors'
                     />
+                    <span className='text-xs text-stone-500'>
+                      {t('emailMessage')}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -266,7 +269,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                   </p>
                 </button>
 
-                <button
+                {/* <button
                   type='button'
                   onClick={() => togglePickupType('yandex')}
                   className={`rounded-2xl bg-stone-50 p-4 w-fit flex items-center gap-3 border transition ${
@@ -282,7 +285,7 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                   <p className='font-semibold text-stone-800'>
                     {t('yandexPickupPoint')}
                   </p>
-                </button>
+                </button> */}
 
                 <button
                   type='button'

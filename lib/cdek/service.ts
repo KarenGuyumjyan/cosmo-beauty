@@ -204,7 +204,6 @@ export async function createCdekOrder(
     number: input.orderNumber,
     tariff_code: input.tariffCode,
     from_location: { code: SENDER_CITY_CODE, address: SENDER_ADDRESS },
-    to_location: { code: input.cityCode },
     delivery_point: input.pickupPointCode,
     recipient: {
       name: input.recipientName,
@@ -221,7 +220,16 @@ export async function createCdekOrder(
       length: p.length,
       width: p.width,
       height: p.height,
-      items: [],
+      // CDEK requires each package to declare its contents. The order is
+      // prepaid via YooKassa, so cash-on-delivery `payment.value` is 0.
+      items: (p.items ?? []).map((it) => ({
+        name: it.name,
+        ware_key: it.ware_key,
+        payment: { value: 0 },
+        cost: it.cost,
+        weight: it.weight,
+        amount: it.amount,
+      })),
     })),
   }
 

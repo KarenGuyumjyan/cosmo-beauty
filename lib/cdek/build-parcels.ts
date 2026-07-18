@@ -20,11 +20,23 @@ export function buildParcelsFromOrderLines(lines: OrderLine[]): CdekParcel[] {
       heightCm?: number;
     };
 
+    const unitWeight = Math.max(1, productAny.weightGrams ?? DEFAULT_WEIGHT_GRAMS);
+    const unitCost = productAny.discountedPrice ?? productAny.price;
+
     return {
-      weight: Math.max(1, (productAny.weightGrams ?? DEFAULT_WEIGHT_GRAMS) * line.quantity),
+      weight: unitWeight * line.quantity,
       length: Math.max(1, productAny.lengthCm ?? DEFAULT_LENGTH_CM),
       width: Math.max(1, productAny.widthCm ?? DEFAULT_WIDTH_CM),
       height: Math.max(1, productAny.heightCm ?? DEFAULT_HEIGHT_CM),
+      items: [
+        {
+          name: productAny.nameRu || productAny.nameEn,
+          ware_key: productAny.id,
+          cost: unitCost,
+          weight: unitWeight,
+          amount: line.quantity,
+        },
+      ],
     };
   });
 }

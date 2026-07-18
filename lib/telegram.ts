@@ -12,6 +12,7 @@ interface OrderNotification {
   items: { name: string; quantity: number; price: number }[];
   shippingCost: number;
   total: number;
+  yookassaId?: string | null;
 }
 
 export async function sendOrderNotification(order: OrderNotification) {
@@ -43,7 +44,11 @@ export async function sendOrderNotification(order: OrderNotification) {
     `📞 Номер телефона — ${order.customerPhone}`,
     order.customerEmail ? `✉️ Эл. почта — ${order.customerEmail}` : null,
     `📦 Тип доставки: ${methodLabel}`,
+    (methodLabel === 'ПВЗ CDEК' &&
+      `Номер ИМ в сдэк: ${order.orderId.slice(0, 12)}`) ||
+      null,
     order.address ? `📍 Адрес: ${order.address}` : null,
+    order.yookassaId ? `💳 Код платежа YooKassa — ${order.yookassaId}` : null,
     ' ',
     '🛒 Товары:',
     itemLines,

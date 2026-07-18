@@ -18,11 +18,20 @@ export type CdekPickupPoint = {
   phones?: string[];
 };
 
+export type CdekPackageItem = {
+  name: string;
+  ware_key: string;
+  cost: number;
+  weight: number;
+  amount: number;
+};
+
 export type CdekParcel = {
   weight: number;
   length: number;
   width: number;
   height: number;
+  items?: CdekPackageItem[];
 };
 
 export type CdekQuoteResult = {
