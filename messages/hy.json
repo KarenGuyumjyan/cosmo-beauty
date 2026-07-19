@@ -227,6 +227,7 @@
     "emailMessage": "Պատվերի մանրամասները կուղարկվի նշված էլ. փոստին։",
     "orderSummary": "Պատվերի մանրամասներ",
     "subtotal": "Ենթագումար",
+    "discount": "Զեղչ",
     "total": "Ընդամենը",
     "buyNow": "Վճարել",
     "processing": "Մշակվում է…",
@@ -238,6 +239,7 @@
     "shopPickup": "Վերցնել խանութից",
     "shopPickupFree": "Անվճար",
     "shopPickupNote": "Վերցրեք ձեր պատվերը մեր խանութից — առանց առաքման վճարի:",
+    "openInYandexMaps": "Բացել Yandex Քարտեզներում",
     "errors": {
       "nameRequired": "Մուտքագրեք անունը",
       "phoneRequired": "Մուտքագրեք հեռախոսահամարը",

@@ -235,6 +235,7 @@
     "emailMessage": "The tracking link will be sent to the specified email address.",
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
+    "discount": "Discount",
     "total": "Total",
     "buyNow": "Buy Now",
     "processing": "Processing…",
@@ -246,6 +247,7 @@
     "shopPickup": "Shop Pickup",
     "shopPickupFree": "Free",
     "shopPickupNote": "Pick up your order at our shop — no shipping charge.",
+    "openInYandexMaps": "Open in Yandex Maps",
     "errors": {
       "nameRequired": "Name is required",
       "phoneRequired": "Phone is required",

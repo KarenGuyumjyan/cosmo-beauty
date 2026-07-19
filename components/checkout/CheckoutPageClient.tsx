@@ -9,6 +9,8 @@ import {
   PackageCheck,
   Store,
   AlertCircle,
+  MapIcon,
+  MapPin,
 } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -149,6 +151,15 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
       setDelivery(null);
     }
   };
+
+  const savingsTotal = items.reduce(
+    (sum, item) =>
+      sum +
+      (item.product.discountedPrice
+        ? (item.product.price - item.product.discountedPrice) * item.quantity
+        : 0),
+    0,
+  );
 
   if (items.length === 0) {
     if (!hydrated) {
@@ -313,26 +324,38 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                 />
               ) : null}
               {selectedPickupType === 'shop' ? (
-                <div className='bg-white rounded-2xl border border-stone-100 p-6'>
-                  <div className='flex items-start gap-3'>
-                    <div className='w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center shrink-0'>
-                      <Store size={18} className='text-rose-600' />
-                    </div>
-                    <div>
-                      <p className='font-semibold text-stone-800'>
-                        {t('shopPickup')} ·{' '}
-                        <span className='text-rose-700'>
-                          {t('shopPickupFree')}
-                        </span>
-                      </p>
-                      <p className='text-sm text-stone-500 mt-1 leading-snug'>
-                        {t('shopPickupNote')}
-                      </p>
-                      <p className='text-sm font-medium text-stone-700 mt-2'>
-                        {SHOP_PICKUP_ADDRESS}
-                      </p>
-                    </div>
+                <div className='bg-white rounded-2xl border border-stone-100 p-6 w-full'>
+                  <p className='font-semibold text-stone-800'>
+                    {t('shopPickup')} ·{' '}
+                    <span className='text-rose-700'>{t('shopPickupFree')}</span>
+                  </p>
+                  <p className='text-sm text-stone-500 mt-1 leading-snug'>
+                    {t('shopPickupNote')}
+                  </p>
+                  <div className='flex items-center gap-2'>
+                    <MapPin size={16} className='text-rose-600' />
+                    <p className='text-sm font-medium text-stone-700 mt-2'>
+                      {SHOP_PICKUP_ADDRESS}
+                    </p>
                   </div>
+                  <div className='mt-3 rounded-xl overflow-hidden border border-stone-100'>
+                    <iframe
+                      src='https://yandex.com/map-widget/v1/?ll=37.596758%2C55.518754&z=16&pt=37.596758%2C55.518754%2Cpm2pnm'
+                      title={SHOP_PICKUP_ADDRESS}
+                      className='w-full h-56'
+                      loading='lazy'
+                      referrerPolicy='no-referrer-when-downgrade'
+                      allowFullScreen
+                    />
+                  </div>
+                  <a
+                    href='https://yandex.com/maps/-/CTRpE6L7'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='inline-block text-sm font-medium text-rose-700 mt-2 hover:underline'
+                  >
+                    {t('openInYandexMaps')}
+                  </a>
                 </div>
               ) : null}
             </div>
@@ -380,6 +403,14 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                     {subtotal.toLocaleString()} {CURRENCY}
                   </span>
                 </div>
+                {savingsTotal > 0 && (
+                  <div className='flex justify-between text-green-600'>
+                    <span>{t('discount')}</span>
+                    <span className='font-medium'>
+                      -{savingsTotal.toLocaleString()} {CURRENCY}
+                    </span>
+                  </div>
+                )}
                 {shippingCost > 0 && (
                   <div className='flex justify-between text-stone-600'>
                     <span>CDEK (ПВЗ)</span>

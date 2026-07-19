@@ -227,6 +227,7 @@
     "emailMessage": "Ссылка для отслеживания придёт на указанный e-mail.",
     "orderSummary": "Ваш заказ",
     "subtotal": "Подытог",
+    "discount": "Скидка",
     "total": "Итого",
     "buyNow": "Оплатить",
     "processing": "Обработка…",
@@ -238,6 +239,7 @@
     "shopPickup": "Самовывоз",
     "shopPickupFree": "Бесплатно",
     "shopPickupNote": "Заберите заказ в нашем магазине — без платы за доставку.",
+    "openInYandexMaps": "Открыть в Яндекс.Картах",
     "errors": {
       "nameRequired": "Введите имя",
       "phoneRequired": "Введите телефон",
