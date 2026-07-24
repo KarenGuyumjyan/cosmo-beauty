@@ -1,28 +1,20 @@
-import type { ProductCategory } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-
-/** Middle segment after CSM- (matches existing seed data, e.g. blush → CSM-BL-001). */
-export const SKU_PREFIX_BY_CATEGORY: Record<ProductCategory, string> = {
-  cosmetic_sponges:  'SP',
-  lip_liner:         'LL',
-  blush:             'BL',
-  stick:             'ST',
-  lip_gloss:         'LG',
-  highlighter:       'LB',
-  concealer:         'CO',
-  eyeshadow_palette: 'EP',
-  setting_spray:     'SS',
-  false_eyelashes:   'FE',
-  makeup_fixer:      'MF',
-};
 
 function escapeRegExp(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** Next SKU for category: CSM-{code}-{nnn} with nnn one higher than existing matches. */
-export async function nextSkuForCategory(category: ProductCategory): Promise<string> {
-  const code = SKU_PREFIX_BY_CATEGORY[category];
+/**
+ * Next SKU for a category: CSM-{prefix}-{nnn} with nnn one higher than the
+ * highest existing match. The prefix comes from the Category row (skuPrefix);
+ * unknown categories fall back to 'XX'.
+ */
+export async function nextSkuForCategory(categorySlug: string): Promise<string> {
+  const category = await prisma.category.findUnique({
+    where: { slug: categorySlug },
+    select: { skuPrefix: true },
+  });
+  const code = category?.skuPrefix ?? 'XX';
   const base = `CSM-${code}-`;
   const rows = await prisma.product.findMany({
     where: { sku: { startsWith: base } },

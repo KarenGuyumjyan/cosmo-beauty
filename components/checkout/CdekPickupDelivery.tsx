@@ -1,260 +1,270 @@
-'use client'
+'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { ChevronDown, MapPin, Search } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { ChevronDown, MapPin, Search } from 'lucide-react';
 import type {
   CdekCity,
   CdekDeliverySelection,
   CdekParcel,
   CdekPickupPoint,
-} from '@/lib/cdek/types'
-import CdekPickupSelector from '@/components/checkout/cdek/CdekPickupSelector'
-import { DEFAULT_CHECKOUT_CITY } from '@/lib/cdek/default-city'
+} from '@/lib/cdek/types';
+import CdekPickupSelector from '@/components/checkout/cdek/CdekPickupSelector';
+import { DEFAULT_CHECKOUT_CITY } from '@/lib/cdek/default-city';
 
 type Props = {
-  parcels: CdekParcel[]
-  totalPrice: number
-  onChange: (value: CdekDeliverySelection | null) => void
-}
+  parcels: CdekParcel[];
+  totalPrice: number;
+  onChange: (value: CdekDeliverySelection | null) => void;
+};
 
 type CdekUpstreamError = {
-  error?: string
-  hint?: string
-  upstreamStatus?: number
-  upstreamPath?: string
-  details?: string
-}
+  error?: string;
+  hint?: string;
+  upstreamStatus?: number;
+  upstreamPath?: string;
+  details?: string;
+};
 
 async function readErrorMessage(
   response: Response,
   fallback: string,
 ): Promise<string> {
   try {
-    const data = (await response.clone().json()) as CdekUpstreamError
+    const data = (await response.clone().json()) as CdekUpstreamError;
     const parts = [
       data.error,
       data.upstreamStatus ? `(${data.upstreamStatus})` : null,
       data.hint,
-    ].filter(Boolean)
-    if (parts.length > 0) return parts.join(' ')
+    ].filter(Boolean);
+    if (parts.length > 0) return parts.join(' ');
   } catch {
     /* fall through to text */
   }
   try {
-    const text = await response.text()
-    if (text) return text.slice(0, 400)
+    const text = await response.text();
+    if (text) return text.slice(0, 400);
   } catch {
     /* ignore */
   }
-  return fallback
+  return fallback;
 }
 
-export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Props) {
-  const t = useTranslations('checkout')
+export default function CdekPickupDelivery({
+  parcels,
+  totalPrice,
+  onChange,
+}: Props) {
+  const t = useTranslations('checkout');
   const cityTriggerClassName =
-    'w-full bg-white px-4 py-3 pr-11 border border-stone-200 rounded-xl text-sm text-left focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors disabled:bg-stone-50 disabled:text-stone-400 disabled:cursor-not-allowed'
+    'w-full bg-white px-4 py-3 pr-11 border border-stone-200 rounded-xl text-sm text-left focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors disabled:bg-stone-50 disabled:text-stone-400 disabled:cursor-not-allowed';
 
-  const [cities, setCities] = useState<CdekCity[]>([])
+  const [cities, setCities] = useState<CdekCity[]>([]);
   const [selectedCity, setSelectedCity] = useState<CdekCity | null>(
     DEFAULT_CHECKOUT_CITY,
-  )
-  const [loadingCities, setLoadingCities] = useState(false)
+  );
+  const [loadingCities, setLoadingCities] = useState(false);
 
-  const [loadingQuote, setLoadingQuote] = useState(false)
-  const [loadingPoints, setLoadingPoints] = useState(true)
+  const [loadingQuote, setLoadingQuote] = useState(false);
+  const [loadingPoints, setLoadingPoints] = useState(true);
   const [quote, setQuote] = useState<{
-    tariffCode: number
-    cdekPrice: number
-  } | null>(null)
-  const [points, setPoints] = useState<CdekPickupPoint[]>([])
-  const [selectedPointCode, setSelectedPointCode] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false)
-  const [citySearch, setCitySearch] = useState('')
+    tariffCode: number;
+    cdekPrice: number;
+  } | null>(null);
+  const [points, setPoints] = useState<CdekPickupPoint[]>([]);
+  const [selectedPointCode, setSelectedPointCode] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const [citySearch, setCitySearch] = useState('');
 
-  const cityRequestId = useRef(0)
-  const cityDropdownRef = useRef<HTMLDivElement | null>(null)
-  const citySearchRef = useRef<HTMLInputElement | null>(null)
+  const cityRequestId = useRef(0);
+  const cityDropdownRef = useRef<HTMLDivElement | null>(null);
+  const citySearchRef = useRef<HTMLInputElement | null>(null);
 
   const filteredCities = useMemo(() => {
-    const q = citySearch.trim().toLowerCase()
-    if (!q) return cities
+    const q = citySearch.trim().toLowerCase();
+    if (!q) return cities;
     return cities.filter(
       (c) =>
         c.city.toLowerCase().includes(q) ||
         (c.region ?? '').toLowerCase().includes(q),
-    )
-  }, [cities, citySearch])
+    );
+  }, [cities, citySearch]);
 
   function openCityDropdown() {
-    setIsCityDropdownOpen(true)
-    setCitySearch('')
-    setTimeout(() => citySearchRef.current?.focus(), 0)
+    setIsCityDropdownOpen(true);
+    setCitySearch('');
+    setTimeout(() => citySearchRef.current?.focus(), 0);
   }
 
   function closeCityDropdown() {
-    setIsCityDropdownOpen(false)
-    setCitySearch('')
+    setIsCityDropdownOpen(false);
+    setCitySearch('');
   }
 
   function handleCitySelect(nextCity: CdekCity) {
-    setSelectedCity(nextCity)
-    closeCityDropdown()
-    setError(null)
+    setSelectedCity(nextCity);
+    closeCityDropdown();
+    setError(null);
   }
 
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
-      if (!cityDropdownRef.current) return
-      const target = event.target
+      if (!cityDropdownRef.current) return;
+      const target = event.target;
       if (target instanceof Node && !cityDropdownRef.current.contains(target)) {
-        closeCityDropdown()
+        closeCityDropdown();
       }
     }
 
     function handleEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        closeCityDropdown()
+        closeCityDropdown();
       }
     }
 
-    document.addEventListener('mousedown', handleOutsideClick)
-    document.addEventListener('keydown', handleEscape)
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('keydown', handleEscape);
 
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick)
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [])
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
 
   // Load city options from the CDEK locations endpoint once.
   useEffect(() => {
-    const requestId = ++cityRequestId.current
+    const requestId = ++cityRequestId.current;
     void (async () => {
-      setLoadingCities(true)
+      setLoadingCities(true);
       try {
-        const res = await fetch('/api/delivery/cdek/cities')
-        if (requestId !== cityRequestId.current) return
+        const res = await fetch('/api/delivery/cdek/cities');
+        if (requestId !== cityRequestId.current) return;
         if (!res.ok) {
-          setCities([])
-          setError(await readErrorMessage(res, t('cdek.errors.resolveFailed')))
-          return
+          setCities([]);
+          setError(await readErrorMessage(res, t('cdek.errors.resolveFailed')));
+          return;
         }
-        const data = (await res.json()) as CdekCity[]
-        if (requestId !== cityRequestId.current) return
-        const loadedCities = Array.isArray(data) ? data : []
+        const data = (await res.json()) as CdekCity[];
+        if (requestId !== cityRequestId.current) return;
+        const loadedCities = Array.isArray(data) ? data : [];
         const hasDefault = loadedCities.some(
           (city) => city.code === DEFAULT_CHECKOUT_CITY.code,
-        )
+        );
         const mergedCities = hasDefault
           ? loadedCities
-          : [DEFAULT_CHECKOUT_CITY, ...loadedCities]
-        setCities(mergedCities)
-        setError(mergedCities.length === 0 ? t('cdek.errors.cityNotFound') : null)
+          : [DEFAULT_CHECKOUT_CITY, ...loadedCities];
+        setCities(mergedCities);
+        setError(
+          mergedCities.length === 0 ? t('cdek.errors.cityNotFound') : null,
+        );
       } catch {
         if (requestId === cityRequestId.current) {
-          setError(t('cdek.errors.resolveFailed'))
+          setError(t('cdek.errors.resolveFailed'));
         }
       } finally {
         if (requestId === cityRequestId.current) {
-          setLoadingCities(false)
+          setLoadingCities(false);
         }
       }
-    })()
-  }, [t])
+    })();
+  }, [t]);
 
   // Reset & load pickup points ONLY when the chosen city changes.
   // Parcels changes (cart edits) must not wipe the user's pickup-point selection.
   useEffect(() => {
-    if (!selectedCity) return
+    if (!selectedCity) return;
 
-    let cancelled = false
-    
+    let cancelled = false;
+
     void (async () => {
       try {
-        setError(null)
-        setQuote(null)
-        setPoints([])
-        setSelectedPointCode('')
-        setLoadingPoints(true)
+        setError(null);
+        setQuote(null);
+        setPoints([]);
+        setSelectedPointCode('');
+        setLoadingPoints(true);
         const res = await fetch('/api/delivery/cdek/pickup-points', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cityCode: selectedCity.code }),
-        })
-        if (cancelled) return
+        });
+        if (cancelled) return;
         if (!res.ok) {
-          setError(await readErrorMessage(res, t('cdek.errors.loadFailed')))
-          return
+          setError(await readErrorMessage(res, t('cdek.errors.loadFailed')));
+          return;
         }
-        const p = (await res.json()) as CdekPickupPoint[]
-        if (cancelled) return
-        setPoints(p)
-        if (p.length === 0) setError(t('cdek.errors.noPickupPoints'))
+        const p = (await res.json()) as CdekPickupPoint[];
+        if (cancelled) return;
+        setPoints(p);
+        if (p.length === 0) setError(t('cdek.errors.noPickupPoints'));
       } catch {
-        if (!cancelled) setError(t('cdek.errors.loadFailed'))
+        if (!cancelled) setError(t('cdek.errors.loadFailed'));
       } finally {
-        if (!cancelled) setLoadingPoints(false)
+        if (!cancelled) setLoadingPoints(false);
       }
-    })()
+    })();
 
     return () => {
-      cancelled = true
-    }
-  }, [selectedCity, t])
+      cancelled = true;
+    };
+  }, [selectedCity, t]);
 
   // Recalculate the quote when city or cart parcels change.
   // Importantly, this does NOT reset `selectedPointCode` - the pickup point
   // stays selected while we re-quote.
   useEffect(() => {
-    if (!selectedCity) return
-    let cancelled = false
-    
+    if (!selectedCity) return;
+    let cancelled = false;
+
     void (async () => {
       try {
-        setLoadingQuote(true)
+        setLoadingQuote(true);
         const res = await fetch('/api/delivery/cdek/quote', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cityCode: selectedCity.code, parcels, totalPrice }),
-        })
-        if (cancelled) return
+          body: JSON.stringify({
+            cityCode: selectedCity.code,
+            parcels,
+            totalPrice,
+          }),
+        });
+        if (cancelled) return;
         if (!res.ok) {
-          setError(await readErrorMessage(res, t('cdek.errors.loadFailed')))
-          setQuote(null)
-          return
+          setError(await readErrorMessage(res, t('cdek.errors.loadFailed')));
+          setQuote(null);
+          return;
         }
         const q = (await res.json()) as {
-          tariffCode: number
-          cdekPrice: number
-        }
-        if (cancelled) return
-        setQuote(q)
+          tariffCode: number;
+          cdekPrice: number;
+        };
+        if (cancelled) return;
+        setQuote(q);
       } catch {
         if (!cancelled) {
-          setError(t('cdek.errors.loadFailed'))
-          setQuote(null)
+          setError(t('cdek.errors.loadFailed'));
+          setQuote(null);
         }
       } finally {
-        if (!cancelled) setLoadingQuote(false)
+        if (!cancelled) setLoadingQuote(false);
       }
-    })()
+    })();
 
     return () => {
-      cancelled = true
-    }
-  }, [selectedCity, parcels, totalPrice, t])
+      cancelled = true;
+    };
+  }, [selectedCity, parcels, totalPrice, t]);
 
   const selectedPoint = useMemo(
     () => points.find((point) => point.code === selectedPointCode) ?? null,
     [points, selectedPointCode],
-  )
+  );
 
   useEffect(() => {
     if (!selectedCity || !selectedPoint || !quote) {
-      onChange(null)
-      return
+      onChange(null);
+      return;
     }
     onChange({
       city: selectedCity.city,
@@ -265,18 +275,22 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
       tariffCode: quote.tariffCode,
       cdekPrice: quote.cdekPrice,
       finalPrice: quote.cdekPrice,
-    })
-  }, [selectedCity, selectedPoint, quote, onChange])
+    });
+  }, [selectedCity, selectedPoint, quote, onChange]);
 
   return (
     <div className='bg-white rounded-2xl border border-stone-100 p-6 space-y-5'>
       <div className='flex items-baseline justify-between gap-4'>
         <h2 className='font-bold text-stone-900 text-lg'>{t('cdek.title')}</h2>
         {quote && !loadingQuote && (
-          <span className='text-sm text-stone-600'>
-            {t('cdek.priceLabel')}{' '}
-            <strong>{quote.cdekPrice.toLocaleString()} ₽</strong>
-          </span>
+          // TODO Add shippingCost price to total so the user sees the final amount before clicking "Buy Now".
+          <div className='flex items-center gap-2'>
+            <span className='text-rose-700'>{t('shopPickupFree')}</span>
+            <span className='text-sm text-stone-600 line-through'>
+              {/* {t('cdek.priceLabel')}{' '} */}
+              <strong>{quote.cdekPrice.toLocaleString()} ₽</strong>
+            </span>
+          </div>
         )}
       </div>
       <div>
@@ -287,7 +301,9 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
           <button
             type='button'
             className={`${cityTriggerClassName} ${selectedCity ? 'text-stone-800' : 'text-stone-400'}`}
-            onClick={() => (isCityDropdownOpen ? closeCityDropdown() : openCityDropdown())}
+            onClick={() =>
+              isCityDropdownOpen ? closeCityDropdown() : openCityDropdown()
+            }
             disabled={loadingCities || cities.length === 0}
             aria-haspopup='listbox'
             aria-expanded={isCityDropdownOpen}
@@ -321,7 +337,7 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
               <ul className='max-h-52 overflow-y-auto py-1' role='listbox'>
                 {filteredCities.length > 0 ? (
                   filteredCities.map((city) => {
-                    const isSelected = selectedCity?.code === city.code
+                    const isSelected = selectedCity?.code === city.code;
                     return (
                       <li
                         key={`${city.code}-${city.region ?? ''}`}
@@ -343,7 +359,7 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
                           {city.region ? `, ${city.region}` : ''}
                         </button>
                       </li>
-                    )
+                    );
                   })
                 ) : (
                   <li className='px-4 py-4 text-center text-sm text-stone-400'>
@@ -410,5 +426,5 @@ export default function CdekPickupDelivery({ parcels, totalPrice, onChange }: Pr
         </div>
       )}
     </div>
-  )
+  );
 }

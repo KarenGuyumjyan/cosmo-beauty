@@ -1,8 +1,23 @@
-import { PrismaClient, Prisma, ProductCategory } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { products } from './seed-data';
 
 const prisma = new PrismaClient();
+
+// Categories that products reference. Must exist before products (FK).
+const CATEGORIES = [
+  { slug: 'cosmetic_sponges',  nameEn: 'Cosmetic Sponges',  nameHy: 'Կոսմետիկ սպունգեր',   nameRu: 'Косметические спонжи', skuPrefix: 'SP', sortOrder: 1 },
+  { slug: 'lip_liner',         nameEn: 'Lip Liner',         nameHy: 'Շրթունքների մատիտ',    nameRu: 'Карандаш для губ',     skuPrefix: 'LL', sortOrder: 2 },
+  { slug: 'blush',             nameEn: 'Blush',             nameHy: 'Երանգավորիչ',          nameRu: 'Румяна',               skuPrefix: 'BL', sortOrder: 3 },
+  { slug: 'stick',             nameEn: 'Stick',             nameHy: 'Սթիք',                 nameRu: 'Стик',                 skuPrefix: 'ST', sortOrder: 4 },
+  { slug: 'lip_gloss',         nameEn: 'Lip Gloss',         nameHy: 'Շրթունքների փայլ',      nameRu: 'Блеск для губ',        skuPrefix: 'LG', sortOrder: 5 },
+  { slug: 'highlighter',       nameEn: 'Highlighter',       nameHy: 'Լուսավորիչ',           nameRu: 'Сияющие румяна',       skuPrefix: 'LB', sortOrder: 6 },
+  { slug: 'concealer',         nameEn: 'Concealer',         nameHy: 'Կոնսիլյար',            nameRu: 'Консилер',             skuPrefix: 'CO', sortOrder: 7 },
+  { slug: 'eyeshadow_palette', nameEn: 'Eyeshadow Palette', nameHy: 'Ստվերների ներկապնակ', nameRu: 'Палетка теней',        skuPrefix: 'EP', sortOrder: 8 },
+  { slug: 'setting_spray',     nameEn: 'Setting Spray',     nameHy: 'Ֆիքսացնող սփրեյ',      nameRu: 'Спрей-фиксатор',       skuPrefix: 'SS', sortOrder: 9 },
+  { slug: 'false_eyelashes',   nameEn: 'False Eyelashes',   nameHy: 'Թարթիչներ',            nameRu: 'Накладные ресницы',    skuPrefix: 'FE', sortOrder: 10 },
+  { slug: 'makeup_fixer',      nameEn: 'Makeup Fixer',      nameHy: 'Մակյաժի ֆիքսիչ',       nameRu: 'Фиксатор макияжа',     skuPrefix: 'MF', sortOrder: 11 },
+];
 
 async function main() {
   console.log('Seeding database…');
@@ -12,6 +27,14 @@ async function main() {
     await tx.order.deleteMany();
     await tx.contactApplication.deleteMany();
     await tx.product.deleteMany();
+
+    for (const c of CATEGORIES) {
+      await tx.category.upsert({
+        where: { slug: c.slug },
+        update: c,
+        create: c,
+      });
+    }
 
     for (const p of products) {
       await tx.product.create({
@@ -30,7 +53,7 @@ async function main() {
           discountedPrice: p.discountedPrice ?? null,
           images: p.images,
           videos: p.videos,
-          category: p.category as ProductCategory,
+          category: p.category,
           size: p.size,
           sku: p.sku,
           stockQuantity: p.stockQuantity,

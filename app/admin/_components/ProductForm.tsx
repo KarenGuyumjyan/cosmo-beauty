@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
-import { categories } from '@/lib/data';
-import type { Product as DbProduct, ProductCategory } from '@prisma/client';
+import type { Product as DbProduct } from '@prisma/client';
+import { useCategories } from '@/context/CategoryContext';
 import { suggestNextSku } from '@/app/admin/_actions/products';
 import { ImagePlus, Film, X, Loader2, GripVertical } from 'lucide-react';
 
@@ -14,14 +14,10 @@ interface ProductFormProps {
   submitLabel: string;
 }
 
-const CATEGORY_OPTIONS = categories.map((c) => ({ value: c.value, label: c.label.ru }));
-
 const FLAG_LABELS: Record<'featured' | 'bestseller', string> = {
   featured: 'Избранное',
   bestseller: 'Хит продаж',
 };
-
-const DEFAULT_CATEGORY = CATEGORY_OPTIONS[0]!.value as ProductCategory;
 
 async function uploadFiles(files: FileList): Promise<string[]> {
   const urls: string[] = [];
@@ -40,7 +36,11 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
   const v = product;
   const isEdit = Boolean(v);
 
-  const [category, setCategory] = useState<ProductCategory>(v?.category ?? DEFAULT_CATEGORY);
+  const categories = useCategories();
+  const CATEGORY_OPTIONS = categories.map((c) => ({ value: c.value, label: c.label.ru }));
+  const DEFAULT_CATEGORY = CATEGORY_OPTIONS[0]?.value ?? '';
+
+  const [category, setCategory] = useState<string>(v?.category ?? DEFAULT_CATEGORY);
   const [sku, setSku] = useState(v?.sku ?? '');
   const lastSuggestedSku = useRef<string | null>(null);
 
@@ -124,7 +124,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
     // eslint-disable-next-line react-hooks/exhaustive-deps -- category changes use handleCategoryChange
   }, [isEdit]);
 
-  function handleCategoryChange(next: ProductCategory) {
+  function handleCategoryChange(next: string) {
     setCategory(next);
     if (isEdit) return;
     const trimmed = sku.trim();
@@ -171,7 +171,7 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
               required
               className="input"
               value={category}
-              onChange={(e) => handleCategoryChange(e.target.value as ProductCategory)}
+              onChange={(e) => handleCategoryChange(e.target.value)}
             >
               {CATEGORY_OPTIONS.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -220,6 +220,33 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
               className="input"
             />
             <p className="text-xs text-stone-400 mt-1.5">Максимум единиц в одном заказе для этого артикула.</p>
+          </div>
+        </div>
+
+        <div className="mt-6 pt-5 border-t border-stone-100">
+          <h3 className="text-sm font-semibold text-stone-700 mb-1">Габариты и вес (для доставки СДЭК)</h3>
+          <p className="text-xs text-stone-400 mb-4">
+            Одна посылка на весь заказ: вес суммируется, размеры коробки берутся по
+            самому большому товару. Если не указать — используются значения по умолчанию
+            (100 г, 20×20×10 см).
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <label className="label">Вес (г)</label>
+              <input name="weightGrams" type="number" min={1} defaultValue={v?.weightGrams ?? ''} className="input" placeholder="100" />
+            </div>
+            <div>
+              <label className="label">Длина (см)</label>
+              <input name="lengthCm" type="number" min={1} defaultValue={v?.lengthCm ?? ''} className="input" placeholder="20" />
+            </div>
+            <div>
+              <label className="label">Ширина (см)</label>
+              <input name="widthCm" type="number" min={1} defaultValue={v?.widthCm ?? ''} className="input" placeholder="20" />
+            </div>
+            <div>
+              <label className="label">Высота (см)</label>
+              <input name="heightCm" type="number" min={1} defaultValue={v?.heightCm ?? ''} className="input" placeholder="10" />
+            </div>
           </div>
         </div>
 

@@ -6,19 +6,10 @@ export interface LocalizedString {
 
 export type Locale = 'en' | 'hy' | 'ru';
 
-// Underscore format - must match Prisma enum ProductCategory values
-export type Category =
-  | 'cosmetic_sponges'
-  | 'lip_liner'
-  | 'blush'
-  | 'stick'
-  | 'lip_gloss'
-  | 'highlighter'
-  | 'concealer'
-  | 'eyeshadow_palette'
-  | 'setting_spray'
-  | 'false_eyelashes'
-  | 'makeup_fixer';
+// Category slug (underscore format, e.g. "blush"). Categories are now stored in
+// the DB (see the Category model / lib/categories.ts), so this is an open string
+// rather than a fixed union.
+export type Category = string;
 
 export interface Product {
   id: string;

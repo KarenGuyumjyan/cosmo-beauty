@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { Locale } from '@/lib/types';
 import ProductGrid from '@/components/catalog/ProductGrid';
 import { getAllProducts } from '@/lib/db-products';
-import { categories } from '@/lib/data';
+import { getCategories } from '@/lib/categories';
 import { BASE_URL, buildPageMetadata } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string }> };
@@ -24,6 +24,7 @@ export default async function CatalogPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: 'catalog' });
 
   const products = await getAllProducts();
+  const categories = await getCategories();
   const allSizes = [...new Set(products.map((p) => p.size))].sort();
 
   const l = locale as Locale;

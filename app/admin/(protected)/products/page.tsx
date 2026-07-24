@@ -1,11 +1,14 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { Plus, Pencil } from 'lucide-react';
-import { categories } from '@/lib/data';
+import { getCategories } from '@/lib/categories';
 import DeleteProductButton from '../../_components/DeleteProductButton';
 
 export default async function AdminProductsPage() {
-  const products = await prisma.product.findMany({ orderBy: { createdAt: 'asc' } });
+  const [products, categories] = await Promise.all([
+    prisma.product.findMany({ orderBy: { createdAt: 'asc' } }),
+    getCategories(),
+  ]);
 
   return (
     <div className="p-8">

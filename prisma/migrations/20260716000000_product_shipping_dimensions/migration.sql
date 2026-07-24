@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "weightGrams" INTEGER,
+ADD COLUMN     "lengthCm" INTEGER,
+ADD COLUMN     "widthCm" INTEGER,
+ADD COLUMN     "heightCm" INTEGER;

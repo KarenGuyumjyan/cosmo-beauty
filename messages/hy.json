@@ -286,7 +286,8 @@
     "items": "Ապրանքներ",
     "shipping": "Առաքում",
     "total": "Ընդհանուր",
-    "continueShopping": "Շարունակել գնումները"
+    "continueShopping": "Շարունակել գնումները",
+    "free": "Անվճար"
   },
   "notFound": {
     "code": "404",

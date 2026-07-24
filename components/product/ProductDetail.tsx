@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ShoppingBag, Check, Package, Tag, ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Product, Locale } from '@/lib/types';
-import { getCategoryLabel } from '@/lib/data';
+import { useCategoryLabel } from '@/context/CategoryContext';
 import { useCart } from '@/context/CartContext';
 import ImageGallery from '@/components/product/ImageGallery';
 
@@ -17,6 +17,7 @@ interface ProductDetailProps {
 export default function ProductDetail({ product, locale }: ProductDetailProps) {
   const t = useTranslations('product');
   const { addItem } = useCart();
+  const getCategoryLabel = useCategoryLabel();
   const [added, setAdded] = useState(false);
 
   const name = product.name[locale];

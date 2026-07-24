@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { ShoppingBag, Star } from 'lucide-react'
 import { Product, Locale } from '@/lib/types'
-import { getCategoryLabel } from '@/lib/data'
+import { useCategoryLabel } from '@/context/CategoryContext'
 import { useCart } from '@/context/CartContext'
 
 interface ProductCardProps {
@@ -22,6 +22,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   const t = useTranslations('catalog')
   const { addItem } = useCart()
+  const getCategoryLabel = useCategoryLabel()
   const [added, setAdded] = useState(false)
 
   const name = product.name[locale]

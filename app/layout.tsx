@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Inter } from 'next/font/google';
 import { getLocale } from 'next-intl/server';
 import { CartProvider } from '@/context/CartContext';
+import { CategoryProvider } from '@/context/CategoryContext';
+import { getCategories } from '@/lib/categories';
 import { BASE_URL, DEFAULT_OG_IMAGE, htmlLang, languageAlternates } from '@/lib/seo';
 import './globals.css';
 
@@ -92,6 +94,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     // admin and other non-locale routes won't have a locale in context
   }
 
+  const categories = await getCategories();
+
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -123,7 +127,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className="antialiased pb-[env(safe-area-inset-bottom)]">
-        <CartProvider>{children}</CartProvider>
+        <CategoryProvider categories={categories}>
+          <CartProvider>{children}</CartProvider>
+        </CategoryProvider>
       </body>
     </html>
   );

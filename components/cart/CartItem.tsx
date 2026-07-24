@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { CartItem as CartItemType, Locale } from '@/lib/types';
-import { getCategoryLabel } from '@/lib/data';
+import { useCategoryLabel } from '@/context/CategoryContext';
 import { maxOrderQuantity } from '@/lib/max-order-quantity';
 import { useCart } from '@/context/CartContext';
 
@@ -16,6 +16,7 @@ interface CartItemProps {
 export default function CartItem({ item, locale }: CartItemProps) {
   const t = useTranslations('cart');
   const { updateQuantity, removeItem } = useCart();
+  const getCategoryLabel = useCategoryLabel();
   const { product, quantity } = item;
   const name = product.name[locale];
   const price = product.discountedPrice ?? product.price;

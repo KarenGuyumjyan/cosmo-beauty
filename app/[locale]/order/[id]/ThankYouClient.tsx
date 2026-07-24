@@ -210,9 +210,13 @@ export default function ThankYouClient({ order }: { order: OrderData }) {
             {order.shippingCost > 0 && (
               <div className="flex justify-between text-stone-600">
                 <span>{t('shipping')}</span>
-                <span>
-                  {order.shippingCost.toLocaleString()} {CURRENCY}
-                </span>
+                {/* TODO Add shippingCost price to total so the user sees the final amount before clicking "Buy Now". */}
+                <div>
+                  <span className='text-rose-700 mr-2'>{t('free')}</span>
+                  <span className="line-through">
+                    {order.shippingCost.toLocaleString()} {CURRENCY}
+                  </span>
+                </div>
               </div>
             )}
 

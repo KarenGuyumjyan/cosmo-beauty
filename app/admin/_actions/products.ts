@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { del } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { nextSkuForCategory } from '@/lib/product-sku';
-import { Prisma, ProductCategory } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { auth } from '@/auth';
 
 async function requireAdmin() {
@@ -29,6 +29,28 @@ function stockQuantityFromForm(formData: FormData): number {
   return n;
 }
 
+// Optional positive integer (shipping dimensions/weight). Blank → null so the
+// parcel builder falls back to its defaults.
+function optionalPositiveIntFromForm(
+  formData: FormData,
+  key: string,
+): number | null {
+  const raw = formData.get(key);
+  if (raw == null || String(raw).trim() === '') return null;
+  const n = parseInt(String(raw), 10);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return n;
+}
+
+function shippingDimensionsFromForm(formData: FormData) {
+  return {
+    weightGrams: optionalPositiveIntFromForm(formData, 'weightGrams'),
+    lengthCm: optionalPositiveIntFromForm(formData, 'lengthCm'),
+    widthCm: optionalPositiveIntFromForm(formData, 'widthCm'),
+    heightCm: optionalPositiveIntFromForm(formData, 'heightCm'),
+  };
+}
+
 async function deleteBlobUrls(urls: string[]) {
   if (urls.length === 0) return;
   await Promise.allSettled(urls.map((url) => del(url)));
@@ -41,7 +63,7 @@ function revalidateAll() {
 }
 
 export async function suggestNextSku(
-  category: ProductCategory
+  category: string
 ): Promise<{ sku: string }> {
   await requireAdmin();
   const sku = await nextSkuForCategory(category);
@@ -53,7 +75,7 @@ export async function createProduct(
 ): Promise<{ error: string } | void> {
   await requireAdmin();
 
-  const category = formData.get('category') as ProductCategory;
+  const category = String(formData.get('category') ?? '');
   let sku = skuFromForm(formData);
   if (!sku) {
     sku = await nextSkuForCategory(category);
@@ -66,6 +88,7 @@ export async function createProduct(
         sku,
         category,
         size:            formData.get('size') as string,
+        ...shippingDimensionsFromForm(formData),
         price:           parseInt(formData.get('price') as string, 10),
         discountedPrice: formData.get('discountedPrice')
           ? parseInt(formData.get('discountedPrice') as string, 10)
@@ -125,8 +148,9 @@ export async function updateProduct(
       where: { id },
       data: {
         sku,
-        category:        formData.get('category') as ProductCategory,
+        category:        String(formData.get('category') ?? ''),
         size:            formData.get('size') as string,
+        ...shippingDimensionsFromForm(formData),
         price:           parseInt(formData.get('price') as string, 10),
         discountedPrice: formData.get('discountedPrice')
           ? parseInt(formData.get('discountedPrice') as string, 10)

@@ -286,7 +286,8 @@
     "items": "Товары",
     "shipping": "Доставка",
     "total": "Итого",
-    "continueShopping": "Продолжить покупки"
+    "continueShopping": "Продолжить покупки",
+    "free": "Бесплатно"
   },
   "notFound": {
     "code": "404",

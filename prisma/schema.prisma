@@ -10,20 +10,6 @@ datasource db {
 
 // ─── Enums ─────────────────────────────────────────────────────────────────
 
-enum ProductCategory {
-  cosmetic_sponges
-  lip_liner
-  blush
-  stick
-  lip_gloss
-  highlighter
-  concealer
-  eyeshadow_palette
-  setting_spray
-  false_eyelashes
-  makeup_fixer
-}
-
 enum OrderStatus {
   PENDING
   PAID
@@ -33,6 +19,17 @@ enum OrderStatus {
 }
 
 // ─── Catalog ───────────────────────────────────────────────────────────────
+
+model Category {
+  slug      String    @id
+  nameEn    String
+  nameHy    String
+  nameRu    String
+  skuPrefix String    @unique
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
 
 model Product {
   id              String          @id
@@ -49,8 +46,13 @@ model Product {
   discountedPrice Int?
   images          String[]
   videos          String[]
-  category        ProductCategory
+  category        String
+  categoryRef     Category        @relation(fields: [category], references: [slug], onUpdate: Cascade)
   size            String
+  weightGrams     Int?
+  lengthCm        Int?
+  widthCm         Int?
+  heightCm        Int?
   sku             String          @unique
   stockQuantity   Int             @default(10)
   includedItems   Json?

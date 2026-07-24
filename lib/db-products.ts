@@ -15,7 +15,7 @@ function toProduct(p: DbProduct): Product {
     discountedPrice: p.discountedPrice ?? undefined,
     images: p.images ?? [],
     videos: p.videos ?? [],
-    category: p.category as Product['category'],
+    category: p.category,
     size: p.size,
     sku: p.sku,
     stockQuantity: p.stockQuantity,

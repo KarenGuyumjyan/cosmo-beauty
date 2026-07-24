@@ -62,9 +62,10 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   );
 
   // Shop pickup is free; CDEK uses its quoted price. Yandex isn't wired up yet.
+  // TODO Add shippingCost price to total so the user sees the final amount before clicking "Buy Now".
   const shippingCost =
     selectedPickupType === 'cdek' ? (delivery?.finalPrice ?? 0) : 0;
-  const total = subtotal + shippingCost;
+  const total = subtotal;
 
   // Shop pickup is always ready; CDEK needs a priced pickup point selected.
   const canPlaceOrder =
@@ -84,16 +85,33 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   // Stable reference: only recompute when cart contents actually change.
   // Without this, every parent re-render produced a fresh array reference,
   // which retriggered the CDEK delivery effect and wiped the selected pickup point.
-  const parcels = useMemo<CdekParcel[]>(
-    () =>
-      items.map((item) => ({
-        weight: Math.max(1, (item.product.weightGrams ?? 100) * item.quantity),
-        length: Math.max(1, item.product.lengthCm ?? 20),
-        width: Math.max(1, item.product.widthCm ?? 20),
-        height: Math.max(1, item.product.heightCm ?? 10),
-      })),
-    [items],
-  );
+  // One order = one box: sum the weights, and size the box to the largest
+  // dimension across all items. Must mirror buildParcelsFromOrderLines so the
+  // quoted price matches the parcel that's actually created after payment.
+  const parcels = useMemo<CdekParcel[]>(() => {
+    if (items.length === 0) return [];
+
+    let weight = 0;
+    let length = 20;
+    let width = 20;
+    let height = 10;
+
+    for (const item of items) {
+      weight += (item.product.weightGrams ?? 100) * item.quantity;
+      length = Math.max(length, item.product.lengthCm ?? 20);
+      width = Math.max(width, item.product.widthCm ?? 20);
+      height = Math.max(height, item.product.heightCm ?? 10);
+    }
+
+    return [
+      {
+        weight: Math.max(1, weight),
+        length: Math.max(1, length),
+        width: Math.max(1, width),
+        height: Math.max(1, height),
+      },
+    ];
+  }, [items]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -411,12 +429,20 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                     </span>
                   </div>
                 )}
+                {/* TODO Add shippingCost price to total so the user sees the
+                final amount before clicking "Buy Now". */}
                 {shippingCost > 0 && (
                   <div className='flex justify-between text-stone-600'>
                     <span>CDEK (ПВЗ)</span>
-                    <span className='font-medium'>
-                      {shippingCost.toLocaleString()} {CURRENCY}
-                    </span>
+
+                    <div>
+                      <span className='text-rose-700 mr-2'>
+                        {t('shopPickupFree')}
+                      </span>
+                      <span className='font-medium line-through'>
+                        {shippingCost.toLocaleString()} {CURRENCY}
+                      </span>
+                    </div>
                   </div>
                 )}
                 {selectedPickupType === 'shop' && (

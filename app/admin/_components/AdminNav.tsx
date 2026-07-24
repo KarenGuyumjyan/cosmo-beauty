@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
+  Tags,
   ShoppingBag,
   Mail,
   LogOut,
@@ -17,6 +18,7 @@ import { adminSignOut } from '../_actions/auth';
 const NAV = [
   { href: '/admin', label: 'Панель', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Товары', icon: Package },
+  { href: '/admin/categories', label: 'Категории', icon: Tags },
   { href: '/admin/orders', label: 'Заказы', icon: ShoppingBag },
   { href: '/admin/contacts', label: 'Обращения', icon: Mail },
 ];

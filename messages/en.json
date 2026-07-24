@@ -294,7 +294,8 @@
     "items": "Items",
     "shipping": "Shipping",
     "total": "Total",
-    "continueShopping": "Continue Shopping"
+    "continueShopping": "Continue Shopping",
+    "free": "Free"
   },
   "notFound": {
     "code": "404",

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { Locale, Category } from '@/lib/types';
-import { getCategoryLabel } from '@/lib/data';
+import { useCategoryLabel } from '@/context/CategoryContext';
 
 interface CategoryItem {
   image: string;
@@ -26,6 +26,7 @@ interface CategoryStripProps {
 
 export default function CategoryStrip({ locale }: CategoryStripProps) {
   const l = locale as Locale;
+  const getCategoryLabel = useCategoryLabel();
 
   // Duplicate items so the marquee loops seamlessly.
   const items = [...CATEGORIES, ...CATEGORIES];

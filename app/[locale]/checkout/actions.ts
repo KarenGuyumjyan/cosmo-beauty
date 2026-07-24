@@ -88,7 +88,9 @@ export async function createOrder(
   // Shop pickup is always free; CDEK carries its quoted delivery price.
   const shippingCost =
     delivery.method === 'CDEK_PICKUP' ? delivery.cdek.finalPrice : 0
-  const total = subtotal + shippingCost
+  
+    // TODO Add shippingCost price to total so the user sees the final amount before clicking "Buy Now".
+  const total = subtotal
 
   // CDEK-specific columns stay null for SHOP_PICKUP so no CDEK order is
   // registered downstream (see finalizeOrderPaidViaYooKassa).
