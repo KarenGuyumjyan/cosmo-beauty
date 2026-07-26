@@ -156,10 +156,16 @@ export async function createOrder(
       quantity: item.quantity,
       vatCode: 1,
     }))
-    if (shippingCost > 0) {
+    // The receipt line-item sum MUST equal the charged amount (`total`), or
+    // YooKassa rejects the payment. Only bill shipping on the receipt for the
+    // part of `total` not covered by the products. Delivery is currently free
+    // (total = subtotal), so no shipping line is added; if shipping is later
+    // folded into `total`, it reappears here automatically and stays in sync.
+    const shippingOnReceipt = total - subtotal
+    if (shippingOnReceipt > 0) {
       receiptItems.push({
         description: 'Доставка CDEK',
-        amountRub: shippingCost,
+        amountRub: shippingOnReceipt,
         quantity: 1,
         vatCode: 1,
         isShipping: true,
