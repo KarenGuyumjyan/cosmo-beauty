@@ -11,11 +11,10 @@ const nextConfig: NextConfig = {
   // Don't advertise the framework in response headers.
   poweredByHeader: false,
   serverExternalPackages: ['bcryptjs', '@prisma/client', 'prisma'],
-  experimental: {
-    // Rewrite barrel imports to per-icon imports so only the icons used ship
-    // to the client (lucide-react is used across 24 files).
-    optimizePackageImports: ['lucide-react'],
-  },
+  // NOTE: do not add `experimental.optimizePackageImports: ['lucide-react']`.
+  // Next already optimizes lucide-react by default, and listing it again makes
+  // the build re-scan its ~3900 icon modules — which can stall the build on a
+  // low-memory VPS.
   images: {
     // Serve AVIF first, then WebP — typically 20-30% smaller than the JPEG/PNG
     // originals. Biggest user-facing win on slow/blocked Russian networks.

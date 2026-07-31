@@ -48,3 +48,7 @@ next-env.d.ts
 # Backups of .env taken during the Postgres -> MySQL migration (contain
 # production database credentials). Never commit.
 .env.backup-*
+
+# This project uses npm (package-lock.json). A stray yarn.lock makes Next.js
+# shell out to `yarn`, which breaks builds on servers without yarn installed.
+yarn.lock
