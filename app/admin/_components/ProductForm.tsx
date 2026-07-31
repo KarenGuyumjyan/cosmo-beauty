@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import type { Product as DbProduct } from '@prisma/client';
+import { jsonToStringArray } from '@/lib/json-array';
 import { useCategories } from '@/context/CategoryContext';
 import { suggestNextSku } from '@/app/admin/_actions/products';
 import { ImagePlus, Film, X, Loader2, GripVertical } from 'lucide-react';
@@ -44,8 +45,8 @@ export default function ProductForm({ action, product, submitLabel }: ProductFor
   const [sku, setSku] = useState(v?.sku ?? '');
   const lastSuggestedSku = useRef<string | null>(null);
 
-  const [images, setImages] = useState<string[]>(v?.images ?? []);
-  const [videos, setVideos] = useState<string[]>(v?.videos ?? []);
+  const [images, setImages] = useState<string[]>(jsonToStringArray(v?.images));
+  const [videos, setVideos] = useState<string[]>(jsonToStringArray(v?.videos));
 
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadingVideos, setUploadingVideos] = useState(false);

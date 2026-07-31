@@ -1,6 +1,7 @@
 import { unstable_cache as cache } from 'next/cache';
 import { prisma } from './prisma';
 import { Product, LocalizedString } from './types';
+import { jsonToStringArray } from './json-array';
 import type { Product as DbProduct } from '@prisma/client';
 
 const REVALIDATE = 60; // seconds
@@ -13,8 +14,8 @@ function toProduct(p: DbProduct): Product {
     description:      { en: p.descriptionEn, hy: p.descriptionHy, ru: p.descriptionRu },
     price: p.price,
     discountedPrice: p.discountedPrice ?? undefined,
-    images: p.images ?? [],
-    videos: p.videos ?? [],
+    images: jsonToStringArray(p.images),
+    videos: jsonToStringArray(p.videos),
     category: p.category,
     size: p.size,
     sku: p.sku,

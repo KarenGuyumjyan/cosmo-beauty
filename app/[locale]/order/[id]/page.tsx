@@ -6,6 +6,7 @@ import {
   finalizeOrderPaidViaYooKassa,
 } from '@/lib/orders/finalize-yookassa-payment';
 import { fetchPayment, validatePaymentMatchesOrder } from '@/lib/yookassa';
+import { firstJsonString } from '@/lib/json-array';
 import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations';
 import type { Metadata } from 'next';
 import ThankYouClient from './ThankYouClient';
@@ -72,7 +73,7 @@ export default async function ThankYouPage({ params }: Props) {
       name: locale === 'ru' ? i.product.nameRu : locale === 'hy' ? i.product.nameHy : i.product.nameEn,
       quantity: i.quantity,
       price: i.price,
-      image: i.product.images[0] ?? '',
+      image: firstJsonString(i.product.images) ?? '',
     })),
   };
 

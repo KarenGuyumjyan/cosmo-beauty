@@ -172,8 +172,15 @@ export default function ProductGrid({ locale, products, allSizes, categories }: 
             </div>
           ) : (
             <div className="grid grid-cols-2 xl:grid-cols-3 gap-6">
-              {filtered.map((product) => (
-                <ProductCard key={product.id} product={product} locale={locale} />
+              {filtered.map((product, i) => (
+                // Eagerly load the first row (2 cols on mobile, 3 on xl) so the
+                // LCP image isn't lazy-loaded.
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  locale={locale}
+                  priority={i < 3}
+                />
               ))}
             </div>
           )}

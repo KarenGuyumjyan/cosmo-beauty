@@ -40,3 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# Postgres -> MySQL data migration dump (contains customer PII: names, phones,
+# emails, addresses). Never commit.
+/prisma/data-export.json
+
+# Backups of .env taken during the Postgres -> MySQL migration (contain
+# production database credentials). Never commit.
+.env.backup-*

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { del } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { nextSkuForCategory } from '@/lib/product-sku';
+import { jsonToStringArray } from '@/lib/json-array';
 import { Prisma } from '@prisma/client';
 import { auth } from '@/auth';
 
@@ -164,8 +165,10 @@ export async function updateProduct(
         descriptionEn:   formData.get('descriptionEn') as string,
         descriptionHy:   formData.get('descriptionHy') as string,
         descriptionRu:   formData.get('descriptionRu') as string,
-        images:          { set: nextImages },
-        videos:          { set: nextVideos },
+        // JSON columns take the array directly ({ set: [...] } was Postgres
+        // scalar-list syntax and is not valid for Json fields).
+        images:          nextImages,
+        videos:          nextVideos,
         stockQuantity:   stockQuantityFromForm(formData),
         featured:        formData.get('featured') === 'on',
         bestseller:      formData.get('bestseller') === 'on',
@@ -185,8 +188,8 @@ export async function updateProduct(
 
   const kept = new Set([...nextImages, ...nextVideos]);
   const removed = [
-    ...(existing?.images ?? []),
-    ...(existing?.videos ?? []),
+    ...jsonToStringArray(existing?.images),
+    ...jsonToStringArray(existing?.videos),
   ].filter((url) => !kept.has(url));
   await deleteBlobUrls(removed);
 
@@ -202,7 +205,10 @@ export async function deleteProduct(id: string) {
   });
   await prisma.product.delete({ where: { id } });
   if (product) {
-    await deleteBlobUrls([...product.images, ...product.videos]);
+    await deleteBlobUrls([
+      ...jsonToStringArray(product.images),
+      ...jsonToStringArray(product.videos),
+    ]);
   }
   revalidateAll();
 }

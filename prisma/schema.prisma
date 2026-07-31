@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("POSTGRES_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 // ─── Enums ─────────────────────────────────────────────────────────────────
@@ -20,11 +19,18 @@ enum OrderStatus {
 
 // ─── Catalog ───────────────────────────────────────────────────────────────
 
+// NOTE ON STRING SIZES (Postgres -> MySQL):
+// Postgres `String` was unlimited TEXT; MySQL defaults to VARCHAR(191), which
+// would silently cap existing content (product shortDesc already reaches 176
+// chars). Free-form text is therefore @db.Text and human-entered fields are
+// widened. Indexed columns (@id/@unique) stay at the 191 default so they fit
+// MySQL's utf8mb4 index-length limit.
+
 model Category {
   slug      String    @id
-  nameEn    String
-  nameHy    String
-  nameRu    String
+  nameEn    String    @db.VarChar(255)
+  nameHy    String    @db.VarChar(255)
+  nameRu    String    @db.VarChar(255)
   skuPrefix String    @unique
   sortOrder Int       @default(0)
   createdAt DateTime  @default(now())
@@ -33,19 +39,24 @@ model Category {
 
 model Product {
   id              String          @id
-  nameEn          String
-  nameHy          String
-  nameRu          String
-  shortDescEn     String
-  shortDescHy     String
-  shortDescRu     String
+  nameEn          String          @db.VarChar(255)
+  nameHy          String          @db.VarChar(255)
+  nameRu          String          @db.VarChar(255)
+  shortDescEn     String          @db.Text
+  shortDescHy     String          @db.Text
+  shortDescRu     String          @db.Text
   descriptionEn   String          @db.Text
   descriptionHy   String          @db.Text
   descriptionRu   String          @db.Text
   price           Int
   discountedPrice Int?
-  images          String[]
-  videos          String[]
+  // MySQL/MariaDB has no scalar list type, so these are JSON arrays of URLs.
+  // Order is meaningful: images[0] is the product's main image.
+  // Read via jsonToStringArray() (lib/json-array.ts); write a plain string[].
+  // No @default: MariaDB can't default a JSON/LONGTEXT column, and every
+  // create path sets them explicitly.
+  images          Json
+  videos          Json
   category        String
   categoryRef     Category        @relation(fields: [category], references: [slug], onUpdate: Cascade)
   size            String
@@ -67,9 +78,9 @@ model Product {
 
 model ContactApplication {
   id        String   @id @default(cuid())
-  name      String
+  name      String   @db.VarChar(255)
   phone     String
-  message   String?
+  message   String?  @db.Text
   createdAt DateTime @default(now())
 }
 
@@ -77,16 +88,16 @@ model ContactApplication {
 
 model Order {
   id             String         @id @default(cuid())
-  customerName   String
+  customerName   String         @db.VarChar(255)
   customerPhone  String
   customerEmail  String?
-  address        String?
+  address        String?        @db.VarChar(500)
   city           String?
   shippingMethod String         @default("")
   cityCode       Int?
   pickupPointCode String?
-  pickupPointName String?
-  pickupPointAddress String?
+  pickupPointName String?       @db.VarChar(500)
+  pickupPointAddress String?    @db.VarChar(500)
   tariffCode     Int?
   cdekPrice      Int?
   finalPrice     Int?

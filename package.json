@@ -10,6 +10,9 @@
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts",
     "db:cleanup": "tsx prisma/cleanup.ts",
+    "db:export": "tsx prisma/export-postgres.ts",
+    "db:import": "tsx prisma/import-mysql.ts",
+    "db:verify": "tsx prisma/verify-mysql.ts",
     "prisma:studio": "prisma studio"
   },
   "prisma": {
@@ -32,10 +35,12 @@
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.1",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pg": "^8.22.0",
     "prisma": "^6.12.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",

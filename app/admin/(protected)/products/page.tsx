@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { Plus, Pencil } from 'lucide-react';
 import { getCategories } from '@/lib/categories';
+import { firstJsonString } from '@/lib/json-array';
 import DeleteProductButton from '../../_components/DeleteProductButton';
 
 export default async function AdminProductsPage() {
@@ -42,13 +43,14 @@ export default async function AdminProductsPage() {
             <tbody className="divide-y divide-stone-50">
               {products.map((p) => {
                 const catLabel = categories.find((c) => c.value === p.category)?.label.ru ?? p.category;
+                const thumbnail = firstJsonString(p.images);
                 return (
                   <tr key={p.id} className="hover:bg-stone-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {p.images[0] && (
+                        {thumbnail && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={p.images[0]} alt={p.nameEn} className="w-10 h-10 rounded-lg object-cover bg-stone-100" />
+                          <img src={thumbnail} alt={p.nameEn} className="w-10 h-10 rounded-lg object-cover bg-stone-100" />
                         )}
                         <div>
                           <p className="font-medium text-stone-800">{p.nameEn}</p>
