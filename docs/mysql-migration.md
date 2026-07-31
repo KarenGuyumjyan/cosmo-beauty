@@ -59,14 +59,10 @@ Replace the Postgres URL in `.env`:
 ```bash
 # Before
 # DATABASE_URL="postgresql://…"
-# POSTGRES_URL="postgresql://…"        # no longer used — safe to delete
 
 # After
 DATABASE_URL="mysql://user:password@host:3306/dbname"
 ```
-
-`POSTGRES_URL` is no longer referenced anywhere (the `directUrl` it backed was
-removed).
 
 ### Local development (macOS, Homebrew)
 
