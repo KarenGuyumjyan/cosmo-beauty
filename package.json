@@ -13,6 +13,8 @@
     "db:export": "tsx prisma/export-postgres.ts",
     "db:import": "tsx prisma/import-mysql.ts",
     "db:verify": "tsx prisma/verify-mysql.ts",
+    "s3:check": "tsx scripts/check-s3.ts",
+    "media:migrate": "tsx scripts/migrate-media-to-s3.ts",
     "prisma:studio": "prisma studio"
   },
   "prisma": {
@@ -20,8 +22,8 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",
-    "@vercel/blob": "^2.3.2",
     "@vercel/speed-insights": "^2.0.0",
+    "aws4fetch": "^1.0.20",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^0.577.0",
     "next": "^16.2.1",

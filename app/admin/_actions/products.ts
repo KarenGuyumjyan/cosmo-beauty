@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { del } from '@vercel/blob';
+import { deleteFromS3 } from '@/lib/s3';
 import { prisma } from '@/lib/prisma';
 import { nextSkuForCategory } from '@/lib/product-sku';
 import { jsonToStringArray } from '@/lib/json-array';
@@ -52,9 +52,17 @@ function shippingDimensionsFromForm(formData: FormData) {
   };
 }
 
-async function deleteBlobUrls(urls: string[]) {
+// Best-effort cleanup of stored media. `deleteFromS3` ignores URLs that don't
+// belong to our bucket, and allSettled keeps one failed delete from blocking
+// the product update.
+async function deleteMediaUrls(urls: string[]) {
   if (urls.length === 0) return;
-  await Promise.allSettled(urls.map((url) => del(url)));
+  const results = await Promise.allSettled(urls.map((url) => deleteFromS3(url)));
+  for (const [i, r] of results.entries()) {
+    if (r.status === 'rejected') {
+      console.warn(`[products] Failed to delete media ${urls[i]}:`, r.reason);
+    }
+  }
 }
 
 function revalidateAll() {
@@ -191,7 +199,7 @@ export async function updateProduct(
     ...jsonToStringArray(existing?.images),
     ...jsonToStringArray(existing?.videos),
   ].filter((url) => !kept.has(url));
-  await deleteBlobUrls(removed);
+  await deleteMediaUrls(removed);
 
   revalidateAll();
   redirect('/admin/products');
@@ -205,7 +213,7 @@ export async function deleteProduct(id: string) {
   });
   await prisma.product.delete({ where: { id } });
   if (product) {
-    await deleteBlobUrls([
+    await deleteMediaUrls([
       ...jsonToStringArray(product.images),
       ...jsonToStringArray(product.videos),
     ]);

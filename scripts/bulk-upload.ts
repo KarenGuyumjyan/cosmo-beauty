@@ -1,17 +1,18 @@
 /**
- * Bulk upload images to Vercel Blob.
+ * Bulk upload images to S3-compatible object storage.
  *
  * Usage:
  *   1. Put all images in a local folder (e.g. ./uploads)
  *   2. Run: npx tsx scripts/bulk-upload.ts ./uploads
  *
- * It will upload every file in that folder to Vercel Blob under "uploads/"
- * and print the blob paths you can use in the database.
+ * Prints the public URLs, ready to paste into a product's images array.
+ * Requires S3_ENDPOINT / S3_BUCKET / S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY.
  */
 
-import { put } from '@vercel/blob';
+import './load-env';
 import { readdir, readFile } from 'fs/promises';
-import { join, basename } from 'path';
+import { join } from 'path';
+import { buildObjectKey, contentTypeFor, isS3Configured, uploadToS3 } from '../lib/s3';
 
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.mov'];
 
@@ -22,9 +23,10 @@ async function main() {
     process.exit(1);
   }
 
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) {
-    console.error('Missing BLOB_READ_WRITE_TOKEN in .env');
+  if (!isS3Configured()) {
+    console.error(
+      'Storage is not configured. Set S3_ENDPOINT, S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY in .env.',
+    );
     process.exit(1);
   }
 
@@ -43,25 +45,24 @@ async function main() {
   const results: string[] = [];
 
   for (const file of mediaFiles) {
-    const filePath = join(folder, file);
-    const fileBuffer = await readFile(filePath);
-    const blobPath = `uploads/${basename(file)}`;
+    const fileBuffer = await readFile(join(folder, file));
 
     try {
-      const blob = await put(blobPath, fileBuffer, {
-        access: 'public',
-        token,
-      });
-      results.push(blob.pathname);
-      console.log(`✅ ${file} → ${blob.pathname}`);
+      const url = await uploadToS3(
+        buildObjectKey(file),
+        fileBuffer,
+        contentTypeFor(file),
+      );
+      results.push(url);
+      console.log(`OK   ${file} -> ${url}`);
     } catch (err) {
-      console.error(`❌ ${file} - failed:`, err);
+      console.error(`FAIL ${file}:`, err instanceof Error ? err.message : err);
     }
   }
 
   console.log('\n── Done ──────────────────────────────────');
   console.log(`Uploaded: ${results.length}/${mediaFiles.length}\n`);
-  console.log('Blob paths (paste into DB images array):');
+  console.log('Public URLs (paste into the product images array):');
   console.log(JSON.stringify(results, null, 2));
 }
 

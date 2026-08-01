@@ -3,6 +3,21 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
+/**
+ * Allow next/image to load from whichever S3 host is configured. Derived from
+ * the env so switching storage providers needs no code change.
+ */
+function s3RemotePattern() {
+  const raw = process.env.S3_PUBLIC_URL || process.env.S3_ENDPOINT;
+  if (!raw) return [];
+  try {
+    const { protocol, hostname } = new URL(raw);
+    return [{ protocol: protocol.replace(':', '') as 'http' | 'https', hostname }];
+  } catch {
+    return [];
+  }
+}
+
 const nextConfig: NextConfig = {
   // Trace only the files actually used into a self-contained build. No-op on
   // Vercel; cuts the deploy from ~800MB of node_modules to ~100MB for a Node/
@@ -20,10 +35,10 @@ const nextConfig: NextConfig = {
     // originals. Biggest user-facing win on slow/blocked Russian networks.
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
+      ...s3RemotePattern(),
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'plus.unsplash.com' },
       { protocol: 'https', hostname: 'picsum.photos' },
-      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
     ],
   },
 };

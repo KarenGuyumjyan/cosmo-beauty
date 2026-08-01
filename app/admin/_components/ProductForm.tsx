@@ -25,7 +25,7 @@ async function uploadFiles(files: FileList): Promise<string[]> {
   for (const file of Array.from(files)) {
     const body = new FormData();
     body.append('file', file);
-    const res = await fetch('/api/blob/upload', { method: 'POST', body });
+    const res = await fetch('/api/upload', { method: 'POST', body });
     if (!res.ok) throw new Error('Ошибка загрузки');
     const data = await res.json();
     urls.push(data.url);
