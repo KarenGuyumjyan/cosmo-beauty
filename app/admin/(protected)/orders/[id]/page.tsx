@@ -144,7 +144,7 @@ export default async function OrderDetailPage({ params }: Props) {
             {order.items.map((item) => (
               <tr key={item.id}>
                 <td className='px-6 py-4 font-medium text-stone-800'>
-                  {item.product.nameEn}
+                  {item.product.nameRu}
                 </td>
                 <td className='px-6 py-4 text-stone-500'>{item.quantity}</td>
                 <td className='px-6 py-4 text-stone-500'>
