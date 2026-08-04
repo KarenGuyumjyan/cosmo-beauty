@@ -209,7 +209,8 @@ export default function ThankYouClient({ order }: { order: OrderData }) {
           <div className="border-t border-stone-100 mt-4 pt-4 space-y-2 text-sm">
             {/* shippingCost is what was actually charged: 0 when the order
                 reached the free-delivery threshold. */}
-            {order.shippingMethod === 'CDEK_PICKUP' && (
+            {(order.shippingMethod === 'CDEK_PICKUP' ||
+              order.shippingMethod === 'CDEK_COURIER') && (
               <div className="flex justify-between text-stone-600">
                 <span>{t('shipping')}</span>
                 {order.shippingCost > 0 ? (

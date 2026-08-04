@@ -21,34 +21,45 @@ type Props = {
 
 type CdekUpstreamError = {
   error?: string;
+  reason?: 'unserviceable' | 'auth' | 'unknown';
   hint?: string;
   upstreamStatus?: number;
   upstreamPath?: string;
   details?: string;
 };
 
-async function readErrorMessage(
+/**
+ * Turn a failed CDEK response into a message worth showing a customer.
+ *
+ * `reason` picks the copy, so an unserved destination gets the friendly
+ * "not available here" text rather than the API's own label. Diagnostics go to
+ * the console: they used to be rendered, which put the server's prose (and its
+ * upstream status code) in front of the customer and meant the localized
+ * messages here were never seen.
+ */
+async function readError(
   response: Response,
-  fallback: string,
+  messages: { unserviceable: string; generic: string },
 ): Promise<string> {
+  let data: CdekUpstreamError | null = null;
   try {
-    const data = (await response.clone().json()) as CdekUpstreamError;
-    const parts = [
-      data.error,
-      data.upstreamStatus ? `(${data.upstreamStatus})` : null,
-      data.hint,
-    ].filter(Boolean);
-    if (parts.length > 0) return parts.join(' ');
+    data = (await response.clone().json()) as CdekUpstreamError;
   } catch {
-    /* fall through to text */
+    return messages.generic;
   }
-  try {
-    const text = await response.text();
-    if (text) return text.slice(0, 400);
-  } catch {
-    /* ignore */
-  }
-  return fallback;
+
+  console.error('[cdek] request failed', {
+    status: response.status,
+    reason: data.reason,
+    upstreamStatus: data.upstreamStatus,
+    upstreamPath: data.upstreamPath,
+    details: data.details,
+    hint: data.hint,
+  });
+
+  return data.reason === 'unserviceable'
+    ? messages.unserviceable
+    : messages.generic;
 }
 
 export default function CdekPickupDelivery({
@@ -143,7 +154,12 @@ export default function CdekPickupDelivery({
         if (requestId !== cityRequestId.current) return;
         if (!res.ok) {
           setCities([]);
-          setError(await readErrorMessage(res, t('cdek.errors.resolveFailed')));
+          setError(
+            await readError(res, {
+              unserviceable: t('cdek.errors.cityNotFound'),
+              generic: t('cdek.errors.resolveFailed'),
+            }),
+          );
           return;
         }
         const data = (await res.json()) as CdekCity[];
@@ -192,7 +208,12 @@ export default function CdekPickupDelivery({
         });
         if (cancelled) return;
         if (!res.ok) {
-          setError(await readErrorMessage(res, t('cdek.errors.loadFailed')));
+          setError(
+            await readError(res, {
+              unserviceable: t('cdek.errors.noPickupPoints'),
+              generic: t('cdek.errors.loadFailed'),
+            }),
+          );
           return;
         }
         const p = (await res.json()) as CdekPickupPoint[];
@@ -232,7 +253,13 @@ export default function CdekPickupDelivery({
         });
         if (cancelled) return;
         if (!res.ok) {
-          setError(await readErrorMessage(res, t('cdek.errors.loadFailed')));
+          // 422 = CDEK does not serve this city with the pickup-point tariff.
+          setError(
+            await readError(res, {
+              unserviceable: t('cdek.errors.noPickupPoints'),
+              generic: t('cdek.errors.loadFailed'),
+            }),
+          );
           setQuote(null);
           return;
         }

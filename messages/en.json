@@ -255,7 +255,8 @@
       "phoneInvalid": "Enter a valid 10-digit mobile number",
       "deliveryRequired": "Select a city or address, a CDEK pickup point, and wait for the delivery price.",
       "deliveryPriceInvalid": "Delivery price must be greater than zero.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "addressRequired": "Please enter a delivery address."
     },
     "cdek": {
       "title": "CDEK delivery (pickup point)",
@@ -277,9 +278,20 @@
         "cityNotFound": "City not found in CDEK for this address. Try another address or enter the city name.",
         "resolveFailed": "Could not match a CDEK city.",
         "noPickupPoints": "No pickup points for this city.",
-        "outOfStockBanner": "Some items are out of stock. Please remove them from cart to continue."
-      }
-    }
+        "outOfStockBanner": "Some items are out of stock. Please remove them from cart to continue.",
+        "courierUnavailable": "Courier delivery is not available for this city."
+      },
+      "courierTitle": "CDEK courier delivery (to your door)",
+      "addressLabel": "Delivery address *",
+      "addressPlaceholder": "Street, building, apartment",
+      "addressHint": "CDEK courier will deliver to this address.",
+      "apartmentLabel": "Apartment",
+      "entranceLabel": "Entrance",
+      "floorLabel": "Floor",
+      "calculating": "Calculating price…",
+      "deliveryDays": "Estimated delivery: {days} working days"
+    },
+    "courierPickup": "Courier to your door"
   },
   "thankYou": {
     "title": "Thank You!",

@@ -37,6 +37,9 @@ export type CdekParcel = {
 export type CdekQuoteResult = {
   tariffCode: number;
   cdekPrice: number;
+  /** Estimated delivery window in working days, when CDEK returns it. */
+  periodMin?: number;
+  periodMax?: number;
 };
 
 export type CdekDeliverySelection = {
@@ -51,12 +54,35 @@ export type CdekDeliverySelection = {
 };
 
 /**
- * Delivery method chosen at checkout. CDEK carries a full pickup-point
- * selection; SHOP_PICKUP is a free in-store pickup with no shipping data.
+ * CDEK courier delivery (tariff 137, склад-дверь). Unlike pickup-point
+ * delivery there is no PVZ code - CDEK needs the recipient's street address.
+ */
+export type CdekCourierSelection = {
+  city: string;
+  cityCode: number;
+  /** Street and house only - the apartment and friends live in their own fields. */
+  address: string;
+  /** Apartment or office number. Optional: private houses have none. */
+  apartment?: string;
+  entrance?: string;
+  floor?: string;
+  tariffCode: number;
+  cdekPrice: number;
+  finalPrice: number;
+  periodMin?: number;
+  periodMax?: number;
+};
+
+/**
+ * Delivery method chosen at checkout.
+ *  - CDEK_PICKUP  pickup point (tariff 136), free above MINIMUM_ORDER_AMOUNT
+ *  - CDEK_COURIER courier to the door (tariff 137), always paid
+ *  - SHOP_PICKUP  free in-store pickup, no shipping data
  * (Yandex pickup will be added later as another CDEK-like variant.)
  */
 export type DeliverySelection =
   | { method: 'CDEK_PICKUP'; cdek: CdekDeliverySelection }
+  | { method: 'CDEK_COURIER'; cdek: CdekCourierSelection }
   | { method: 'SHOP_PICKUP' };
 
 export type CdekCreateOrderResult = {

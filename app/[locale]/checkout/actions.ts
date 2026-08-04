@@ -1,6 +1,7 @@
 'use server'
 
 import type { DeliverySelection } from '@/lib/cdek/types'
+import { formatCourierAddress } from '@/lib/cdek/format-address'
 import { prisma } from '@/lib/prisma'
 import { createPayment, type ReceiptItemInput } from '@/lib/yookassa'
 import { BASE_URL } from '@/lib/seo'
@@ -56,6 +57,15 @@ export async function createOrder(
       return { error: 'Delivery price must be greater than 0' }
     }
   }
+  if (delivery.method === 'CDEK_COURIER') {
+    const c = delivery.cdek
+    if (!c.city || !c.address.trim()) {
+      return { error: 'Delivery address is required' }
+    }
+    if (c.finalPrice <= 0) {
+      return { error: 'Delivery price must be greater than 0' }
+    }
+  }
   if (!items.length) return { error: 'Cart is empty' }
 
   const products = await prisma.product.findMany({
@@ -86,18 +96,24 @@ export async function createOrder(
 
   const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
-  // Shop pickup is always free; CDEK carries its quoted delivery price.
+  // Shop pickup is always free; both CDEK methods carry a quoted price.
   const quotedShipping =
-    delivery.method === 'CDEK_PICKUP' ? delivery.cdek.finalPrice : 0
+    delivery.method === 'SHOP_PICKUP' ? 0 : delivery.cdek.finalPrice
 
-  // CDEK delivery is free from MINIMUM_ORDER_AMOUNT upwards; below it the
-  // customer pays the quote.
+  // Pickup-point delivery is free from MINIMUM_ORDER_AMOUNT upwards. Courier
+  // delivery (tariff 137) is always paid, so the threshold never applies to it.
   const shippingCost =
-    subtotal >= MINIMUM_ORDER_AMOUNT ? 0 : quotedShipping
+    delivery.method === 'CDEK_COURIER'
+      ? quotedShipping
+      : subtotal >= MINIMUM_ORDER_AMOUNT
+        ? 0
+        : quotedShipping
   const total = subtotal + shippingCost
 
   // CDEK-specific columns stay null for SHOP_PICKUP so no CDEK order is
   // registered downstream (see finalizeOrderPaidViaYooKassa).
+  // Courier orders carry no pickup-point code - the address is the destination,
+  // which is exactly how finalizeOrderPaidViaYooKassa tells the two apart.
   const shippingData =
     delivery.method === 'CDEK_PICKUP'
       ? {
@@ -112,10 +128,22 @@ export async function createOrder(
           cdekPrice: delivery.cdek.cdekPrice,
           finalPrice: delivery.cdek.finalPrice,
         }
-      : {
-          shippingMethod: 'SHOP_PICKUP',
-          address: SHOP_PICKUP_ADDRESS,
-        }
+      : delivery.method === 'CDEK_COURIER'
+        ? {
+            shippingMethod: 'CDEK_COURIER',
+            city: delivery.cdek.city,
+            cityCode: delivery.cdek.cityCode,
+            // Apartment / entrance / floor are folded into the stored line:
+            // it is the only address field CDEK and the waybill ever see.
+            address: formatCourierAddress(delivery.cdek),
+            tariffCode: delivery.cdek.tariffCode,
+            cdekPrice: delivery.cdek.cdekPrice,
+            finalPrice: delivery.cdek.finalPrice,
+          }
+        : {
+            shippingMethod: 'SHOP_PICKUP',
+            address: SHOP_PICKUP_ADDRESS,
+          }
 
   const order = await prisma.order.create({
     data: {
@@ -168,7 +196,10 @@ export async function createOrder(
     const shippingOnReceipt = total - subtotal
     if (shippingOnReceipt > 0) {
       receiptItems.push({
-        description: 'Доставка CDEK',
+        description:
+          delivery.method === 'CDEK_COURIER'
+            ? 'Доставка CDEK (курьер)'
+            : 'Доставка CDEK',
         amountRub: shippingOnReceipt,
         quantity: 1,
         vatCode: 1,

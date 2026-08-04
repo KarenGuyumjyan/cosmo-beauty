@@ -3,14 +3,50 @@ import { NextResponse } from 'next/server';
 const CDEK_REQUEST_RX = /^CDEK request failed \(([^)]+)\): (\d+)\s+([\s\S]*)$/;
 const CDEK_AUTH_RX = /^CDEK auth failed: (\d+)\s+([\s\S]*)$/;
 
+/**
+ * Machine-readable classification so the client can show a localized message
+ * instead of parsing prose or dumping raw CDEK JSON at the customer.
+ *
+ *  - `unserviceable` CDEK simply does not deliver there with this tariff. This
+ *    is a normal outcome the customer must see as a friendly message.
+ *  - `auth`          credentials/contract problem - our fault, not the user's.
+ *  - `unknown`       anything else (outage, malformed request…).
+ */
+export type CdekErrorReason = 'unserviceable' | 'auth' | 'unknown';
+
 export type CdekErrorPayload = {
   error: string;
   source: 'cdek';
+  reason: CdekErrorReason;
   upstreamStatus?: number;
   upstreamPath?: string;
   hint?: string;
   details: string;
 };
+
+/**
+ * CDEK error codes that mean "no service for this direction/tariff".
+ * Confirmed against api.cdek.ru/v2 with an unknown city and an unserved route.
+ */
+const UNSERVICEABLE_CODES = [
+  'v2_recipient_location_not_recognized',
+  'v2_sender_location_not_recognized',
+  'err_result_service_empty',
+  'v2_tariff_code_invalid',
+];
+
+function classify(upstreamStatus: number | undefined, body: string): CdekErrorReason {
+  if (upstreamStatus === 401 || upstreamStatus === 403 || upstreamStatus === 410) {
+    return 'auth';
+  }
+  if (UNSERVICEABLE_CODES.some((code) => body.includes(code))) {
+    return 'unserviceable';
+  }
+  // CDEK answers an unserved direction with 400 + a Russian explanation that
+  // does not always carry one of the codes above.
+  if (upstreamStatus === 400) return 'unserviceable';
+  return 'unknown';
+}
 
 function pickHint(status: number, baseUrl: string | undefined): string {
   const isProd = baseUrl && /api\.cdek\.ru/.test(baseUrl) && !/edu\.cdek\.ru/.test(baseUrl);
@@ -38,16 +74,21 @@ export function cdekErrorResponse(error: unknown, label: string): NextResponse<C
   if (reqMatch) {
     const [, path, statusStr, body] = reqMatch;
     const upstreamStatus = Number(statusStr);
+    const reason = classify(upstreamStatus, body);
     return NextResponse.json(
       {
         error: label,
         source: 'cdek',
+        reason,
         upstreamStatus,
         upstreamPath: path,
         hint: pickHint(upstreamStatus, baseUrl),
         details: body.slice(0, 600),
       },
-      { status: 502 },
+      // An unserved destination is a valid answer about the request, not an
+      // upstream failure - 422 lets the client treat it as a normal outcome
+      // while 502 still means "CDEK is broken".
+      { status: reason === 'unserviceable' ? 422 : 502 },
     );
   }
 
@@ -59,6 +100,7 @@ export function cdekErrorResponse(error: unknown, label: string): NextResponse<C
       {
         error: label,
         source: 'cdek',
+        reason: 'auth',
         upstreamStatus,
         upstreamPath: 'oauth/token',
         hint: pickHint(upstreamStatus, baseUrl),
@@ -72,6 +114,7 @@ export function cdekErrorResponse(error: unknown, label: string): NextResponse<C
     {
       error: label,
       source: 'cdek',
+      reason: 'unknown',
       details: message.slice(0, 600),
     },
     { status: 500 },

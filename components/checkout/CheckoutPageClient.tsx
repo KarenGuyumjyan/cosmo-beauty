@@ -9,8 +9,8 @@ import {
   PackageCheck,
   Store,
   AlertCircle,
-  MapIcon,
   MapPin,
+  Truck,
 } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -18,12 +18,14 @@ import { useCart } from '@/context/CartContext';
 import { createOrder } from '@/app/[locale]/checkout/actions';
 import type { Locale } from '@/lib/types';
 import type {
+  CdekCourierSelection,
   CdekDeliverySelection,
   CdekParcel,
   DeliverySelection,
 } from '@/lib/cdek/types';
 import { MINIMUM_ORDER_AMOUNT, SHOP_PICKUP_ADDRESS } from '@/lib/shop';
 import CdekPickupDelivery from '@/components/checkout/CdekPickupDelivery';
+import CdekCourierDelivery from '@/components/checkout/CdekCourierDelivery';
 import {
   formatPhone,
   isValidRuPhone,
@@ -45,10 +47,11 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [delivery, setDelivery] = useState<CdekDeliverySelection | null>(null);
+  const [courier, setCourier] = useState<CdekCourierSelection | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [selectedPickupType, setSelectedPickupType] = useState<
-    'cdek' | 'yandex' | 'shop'
+    'cdek' | 'courier' | 'yandex' | 'shop'
   >('cdek');
   // The cart hydrates from localStorage after mount, so on first render
   // `items` is always []. Once we've mounted we know an empty cart is real
@@ -61,17 +64,24 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
     getServerHydratedSnapshot,
   );
 
-  // Shop pickup is free; CDEK uses its quoted price. Yandex isn't wired up yet.
+  // Shop pickup is free; both CDEK methods carry a quoted price.
+  // Yandex isn't wired up yet.
   const quotedShipping =
-    selectedPickupType === 'cdek' ? (delivery?.finalPrice ?? 0) : 0;
+    selectedPickupType === 'cdek'
+      ? (delivery?.finalPrice ?? 0)
+      : selectedPickupType === 'courier'
+        ? (courier?.finalPrice ?? 0)
+        : 0;
 
-  // CDEK delivery is free from MINIMUM_ORDER_AMOUNT upwards; below it the
-  // customer pays the quote. Must stay in step with checkout/actions.ts.
-  const freeShipping = subtotal >= MINIMUM_ORDER_AMOUNT;
+  // Pickup-point delivery is free from MINIMUM_ORDER_AMOUNT upwards. Courier
+  // delivery (tariff 137) is always paid, so the threshold never applies.
+  // Must stay in step with checkout/actions.ts.
+  const freeShipping =
+    selectedPickupType !== 'courier' && subtotal >= MINIMUM_ORDER_AMOUNT;
   const shippingCost = freeShipping ? 0 : quotedShipping;
   const total = subtotal + shippingCost;
 
-  // Shop pickup is always ready; CDEK needs a priced pickup point selected.
+  // Shop pickup is always ready; the CDEK methods need a priced destination.
   // This checks the quote, not the charged amount: shippingCost is 0 when
   // delivery is free, which must not block the order.
   const canPlaceOrder =
@@ -79,7 +89,9 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
       ? true
       : selectedPickupType === 'cdek'
         ? Boolean(delivery) && quotedShipping > 0
-        : false;
+        : selectedPickupType === 'courier'
+          ? Boolean(courier) && quotedShipping > 0
+          : false;
 
   const hasOutOfStock = items.some((item) => item.product.stockQuantity === 0);
 
@@ -137,6 +149,12 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
       if (delivery.finalPrice <= 0)
         return setError(t('errors.deliveryPriceInvalid'));
       deliverySelection = { method: 'CDEK_PICKUP', cdek: delivery };
+    } else if (selectedPickupType === 'courier') {
+      if (!courier?.address.trim())
+        return setError(t('errors.addressRequired'));
+      if (courier.finalPrice <= 0)
+        return setError(t('errors.deliveryPriceInvalid'));
+      deliverySelection = { method: 'CDEK_COURIER', cdek: courier };
     } else {
       // Yandex pickup isn't available yet.
       return setError(t('errors.deliveryRequired'));
@@ -169,10 +187,13 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
       setSubmitting(false);
     }
   }
-  const togglePickupType = (type: 'cdek' | 'yandex' | 'shop') => {
+  const togglePickupType = (type: 'cdek' | 'courier' | 'yandex' | 'shop') => {
     if (type !== selectedPickupType) {
       setSelectedPickupType(type);
+      // Clear both CDEK selections so a stale quote from the previous method
+      // can never be submitted or priced.
       setDelivery(null);
+      setCourier(null);
     }
   };
 
@@ -304,6 +325,26 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                   </p>
                 </button>
 
+                <button
+                  type='button'
+                  onClick={() => togglePickupType('courier')}
+                  className={`rounded-2xl bg-stone-50 p-4 w-fit flex items-center gap-3 border transition ${
+                    selectedPickupType === 'courier'
+                      ? 'border-rose-700'
+                      : 'border-transparent'
+                  }`}
+                >
+                  <div className='w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-stone-200 shrink-0'>
+                    <Truck size={18} className='text-rose-600' />
+                  </div>
+
+                  <div className='text-left'>
+                    <p className='font-semibold text-stone-800'>
+                      {t('courierPickup')}
+                    </p>
+                  </div>
+                </button>
+
                 {/* <button
                   type='button'
                   onClick={() => togglePickupType('yandex')}
@@ -345,6 +386,13 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                   parcels={parcels}
                   totalPrice={subtotal}
                   onChange={setDelivery}
+                />
+              ) : null}
+              {selectedPickupType === 'courier' ? (
+                <CdekCourierDelivery
+                  parcels={parcels}
+                  totalPrice={subtotal}
+                  onChange={setCourier}
                 />
               ) : null}
               {selectedPickupType === 'shop' ? (
@@ -437,8 +485,14 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                 )}
                 {quotedShipping > 0 && (
                   <div className='flex justify-between text-stone-600'>
-                    <span>CDEK (ПВЗ)</span>
+                    <span>
+                      {selectedPickupType === 'courier'
+                        ? t('courierPickup')
+                        : 'CDEK (ПВЗ)'}
+                    </span>
 
+                    {/* freeShipping is always false for courier, so it falls
+                        through to the paid branch below. */}
                     {freeShipping ? (
                       // Free: show the quote struck through so the saving is visible.
                       <div>
@@ -477,6 +531,24 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                     <p className='mt-1 text-stone-400'>
                       {delivery.city} · код ПВЗ: {delivery.pickupPointCode}
                     </p>
+                  </div>
+                )}
+                {selectedPickupType === 'courier' && courier && (
+                  <div className='text-xs text-stone-500 border-t border-dashed border-stone-100 pt-2 mt-2'>
+                    <p className='font-medium text-stone-600 leading-snug'>
+                      {courier.address}
+                    </p>
+                    <p className='mt-1 text-stone-400'>{courier.city}</p>
+                    {courier.periodMin && courier.periodMax && (
+                      <p className='mt-1 text-stone-400'>
+                        {t('cdek.deliveryDays', {
+                          days:
+                            courier.periodMin === courier.periodMax
+                              ? `${courier.periodMin}`
+                              : `${courier.periodMin}-${courier.periodMax}`,
+                        })}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

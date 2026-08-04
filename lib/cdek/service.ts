@@ -161,50 +161,85 @@ export async function getPickupPoints(
   }))
 }
 
+/**
+ * Price a delivery for a given tariff.
+ *
+ * `tariffCode` defaults to pickup-point delivery so existing callers keep their
+ * behaviour; pass CDEK_TARIFF_COURIER for door delivery.
+ */
 export async function calculateQuote(
   cityCode: number,
   parcels: CdekParcel[],
   totalPrice: number,
+  tariffCode: number = DEFAULT_TARIFF_CODE,
 ): Promise<CdekQuoteResult> {
   const quote = await cdekRequest<{
     total_sum?: number
     tariff_code?: number
+    period_min?: number
+    period_max?: number
   }>('/calculator/tariff', {
     method: 'POST',
     body: JSON.stringify({
       from_location: { code: SENDER_CITY_CODE },
       to_location: { code: cityCode },
-      tariff_code: DEFAULT_TARIFF_CODE,
+      tariff_code: tariffCode,
       packages: parcels,
       services: [{ code: 'INSURANCE', parameter: totalPrice }],
     }),
   })
 
   return {
-    tariffCode: quote.tariff_code ?? DEFAULT_TARIFF_CODE,
+    tariffCode: quote.tariff_code ?? tariffCode,
     cdekPrice: Math.round(quote.total_sum ?? 0),
+    periodMin: typeof quote.period_min === 'number' ? quote.period_min : undefined,
+    periodMax: typeof quote.period_max === 'number' ? quote.period_max : undefined,
   }
 }
 
 type CreateCdekOrderInput = {
   orderNumber: string
   cityCode: number
-  pickupPointCode: string
   tariffCode: number
   recipientName: string
   recipientPhone: string
   recipientEmail?: string | null
   parcels: CdekParcel[]
+  /**
+   * Pickup-point code, for warehouse->PVZ tariffs (e.g. 136). Mutually
+   * exclusive with `address`.
+   */
+  pickupPointCode?: string | null
+  /**
+   * Recipient street address, for door tariffs (e.g. 137). CDEK rejects an
+   * order that has neither a delivery point nor a destination address.
+   */
+  address?: string | null
 }
 
 export async function createCdekOrder(
   input: CreateCdekOrderInput,
 ): Promise<CdekCreateOrderResult> {
+  const pickupPointCode = input.pickupPointCode?.trim() || null
+  const address = input.address?.trim() || null
+
+  if (!pickupPointCode && !address) {
+    throw new Error(
+      'createCdekOrder needs either pickupPointCode (PVZ tariffs) or address (door tariffs)',
+    )
+  }
+
+  // PVZ tariffs identify the destination by pickup-point code; door tariffs
+  // (e.g. 137) have no delivery point and must send `to_location.address`.
+  const destination = pickupPointCode
+    ? { delivery_point: pickupPointCode }
+    : { to_location: { code: input.cityCode, address } }
+
   const payload = {
     number: input.orderNumber,
     tariff_code: input.tariffCode,
     from_location: { code: SENDER_CITY_CODE, address: SENDER_ADDRESS },
-    delivery_point: input.pickupPointCode,
+    ...destination,
     recipient: {
       name: input.recipientName,
       phones: [{ number: input.recipientPhone }],

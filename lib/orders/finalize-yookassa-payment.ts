@@ -47,17 +47,30 @@ export async function finalizeOrderPaidViaYooKassa(
     `[yookassa] Order ${order.id} set to PAID (payment ${order.yookassaId ?? 'unknown'})`,
   )
 
+  // Both CDEK methods register an order here; they differ only in how the
+  // destination is expressed - a pickup-point code (tariff 136) or the
+  // recipient's street address (courier, tariff 137).
+  const isCdekOrder =
+    order.shippingMethod === 'CDEK_PICKUP' ||
+    order.shippingMethod === 'CDEK_COURIER'
+  const hasDestination = Boolean(
+    order.pickupPointCode || (order.shippingMethod === 'CDEK_COURIER' && order.address),
+  )
+
   if (
     !order.cdekUuid &&
+    isCdekOrder &&
     order.cityCode &&
-    order.pickupPointCode &&
-    order.tariffCode
+    order.tariffCode &&
+    hasDestination
   ) {
     try {
       const cdek = await createCdekOrder({
         orderNumber: order.id.slice(0, 12),
         cityCode: order.cityCode,
         pickupPointCode: order.pickupPointCode,
+        address:
+          order.shippingMethod === 'CDEK_COURIER' ? order.address : null,
         tariffCode: order.tariffCode,
         recipientName: order.customerName,
         recipientPhone: order.customerPhone,

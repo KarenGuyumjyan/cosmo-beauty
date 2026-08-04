@@ -5,8 +5,15 @@ type YandexSuggestResponse = {
 /**
  * Address / street / house hints (Yandex Suggest API), Russia-wide (no bbox).
  * Uses `NEXT_PUBLIC_YANDEX_MAPS_API_KEY` (same key as Maps JS).
+ *
+ * `types` defaults to street **and** house: with `street` alone Yandex returns
+ * nothing once a house number is typed ("Москва, Тверская 10" → 0 results),
+ * which is exactly what a courier delivery address needs.
  */
-export async function fetchYandexSuggestAddresses(address: string): Promise<string[]> {
+export async function fetchYandexSuggestAddresses(
+  address: string,
+  { results = 5, types = 'street,house' }: { results?: number; types?: string } = {},
+): Promise<string[]> {
   const text = address.trim();
   if (!text) return [];
 
@@ -16,8 +23,8 @@ export async function fetchYandexSuggestAddresses(address: string): Promise<stri
   const url = new URL('https://suggest-maps.yandex.ru/v1/suggest');
   url.searchParams.set('text', text);
   url.searchParams.set('lang', 'ru');
-  url.searchParams.set('results', '4');
-  url.searchParams.set('types', 'street');
+  url.searchParams.set('results', String(results));
+  url.searchParams.set('types', types);
   url.searchParams.set('print_address', '1');
   url.searchParams.set('apikey', apikey);
 
