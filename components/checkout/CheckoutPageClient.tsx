@@ -22,7 +22,7 @@ import type {
   CdekParcel,
   DeliverySelection,
 } from '@/lib/cdek/types';
-import { SHOP_PICKUP_ADDRESS } from '@/lib/shop';
+import { MINIMUM_ORDER_AMOUNT, SHOP_PICKUP_ADDRESS } from '@/lib/shop';
 import CdekPickupDelivery from '@/components/checkout/CdekPickupDelivery';
 import {
   formatPhone,
@@ -62,17 +62,23 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
   );
 
   // Shop pickup is free; CDEK uses its quoted price. Yandex isn't wired up yet.
-  // TODO Add shippingCost price to total so the user sees the final amount before clicking "Buy Now".
-  const shippingCost =
+  const quotedShipping =
     selectedPickupType === 'cdek' ? (delivery?.finalPrice ?? 0) : 0;
-  const total = subtotal;
+
+  // CDEK delivery is free from MINIMUM_ORDER_AMOUNT upwards; below it the
+  // customer pays the quote. Must stay in step with checkout/actions.ts.
+  const freeShipping = subtotal >= MINIMUM_ORDER_AMOUNT;
+  const shippingCost = freeShipping ? 0 : quotedShipping;
+  const total = subtotal + shippingCost;
 
   // Shop pickup is always ready; CDEK needs a priced pickup point selected.
+  // This checks the quote, not the charged amount: shippingCost is 0 when
+  // delivery is free, which must not block the order.
   const canPlaceOrder =
     selectedPickupType === 'shop'
       ? true
       : selectedPickupType === 'cdek'
-        ? Boolean(delivery) && shippingCost > 0
+        ? Boolean(delivery) && quotedShipping > 0
         : false;
 
   const hasOutOfStock = items.some((item) => item.product.stockQuantity === 0);
@@ -429,20 +435,25 @@ export default function CheckoutPageClient({ locale }: { locale: Locale }) {
                     </span>
                   </div>
                 )}
-                {/* TODO Add shippingCost price to total so the user sees the
-                final amount before clicking "Buy Now". */}
-                {shippingCost > 0 && (
+                {quotedShipping > 0 && (
                   <div className='flex justify-between text-stone-600'>
                     <span>CDEK (ПВЗ)</span>
 
-                    <div>
-                      <span className='text-rose-700 mr-2'>
-                        {t('shopPickupFree')}
+                    {freeShipping ? (
+                      // Free: show the quote struck through so the saving is visible.
+                      <div>
+                        <span className='text-rose-700 mr-2'>
+                          {t('shopPickupFree')}
+                        </span>
+                        <span className='font-medium line-through'>
+                          {quotedShipping.toLocaleString()} {CURRENCY}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className='font-medium'>
+                        {quotedShipping.toLocaleString()} {CURRENCY}
                       </span>
-                      <span className='font-medium line-through'>
-                        {shippingCost.toLocaleString()} {CURRENCY}
-                      </span>
-                    </div>
+                    )}
                   </div>
                 )}
                 {selectedPickupType === 'shop' && (

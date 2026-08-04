@@ -4,7 +4,7 @@ import type { DeliverySelection } from '@/lib/cdek/types'
 import { prisma } from '@/lib/prisma'
 import { createPayment, type ReceiptItemInput } from '@/lib/yookassa'
 import { BASE_URL } from '@/lib/seo'
-import { SHOP_PICKUP_ADDRESS } from '@/lib/shop'
+import { MINIMUM_ORDER_AMOUNT, SHOP_PICKUP_ADDRESS } from '@/lib/shop'
 
 type StockRow = { id: string; stockQuantity: number; nameEn: string }
 
@@ -85,12 +85,16 @@ export async function createOrder(
   })
 
   const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+
   // Shop pickup is always free; CDEK carries its quoted delivery price.
-  const shippingCost =
+  const quotedShipping =
     delivery.method === 'CDEK_PICKUP' ? delivery.cdek.finalPrice : 0
-  
-    // TODO Add shippingCost price to total so the user sees the final amount before clicking "Buy Now".
-  const total = subtotal
+
+  // CDEK delivery is free from MINIMUM_ORDER_AMOUNT upwards; below it the
+  // customer pays the quote.
+  const shippingCost =
+    subtotal >= MINIMUM_ORDER_AMOUNT ? 0 : quotedShipping
+  const total = subtotal + shippingCost
 
   // CDEK-specific columns stay null for SHOP_PICKUP so no CDEK order is
   // registered downstream (see finalizeOrderPaidViaYooKassa).

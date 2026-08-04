@@ -11,6 +11,7 @@ import type {
 } from '@/lib/cdek/types';
 import CdekPickupSelector from '@/components/checkout/cdek/CdekPickupSelector';
 import { DEFAULT_CHECKOUT_CITY } from '@/lib/cdek/default-city';
+import { MINIMUM_ORDER_AMOUNT } from '@/lib/shop';
 
 type Props = {
   parcels: CdekParcel[];
@@ -283,13 +284,20 @@ export default function CdekPickupDelivery({
       <div className='flex items-baseline justify-between gap-4'>
         <h2 className='font-bold text-stone-900 text-lg'>{t('cdek.title')}</h2>
         {quote && !loadingQuote && (
-          // TODO Add shippingCost price to total so the user sees the final amount before clicking "Buy Now".
           <div className='flex items-center gap-2'>
-            <span className='text-rose-700'>{t('shopPickupFree')}</span>
-            <span className='text-sm text-stone-600 line-through'>
-              {/* {t('cdek.priceLabel')}{' '} */}
-              <strong>{quote.cdekPrice.toLocaleString()} ₽</strong>
-            </span>
+            {/* Free from MINIMUM_ORDER_AMOUNT upwards; below it the customer pays. */}
+            {totalPrice >= MINIMUM_ORDER_AMOUNT ? (
+              <>
+                <span className='text-rose-700'>{t('shopPickupFree')}</span>
+                <span className='text-sm text-stone-600 line-through'>
+                  <strong>{quote.cdekPrice.toLocaleString()} ₽</strong>
+                </span>
+              </>
+            ) : (
+              <span className='text-sm text-stone-600'>
+                <strong>{quote.cdekPrice.toLocaleString()} ₽</strong>
+              </span>
+            )}
           </div>
         )}
       </div>

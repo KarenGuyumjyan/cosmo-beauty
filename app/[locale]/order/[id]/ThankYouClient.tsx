@@ -207,16 +207,18 @@ export default function ThankYouClient({ order }: { order: OrderData }) {
           </div>
 
           <div className="border-t border-stone-100 mt-4 pt-4 space-y-2 text-sm">
-            {order.shippingCost > 0 && (
+            {/* shippingCost is what was actually charged: 0 when the order
+                reached the free-delivery threshold. */}
+            {order.shippingMethod === 'CDEK_PICKUP' && (
               <div className="flex justify-between text-stone-600">
                 <span>{t('shipping')}</span>
-                {/* TODO Add shippingCost price to total so the user sees the final amount before clicking "Buy Now". */}
-                <div>
-                  <span className='text-rose-700 mr-2'>{t('free')}</span>
-                  <span className="line-through">
+                {order.shippingCost > 0 ? (
+                  <span className="font-medium">
                     {order.shippingCost.toLocaleString()} {CURRENCY}
                   </span>
-                </div>
+                ) : (
+                  <span className="text-rose-700">{t('free')}</span>
+                )}
               </div>
             )}
 
