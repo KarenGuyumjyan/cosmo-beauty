@@ -127,7 +127,7 @@ export default async function OrderDetailPage({ params }: Props) {
       </div>
 
       {/* Items */}
-      <div className='bg-white rounded-2xl border border-stone-100 overflow-hidden mb-5'>
+      <div className='bg-white rounded-2xl border border-stone-100 overflow-scroll mb-5'>
         <div className='px-6 py-4 border-b border-stone-100'>
           <h2 className='font-semibold text-stone-900'>Состав заказа</h2>
         </div>
