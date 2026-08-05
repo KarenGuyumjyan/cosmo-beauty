@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronDown, Search, Truck } from 'lucide-react';
+import { Truck } from 'lucide-react';
 import type {
   CdekCity,
   CdekCourierSelection,
   CdekParcel,
   CdekQuoteResult,
 } from '@/lib/cdek/types';
+import CdekCitySelect from '@/components/checkout/cdek/CdekCitySelect';
 import { CDEK_TARIFF_COURIER } from '@/lib/cdek/tariffs';
 import { DEFAULT_CHECKOUT_CITY } from '@/lib/cdek/default-city';
 
@@ -72,16 +73,10 @@ export default function CdekCourierDelivery({
   onChange,
 }: Props) {
   const t = useTranslations('checkout');
-  const cityTriggerClassName =
-    'w-full bg-white px-4 py-3 pr-11 border border-stone-200 rounded-xl text-sm text-left focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors disabled:bg-stone-50 disabled:text-stone-400 disabled:cursor-not-allowed';
 
-  const [cities, setCities] = useState<CdekCity[]>([]);
   const [selectedCity, setSelectedCity] = useState<CdekCity | null>(
     DEFAULT_CHECKOUT_CITY,
   );
-  const [loadingCities, setLoadingCities] = useState(false);
-  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
-  const [citySearch, setCitySearch] = useState('');
 
   const [address, setAddress] = useState('');
   const [apartment, setApartment] = useState('');
@@ -94,90 +89,17 @@ export default function CdekCourierDelivery({
   const [hints, setHints] = useState<string[]>([]);
   const [showHints, setShowHints] = useState(false);
 
-  const cityRequestId = useRef(0);
   const quoteRequestId = useRef(0);
   const hintRequestId = useRef(0);
-  const cityDropdownRef = useRef<HTMLDivElement | null>(null);
-  const citySearchRef = useRef<HTMLInputElement | null>(null);
   const addressBoxRef = useRef<HTMLDivElement | null>(null);
   // Set when the customer picks a suggestion, so choosing one does not
   // immediately trigger a fresh lookup for the text we just inserted.
   const suppressNextHintFetch = useRef(false);
 
-  const filteredCities = useMemo(() => {
-    const q = citySearch.trim().toLowerCase();
-    if (!q) return cities;
-    return cities.filter(
-      (c) =>
-        c.city.toLowerCase().includes(q) ||
-        (c.region ?? '').toLowerCase().includes(q),
-    );
-  }, [cities, citySearch]);
-
-  function openCityDropdown() {
-    setIsCityDropdownOpen(true);
-    setCitySearch('');
-    setTimeout(() => citySearchRef.current?.focus(), 0);
-  }
-
-  function closeCityDropdown() {
-    setIsCityDropdownOpen(false);
-    setCitySearch('');
-  }
-
-  useEffect(() => {
-    function handleOutsideClick(event: MouseEvent) {
-      if (!cityDropdownRef.current) return;
-      const target = event.target;
-      if (target instanceof Node && !cityDropdownRef.current.contains(target)) {
-        closeCityDropdown();
-      }
-    }
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') closeCityDropdown();
-    }
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('keydown', handleEscape);
-    };
+  const handleCitySelect = useCallback((nextCity: CdekCity) => {
+    setSelectedCity(nextCity);
+    setError(null);
   }, []);
-
-  // Load the city list once.
-  useEffect(() => {
-    const requestId = ++cityRequestId.current;
-    void (async () => {
-      setLoadingCities(true);
-      try {
-        const res = await fetch('/api/delivery/cdek/cities');
-        if (requestId !== cityRequestId.current) return;
-        if (!res.ok) {
-          setCities([]);
-          setError(
-            await readError(res, {
-              unserviceable: t('cdek.errors.cityNotFound'),
-              generic: t('cdek.errors.resolveFailed'),
-            }),
-          );
-          return;
-        }
-        const data = (await res.json()) as CdekCity[];
-        if (requestId !== cityRequestId.current) return;
-        const loaded = Array.isArray(data) ? data : [];
-        const hasDefault = loaded.some(
-          (city) => city.code === DEFAULT_CHECKOUT_CITY.code,
-        );
-        setCities(hasDefault ? loaded : [DEFAULT_CHECKOUT_CITY, ...loaded]);
-      } catch {
-        if (requestId === cityRequestId.current) {
-          setError(t('cdek.errors.resolveFailed'));
-        }
-      } finally {
-        if (requestId === cityRequestId.current) setLoadingCities(false);
-      }
-    })();
-  }, [t]);
 
   // Price courier delivery for the selected city. The address does not affect
   // the tariff calculation, so this deliberately does not depend on it.
@@ -340,88 +262,11 @@ export default function CdekCourierDelivery({
         )}
       </div>
 
-      <div>
-        <label className='block text-sm font-medium text-stone-700 mb-1.5'>
-          {t('cdek.cityLabel')}
-        </label>
-        <div className='relative' ref={cityDropdownRef}>
-          <button
-            type='button'
-            className={`${cityTriggerClassName} ${selectedCity ? 'text-stone-800' : 'text-stone-400'}`}
-            onClick={() =>
-              isCityDropdownOpen ? closeCityDropdown() : openCityDropdown()
-            }
-            disabled={loadingCities || cities.length === 0}
-            aria-haspopup='listbox'
-            aria-expanded={isCityDropdownOpen}
-          >
-            {selectedCity
-              ? `${selectedCity.city}${selectedCity.region ? `, ${selectedCity.region}` : ''}`
-              : t('cdek.cityPlaceholder')}
-          </button>
-          <ChevronDown
-            size={16}
-            className={`pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transition-transform ${loadingCities ? 'text-stone-300' : 'text-stone-400'} ${isCityDropdownOpen ? 'rotate-180' : ''}`}
-          />
-          {isCityDropdownOpen && (
-            <div className='absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-stone-200/50'>
-              <div className='p-2 border-b border-stone-100'>
-                <div className='relative'>
-                  <Search
-                    size={14}
-                    className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400'
-                  />
-                  <input
-                    ref={citySearchRef}
-                    type='text'
-                    value={citySearch}
-                    onChange={(e) => setCitySearch(e.target.value)}
-                    placeholder={t('cdek.citySearchPlaceholder')}
-                    className='w-full pl-8 pr-3 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-colors placeholder-stone-400 text-stone-800'
-                  />
-                </div>
-              </div>
-              <ul className='max-h-52 overflow-y-auto py-1' role='listbox'>
-                {filteredCities.length > 0 ? (
-                  filteredCities.map((city) => {
-                    const isSelected = selectedCity?.code === city.code;
-                    return (
-                      <li
-                        key={`${city.code}-${city.region ?? ''}`}
-                        role='option'
-                        aria-selected={isSelected}
-                      >
-                        <button
-                          type='button'
-                          onClick={() => {
-                            setSelectedCity(city);
-                            closeCityDropdown();
-                            setError(null);
-                          }}
-                          className={`w-full px-4 py-2.5 text-left text-xs transition-colors hover:bg-rose-50 ${
-                            isSelected
-                              ? 'bg-rose-50 text-rose-700'
-                              : 'text-stone-700'
-                          }`}
-                        >
-                          <span className='font-semibold text-sm'>
-                            {city.city}
-                          </span>
-                          {city.region ? `, ${city.region}` : ''}
-                        </button>
-                      </li>
-                    );
-                  })
-                ) : (
-                  <li className='px-4 py-4 text-center text-sm text-stone-400'>
-                    {t('cdek.errors.cityNotFound')}
-                  </li>
-                )}
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
+      <CdekCitySelect
+        value={selectedCity}
+        onChange={handleCitySelect}
+        onError={setError}
+      />
 
       <div>
         <label

@@ -1,5 +1,7 @@
+import type { CdekCity } from './types';
+
 /**
- * Address autocomplete backed by CDEK's own geocoder.
+ * Address and city autocomplete backed by CDEK's own geocoder.
  *
  * `my.cdek.ru/api/geo/autocomplete` is the endpoint the CDEK personal cabinet
  * and delivery widget call while you type. It is undocumented and not part of
@@ -10,7 +12,7 @@
  *
  * Because it is a private endpoint it may change or start refusing us without
  * notice, so every failure resolves to an empty list and the caller falls back
- * to Yandex Suggest.
+ * to the v2 API (cities) or Yandex Suggest (addresses).
  */
 
 const AUTOCOMPLETE_URL = 'https://my.cdek.ru/api/geo/autocomplete';
@@ -41,13 +43,63 @@ type CdekGeoAddress = {
 };
 
 /**
+ * Only the numeric city code matters here. It is the one place the geocoder
+ * exposes it - the address block itself carries a `cityUuid`, which nothing in
+ * the v2 API accepts.
+ */
+type CdekGeoOffice = {
+  cityCode?: number;
+  city?: string;
+};
+
+/**
  * Results interleave street addresses and pickup points; `office` entries are
  * what the widget renders as map pins and are useless for a courier address.
  */
 type CdekGeoItem = {
-  address?: CdekGeoAddress;
-  office?: unknown;
+  address?: CdekGeoAddress & { offices?: CdekGeoOffice[] };
+  office?: CdekGeoOffice;
 };
+
+/**
+ * Ask the geocoder about `query`.
+ *
+ * `extra` carries the mode flags: with none the response is plain addresses,
+ * with `action=handOut&mode=ap` each locality also nests the pickup points
+ * around it (see `fetchCdekCitySuggestions`). Resolves to `[]` on any failure -
+ * every caller has a fallback and none may block checkout.
+ */
+async function requestAutocomplete(
+  query: string,
+  extra: Record<string, string> = {},
+): Promise<CdekGeoItem[]> {
+  const url = new URL(AUTOCOMPLETE_URL);
+  url.searchParams.set('query', query);
+  url.searchParams.set('source', SOURCE);
+  for (const [key, value] of Object.entries(extra)) {
+    url.searchParams.set(key, value);
+  }
+
+  try {
+    const res = await fetch(url.toString(), {
+      headers: {
+        Accept: 'application/json',
+        // The endpoint is meant for the cabinet's own frontend and answers
+        // with an empty body for clients that look automated.
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        Referer: 'https://my.cdek.ru/',
+      },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) return [];
+    const data: unknown = await res.json();
+    return Array.isArray(data) ? (data as CdekGeoItem[]) : [];
+  } catch {
+    return [];
+  }
+}
 
 export type CdekAddressHint = {
   /** Display text, also what gets sent to CDEK as `to_location.address`. */
@@ -102,38 +154,14 @@ export async function fetchCdekAddressHints(
   const text = query.trim();
   if (!text) return [];
 
-  const url = new URL(AUTOCOMPLETE_URL);
-  url.searchParams.set('query', text);
-  url.searchParams.set('country', countryIsoCode);
-  url.searchParams.set('source', SOURCE);
-  if (typeof lat === 'number' && typeof lon === 'number') {
-    url.searchParams.set('lat', String(lat));
-    url.searchParams.set('lon', String(lon));
-  }
+  const items = await requestAutocomplete(text, {
+    country: countryIsoCode,
+    ...(typeof lat === 'number' && typeof lon === 'number'
+      ? { lat: String(lat), lon: String(lon) }
+      : {}),
+  });
 
-  let data: unknown;
-  try {
-    const res = await fetch(url.toString(), {
-      headers: {
-        Accept: 'application/json',
-        // The endpoint is meant for the cabinet's own frontend and answers
-        // with an empty body for clients that look automated.
-        'User-Agent':
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        Referer: 'https://my.cdek.ru/',
-      },
-      cache: 'no-store',
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-    if (!res.ok) return [];
-    data = await res.json();
-  } catch {
-    return [];
-  }
-
-  if (!Array.isArray(data)) return [];
-
-  const hints = (data as CdekGeoItem[])
+  const hints = items
     .filter((item) => item && item.address && !item.office)
     .map((item) => toHint(item.address!))
     .filter((hint): hint is CdekAddressHint => hint !== null);
@@ -154,4 +182,64 @@ export async function fetchCdekAddressHints(
   });
 
   return unique.slice(0, limit);
+}
+
+/**
+ * Cities matching `query`, as CDEK's own widget resolves them.
+ *
+ * This exists because `/location/cities` is paginated: pulling a page of it
+ * gives an arbitrary slice of Russia, so any city outside that slice simply
+ * could not be picked at checkout. The geocoder searches the whole country.
+ *
+ * `action=handOut&mode=ap` is the flag pair that makes each locality carry a
+ * nested `offices[]`, and that is the only place the response exposes the
+ * numeric `cityCode` that `/deliverypoints` and the quote endpoint need - the
+ * address block itself only has a `cityUuid`. It doubles as the filter we
+ * want: a locality with no nested office is one CDEK has no pickup point in,
+ * and a "city" the customer must not be able to choose.
+ *
+ * The nested offices are a preview (Samara returns 10 of its many), so they
+ * are read for the code only - the point list still comes from
+ * `getPickupPoints`.
+ */
+export async function fetchCdekCitySuggestions(
+  query: string,
+  { countryIsoCode = 'RU', limit = 15 }: {
+    countryIsoCode?: string;
+    limit?: number;
+  } = {},
+): Promise<CdekCity[]> {
+  const text = query.trim();
+  if (!text) return [];
+
+  const items = await requestAutocomplete(text, {
+    country: countryIsoCode,
+    action: 'handOut',
+    mode: 'ap',
+  });
+
+  const seen = new Set<number>();
+  const cities: CdekCity[] = [];
+
+  for (const item of items) {
+    const address = item?.address;
+    // Street-level rows repeat the locality they belong to ("...г Верхняя
+    // Пышма, пр-кт Успенский"), so labels are built from the `city`/`region`
+    // fields and deduped by code rather than taken from the formatted line.
+    const code = address?.offices?.find((office) =>
+      Number.isFinite(office?.cityCode),
+    )?.cityCode;
+    const city = address?.city?.trim();
+    if (!code || !city || seen.has(code)) continue;
+    seen.add(code);
+    cities.push({
+      code,
+      city,
+      region: address?.region?.trim() || undefined,
+      country: address?.country?.trim() || undefined,
+    });
+    if (cities.length >= limit) break;
+  }
+
+  return cities;
 }
