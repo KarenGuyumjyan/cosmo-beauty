@@ -87,7 +87,7 @@ export default async function AdminDashboard() {
               <thead>
                 <tr className="text-xs font-medium text-stone-500 uppercase tracking-wider border-b border-stone-100">
                   <th className="text-left px-6 py-3">Клиент</th>
-                  <th className="text-left px-6 py-3">Позиции</th>
+                  <th className="text-left px-6 py-3">Товаров</th>
                   <th className="text-left px-6 py-3">Сумма</th>
                   <th className="text-left px-6 py-3">Статус</th>
                   <th className="text-left px-6 py-3">Дата</th>

@@ -66,7 +66,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
                   <th className="text-left px-6 py-3">ID</th>
                   <th className="text-left px-6 py-3">Клиент</th>
                   <th className="text-left px-6 py-3">Телефон</th>
-                  <th className="text-left px-6 py-3">Позиции</th>
+                  <th className="text-left px-6 py-3">Товаров</th>
                   <th className="text-left px-6 py-3">Сумма</th>
                   <th className="text-left px-6 py-3">Статус</th>
                   <th className="text-left px-6 py-3">Дата</th>
