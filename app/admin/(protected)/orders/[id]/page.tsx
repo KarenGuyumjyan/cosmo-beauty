@@ -1,10 +1,11 @@
-import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import { OrderStatus } from '@prisma/client'
-import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations'
-import OrderStatusForm from '@/app/admin/_components/OrderStatusForm'
-import Link from 'next/link'
-import { orderStatusLabelRu } from '@/app/admin/_lib/order-status-ru'
+import { notFound } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { OrderStatus } from '@prisma/client';
+import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations';
+import OrderStatusForm from '@/app/admin/_components/OrderStatusForm';
+import Link from 'next/link';
+import { orderStatusLabelRu } from '@/app/admin/_lib/order-status-ru';
+import { getCdekOrderStatus } from '@/lib/cdek/service';
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
@@ -12,17 +13,29 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   SHIPPED: 'bg-purple-100 text-purple-800',
   DELIVERED: 'bg-green-100  text-green-800',
   CANCELLED: 'bg-red-100    text-red-800',
-}
+};
 
-type Props = { params: Promise<{ id: string }> }
+type Props = { params: Promise<{ id: string }> };
 
 export default async function OrderDetailPage({ params }: Props) {
-  const { id } = await params
+  const { id } = await params;
   const order = (await prisma.order.findUnique({
     where: { id },
     include: { items: { include: { product: true } } },
-  })) as OrderWithItemsAndProduct | null
-  if (!order) notFound()
+  })) as OrderWithItemsAndProduct | null;
+  if (!order) notFound();
+
+  const cdek = await getCdekOrderStatus({
+    uuid: order.cdekUuid,
+    cdekNumber: order.cdekTrackingNumber,
+  });
+
+  console.log({
+    cdek,
+    orderId: order.cdekUuid,
+    trackingNumber: order.cdekTrackingNumber,
+    order,
+  });
 
   return (
     <div className='p-8 max-w-3xl'>
@@ -94,33 +107,42 @@ export default async function OrderDetailPage({ params }: Props) {
           {order.cdekTrackingNumber && (
             <div>
               <p className='text-stone-400 text-xs mb-0.5'>CDEK трек-номер</p>
-              <p className='font-medium text-stone-800 font-mono text-xs'>{order.cdekTrackingNumber}</p>
+              <p className='font-medium text-stone-800 font-mono text-xs'>
+                {order.cdekTrackingNumber}
+              </p>
             </div>
           )}
           <div>
             <p className='text-stone-400 text-xs mb-0.5'>Стоимость доставки</p>
             <p className='font-medium text-stone-800'>
-              {order.shippingCost > 0 ? `${order.shippingCost.toLocaleString()} ₽` : 'Бесплатно'}
+              {order.shippingCost > 0
+                ? `${order.shippingCost.toLocaleString()} ₽`
+                : 'Бесплатно'}
             </p>
           </div>
           {order.address && (
             <div className='col-span-2'>
               <p className='text-stone-400 text-xs mb-0.5'>Адрес</p>
               <p className='font-medium text-stone-800'>
-                {order.city ? `${order.city}, ` : ''}{order.address}
+                {order.city ? `${order.city}, ` : ''}
+                {order.address}
               </p>
             </div>
           )}
           {order.yookassaId && (
             <div>
               <p className='text-stone-400 text-xs mb-0.5'>ID ЮKassa</p>
-              <p className='font-medium text-stone-800 font-mono text-xs'>{order.yookassaId}</p>
+              <p className='font-medium text-stone-800 font-mono text-xs'>
+                {order.yookassaId}
+              </p>
             </div>
           )}
           {order.yookassaStatus && (
             <div>
               <p className='text-stone-400 text-xs mb-0.5'>Статус оплаты</p>
-              <p className='font-medium text-stone-800'>{order.yookassaStatus}</p>
+              <p className='font-medium text-stone-800'>
+                {order.yookassaStatus}
+              </p>
             </div>
           )}
         </div>
@@ -159,18 +181,37 @@ export default async function OrderDetailPage({ params }: Props) {
           <tfoot>
             {order.shippingCost > 0 && (
               <tr className='border-t border-stone-100'>
-                <td colSpan={3} className='px-6 py-2 text-right text-sm text-stone-500'>Подытог</td>
-                <td className='px-6 py-2 text-right text-sm font-medium'>{order.subtotal.toLocaleString()} ₽</td>
+                <td
+                  colSpan={3}
+                  className='px-6 py-2 text-right text-sm text-stone-500'
+                >
+                  Подытог
+                </td>
+                <td className='px-6 py-2 text-right text-sm font-medium'>
+                  {order.subtotal.toLocaleString()} ₽
+                </td>
               </tr>
             )}
             {order.shippingCost > 0 && (
               <tr>
-                <td colSpan={3} className='px-6 py-2 text-right text-sm text-stone-500'>Доставка</td>
-                <td className='px-6 py-2 text-right text-sm font-medium'>{order.shippingCost.toLocaleString()} ₽</td>
+                <td
+                  colSpan={3}
+                  className='px-6 py-2 text-right text-sm text-stone-500'
+                >
+                  Доставка
+                </td>
+                <td className='px-6 py-2 text-right text-sm font-medium'>
+                  {order.shippingCost.toLocaleString()} ₽
+                </td>
               </tr>
             )}
             <tr className='border-t border-stone-200'>
-              <td colSpan={3} className='px-6 py-4 text-right font-semibold text-stone-700'>Итого</td>
+              <td
+                colSpan={3}
+                className='px-6 py-4 text-right font-semibold text-stone-700'
+              >
+                Итого
+              </td>
               <td className='px-6 py-4 text-right font-bold text-rose-600 text-base'>
                 {order.total.toLocaleString()} ₽
               </td>
@@ -185,5 +226,5 @@ export default async function OrderDetailPage({ params }: Props) {
         <OrderStatusForm orderId={order.id} current={order.status} />
       </div>
     </div>
-  )
+  );
 }
