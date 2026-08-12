@@ -30,13 +30,6 @@ export default async function OrderDetailPage({ params }: Props) {
     cdekNumber: order.cdekTrackingNumber,
   });
 
-  console.log({
-    cdek,
-    orderId: order.cdekUuid,
-    trackingNumber: order.cdekTrackingNumber,
-    order,
-  });
-
   return (
     <div className='p-8 max-w-3xl'>
       <div className='mb-8'>
@@ -223,7 +216,13 @@ export default async function OrderDetailPage({ params }: Props) {
       {/* Status update */}
       <div className='bg-white rounded-2xl border border-stone-100 p-6'>
         <h2 className='font-semibold text-stone-900 mb-4'>Статус заказа</h2>
+        <div className='hidden'>
+          <div>cdekUuid-{order.cdekUuid}</div>
+          <div>cdekTrackingNumber-{order.cdekTrackingNumber}</div>
+          <div className='my-4 border-t-2'>cdek-{JSON.stringify(cdek)}</div>
+        </div>
         <OrderStatusForm orderId={order.id} current={order.status} />
+        <div className='hidden'>order-{JSON.stringify(order)}</div>
       </div>
     </div>
   );
