@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { OrderStatus } from '@prisma/client';
 import type { OrderWithItemsAndProduct } from '@/lib/types/order-with-relations';
 import OrderStatusForm from '@/app/admin/_components/OrderStatusForm';
+import CdekSyncButton from '@/app/admin/_components/CdekSyncButton';
 import Link from 'next/link';
 import { orderStatusLabelRu } from '@/app/admin/_lib/order-status-ru';
 import { getCdekOrderStatus } from '@/lib/cdek/service';
@@ -222,6 +223,13 @@ export default async function OrderDetailPage({ params }: Props) {
           <div className='my-4 border-t-2'>cdek-{JSON.stringify(cdek)}</div>
         </div>
         <OrderStatusForm orderId={order.id} current={order.status} />
+        <CdekSyncButton
+          orderId={order.id}
+          cdekStatus={order.cdekStatus}
+          hasCdekIdentifier={Boolean(
+            order.cdekUuid || order.cdekTrackingNumber,
+          )}
+        />
         <div className='hidden'>order-{JSON.stringify(order)}</div>
       </div>
     </div>

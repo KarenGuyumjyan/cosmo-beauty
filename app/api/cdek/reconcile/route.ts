@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCdekOrderStatus } from '@/lib/cdek/service';
-import { mapCdekStatusToOrderStatus } from '@/lib/cdek/status-map';
+import { syncCdekStatus } from '@/lib/orders/sync-cdek-status';
 
 // Cron: runs daily at 22:00 Moscow time (19:00 UTC) — see vercel.json.
 // Fetches every in-flight CDEK order from CDEK and syncs its delivery status.
@@ -41,33 +40,11 @@ async function reconcile() {
 
   for (const order of orders) {
     checked += 1;
-    try {
-      const cdek = await getCdekOrderStatus({
-        uuid: order.cdekUuid,
-        cdekNumber: order.cdekTrackingNumber,
-      });
-
-      const mapped = mapCdekStatusToOrderStatus(cdek.code);
-      const statusChanged = mapped !== null && mapped !== order.status;
-
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          cdekStatus: cdek.code,
-          cdekRawResponse: cdek.rawResponse as object,
-          // Backfill the tracking number if CDEK now knows it.
-          ...(cdek.trackingNumber && !order.cdekTrackingNumber
-            ? { cdekTrackingNumber: cdek.trackingNumber }
-            : {}),
-          ...(statusChanged ? { status: mapped } : {}),
-        },
-      });
-
-      if (statusChanged) updated += 1;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`[cdek:reconcile] Failed for order ${order.id}:`, message);
-      errors.push({ orderId: order.id, error: message });
+    const result = await syncCdekStatus(order);
+    if (result.ok) {
+      if (result.changed) updated += 1;
+    } else {
+      errors.push({ orderId: order.id, error: result.error });
     }
   }
 

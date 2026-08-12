@@ -39,6 +39,7 @@ export type OrderWithItemsAndProduct = {
   yookassaStatus: string | null;
   cdekUuid: string | null;
   cdekTrackingNumber: string | null;
+  cdekStatus: string | null;
   createdAt: Date;
   items: OrderItemWithProduct[];
 };
