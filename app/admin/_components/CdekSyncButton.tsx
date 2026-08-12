@@ -36,7 +36,11 @@ export default function CdekSyncButton({
       const result = await syncOrderWithCdek(orderId);
       if (!result.ok) {
         setFailed(true);
-        setMessage(`Ошибка СДЭК: ${result.error}`);
+        setMessage(
+          result.notFound
+            ? 'Заказ не зарегистрирован в СДЭК: накладная так и не была создана. Статус нужно выставить вручную.'
+            : `Ошибка СДЭК: ${result.error}`,
+        );
         return;
       }
       setMessage(

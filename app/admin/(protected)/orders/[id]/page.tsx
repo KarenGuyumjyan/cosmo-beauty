@@ -6,7 +6,6 @@ import OrderStatusForm from '@/app/admin/_components/OrderStatusForm';
 import CdekSyncButton from '@/app/admin/_components/CdekSyncButton';
 import Link from 'next/link';
 import { orderStatusLabelRu } from '@/app/admin/_lib/order-status-ru';
-import { getCdekOrderStatus } from '@/lib/cdek/service';
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
@@ -25,11 +24,6 @@ export default async function OrderDetailPage({ params }: Props) {
     include: { items: { include: { product: true } } },
   })) as OrderWithItemsAndProduct | null;
   if (!order) notFound();
-
-  const cdek = await getCdekOrderStatus({
-    uuid: order.cdekUuid,
-    cdekNumber: order.cdekTrackingNumber,
-  });
 
   return (
     <div className='p-8 max-w-3xl'>
@@ -217,11 +211,6 @@ export default async function OrderDetailPage({ params }: Props) {
       {/* Status update */}
       <div className='bg-white rounded-2xl border border-stone-100 p-6'>
         <h2 className='font-semibold text-stone-900 mb-4'>Статус заказа</h2>
-        <div className='hidden'>
-          <div>cdekUuid-{order.cdekUuid}</div>
-          <div>cdekTrackingNumber-{order.cdekTrackingNumber}</div>
-          <div className='my-4 border-t-2'>cdek-{JSON.stringify(cdek)}</div>
-        </div>
         <OrderStatusForm orderId={order.id} current={order.status} />
         <CdekSyncButton
           orderId={order.id}
@@ -230,7 +219,6 @@ export default async function OrderDetailPage({ params }: Props) {
             order.cdekUuid || order.cdekTrackingNumber,
           )}
         />
-        <div className='hidden'>order-{JSON.stringify(order)}</div>
       </div>
     </div>
   );

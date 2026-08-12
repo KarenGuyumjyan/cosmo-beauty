@@ -11,7 +11,26 @@ export type CdekSyncResult =
       cdekStatus: string | null;
       status: OrderStatus;
     }
-  | { ok: false; error: string };
+  | {
+      ok: false;
+      error: string;
+      /** CDEK has no order under this uuid - see `isEntityNotFound`. */
+      notFound?: boolean;
+    };
+
+/**
+ * True when CDEK says the uuid corresponds to no order.
+ *
+ * CDEK registers orders asynchronously: `POST /orders` hands back a uuid with
+ * `requests[0].state = "ACCEPTED"` before the order exists. If that processing
+ * never completes - the usual case for an order cancelled shortly after
+ * checkout - the uuid is stored here but resolves to nothing upstream, and
+ * `GET /orders/{uuid}` answers 400 `v2_entity_not_found` forever. That is a
+ * permanent, expected state, not a transient failure worth retrying.
+ */
+function isEntityNotFound(message: string): boolean {
+  return message.includes('v2_entity_not_found');
+}
 
 export type SyncableOrder = {
   id: string;
@@ -68,6 +87,16 @@ export async function syncCdekStatus(
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    if (isEntityNotFound(message)) {
+      console.warn(
+        `[cdek:sync] Order ${order.id}: CDEK has no entity for uuid ${order.cdekUuid}`,
+      );
+      return {
+        ok: false,
+        notFound: true,
+        error: 'CDEK has no order registered under this uuid',
+      };
+    }
     console.error(`[cdek:sync] Failed for order ${order.id}:`, message);
     return { ok: false, error: message };
   }
