@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { syncCdekStatus } from '@/lib/orders/sync-cdek-status';
 
-// Cron: runs daily at 22:00 Moscow time (19:00 UTC) — see vercel.json.
 // Fetches every in-flight CDEK order from CDEK and syncs its delivery status.
+//
+// Scheduled by the host's crontab via scripts/cdek-reconcile.sh — NOT by
+// vercel.json, which only ever ran on Vercel and stopped silently when the app
+// moved to its own hosting. Install instructions are in that script's header.
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
