@@ -5,12 +5,24 @@ import { prisma } from '@/lib/prisma';
 import { OrderStatus } from '@prisma/client';
 import { auth } from '@/auth';
 import { syncCdekStatus } from '@/lib/orders/sync-cdek-status';
+import { notifyOrderDelivered } from '@/lib/orders/notify-order-delivered';
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
   const session = await auth();
   if (!session) throw new Error('Unauthorized');
 
-  await prisma.order.update({ where: { id: orderId }, data: { status } });
+  // updateMany + the `not` guard so re-saving the status the order already has
+  // is a no-op that cannot re-send the DELIVERED notification. Only the write
+  // that actually moves the order reports count > 0.
+  const write = await prisma.order.updateMany({
+    where: { id: orderId, status: { not: status } },
+    data: { status },
+  });
+
+  if (write.count > 0 && status === 'DELIVERED') {
+    await notifyOrderDelivered(orderId);
+  }
+
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath('/admin/orders');
 }

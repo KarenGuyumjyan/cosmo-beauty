@@ -2,6 +2,7 @@ import type { OrderStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getCdekOrderStatus } from '@/lib/cdek/service';
 import { mapCdekStatusToOrderStatus } from '@/lib/cdek/status-map';
+import { notifyOrderDelivered } from '@/lib/orders/notify-order-delivered';
 
 export type CdekSyncResult =
   | {
@@ -66,24 +67,41 @@ export async function syncCdekStatus(
     const mapped = mapCdekStatusToOrderStatus(cdek.code);
     const changed = mapped !== null && mapped !== order.status;
 
-    await prisma.order.update({
-      where: { id: order.id },
-      data: {
-        cdekStatus: cdek.code,
-        cdekRawResponse: cdek.rawResponse as object,
-        // Backfill the tracking number if CDEK now knows it.
-        ...(cdek.trackingNumber && !order.cdekTrackingNumber
-          ? { cdekTrackingNumber: cdek.trackingNumber }
-          : {}),
-        ...(changed ? { status: mapped } : {}),
-      },
+    const mirror = {
+      cdekStatus: cdek.code,
+      cdekRawResponse: cdek.rawResponse as object,
+      // Backfill the tracking number if CDEK now knows it.
+      ...(cdek.trackingNumber && !order.cdekTrackingNumber
+        ? { cdekTrackingNumber: cdek.trackingNumber }
+        : {}),
+    };
+
+    // The status write is guarded on the status we read a moment ago, so an
+    // admin (or an overlapping reconcile run) that moved the order in the
+    // meantime wins and we do not double-fire the DELIVERED notification.
+    const write = await prisma.order.updateMany({
+      where: { id: order.id, ...(changed ? { status: order.status } : {}) },
+      data: { ...mirror, ...(changed ? { status: mapped } : {}) },
     });
+
+    const transitioned = changed && write.count > 0;
+
+    if (changed && write.count === 0) {
+      // Lost the race on the status, but the CDEK mirror is still fresher than
+      // what is stored - an order with a null cdekStatus must keep meaning
+      // "never polled".
+      await prisma.order.update({ where: { id: order.id }, data: mirror });
+    }
+
+    if (transitioned && mapped === 'DELIVERED') {
+      await notifyOrderDelivered(order.id);
+    }
 
     return {
       ok: true,
-      changed,
+      changed: transitioned,
       cdekStatus: cdek.code,
-      status: changed ? mapped : order.status,
+      status: transitioned ? mapped : order.status,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -19,6 +19,17 @@ export default function OrderStatusForm({
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
 
+  // "Обновить из СДЭК" changes the status server-side and revalidates this
+  // page, so `current` arrives updated while the select still shows whatever it
+  // was mounted with. Re-sync it to the server value instead of making the
+  // admin reload the page. Any unsaved selection is intentionally discarded:
+  // the freshly synced status is the truth.
+  const [syncedTo, setSyncedTo] = useState<OrderStatus>(current);
+  if (current !== syncedTo) {
+    setSyncedTo(current);
+    setStatus(current);
+  }
+
   async function handleSave() {
     setSaving(true);
     setError('');
